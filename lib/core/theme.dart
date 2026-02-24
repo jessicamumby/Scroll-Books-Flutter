@@ -21,18 +21,23 @@ class AppTheme {
   static const Color amber       = Color(0xFF9A6F2A);
   static const Color amberRich   = Color(0xFFB8852E);
   static const Color amberPale   = Color(0xFFE8D4A0);
+  static const Color amberWash   = Color(0xFFF0E6C4);   // very light amber wash
 
   // ── Supporting ──
   static const Color sienna      = Color(0xFF7A3325);
   static const Color forest      = Color(0xFF3A5A30);
+  static const Color forestPale  = Color(0xFFC8D8C4);   // success bg tint
 
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     scaffoldBackgroundColor: page,
     colorScheme: ColorScheme.light(
       primary: amber,
+      onPrimary: surface,
       surface: surface,
+      onSurface: ink,
       error: sienna,
+      onError: surface,
     ),
     textTheme: GoogleFonts.dmSansTextTheme().copyWith(
       displayLarge: GoogleFonts.playfairDisplay(
@@ -81,7 +86,6 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: amber,
-        foregroundColor: surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
         textStyle: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w700),
