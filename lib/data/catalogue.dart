@@ -100,9 +100,6 @@ const List<Book> catalogue = [
 ];
 
 Book? getBookById(String id) {
-  try {
-    return catalogue.firstWhere((b) => b.id == id);
-  } catch (_) {
-    return null;
-  }
+  final matches = catalogue.where((b) => b.id == id);
+  return matches.isEmpty ? null : matches.first;
 }

@@ -10,12 +10,15 @@ class AppProvider extends ChangeNotifier {
   Future<void> load(String userId) async {
     loading = true;
     notifyListeners();
-    final data = await UserDataService.fetchAll(userId);
-    library = data.library;
-    progress = data.progress;
-    readDays = data.readDays;
-    loading = false;
-    notifyListeners();
+    try {
+      final data = await UserDataService.fetchAll(userId);
+      library = data.library;
+      progress = data.progress;
+      readDays = data.readDays;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> addToLibrary(String userId, String bookId) async {
@@ -24,15 +27,18 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProgress(String bookId, int chunkIndex) {
+  Future<void> updateProgress(String userId, String bookId, int chunkIndex) async {
     progress = {...progress, bookId: chunkIndex};
     notifyListeners();
+    await UserDataService.syncProgress(userId, bookId, chunkIndex);
   }
 
-  void markReadToday(String date) {
-    if (!readDays.contains(date)) {
-      readDays = [...readDays, date];
+  Future<void> markReadToday(String userId) async {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (!readDays.contains(today)) {
+      readDays = [...readDays, today];
       notifyListeners();
     }
+    await UserDataService.markReadToday(userId);
   }
 }
