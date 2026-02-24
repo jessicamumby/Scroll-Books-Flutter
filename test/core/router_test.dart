@@ -1,0 +1,33 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:scroll_books/core/router.dart';
+
+class _NoOpAsyncStorage extends GotrueAsyncStorage {
+  const _NoOpAsyncStorage();
+  @override
+  Future<String?> getItem({required String key}) async => null;
+  @override
+  Future<void> setItem({required String key, required String value}) async {}
+  @override
+  Future<void> removeItem({required String key}) async {}
+}
+
+void main() {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await Supabase.initialize(
+      url: 'https://example.supabase.co',
+      anonKey: 'test-anon-key',
+      authOptions: const FlutterAuthClientOptions(
+        localStorage: EmptyLocalStorage(),
+        pkceAsyncStorage: _NoOpAsyncStorage(),
+      ),
+    );
+  });
+
+  test('router is a GoRouter instance', () {
+    expect(router, isA<GoRouter>());
+  });
+}
