@@ -9,6 +9,7 @@ import '../screens/library_screen.dart';
 import '../screens/book_detail_screen.dart';
 import '../screens/reader_screen.dart';
 import '../screens/stats_screen.dart';
+import '../screens/email_confirm_screen.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -30,7 +31,7 @@ final router = GoRouter(
   redirect: (context, state) {
     final loc = state.matchedLocation;
     final authed = _isAuthenticated;
-    final publicOnly = ['/', '/login', '/signup', '/forgot-password'];
+    final publicOnly = ['/', '/login', '/signup', '/forgot-password', '/email-confirm'];
     final requiresAuth = loc.startsWith('/app') || loc.startsWith('/read');
     if (!authed && requiresAuth) return '/login';
     if (authed && publicOnly.contains(loc)) return '/app/library';
@@ -41,6 +42,7 @@ final router = GoRouter(
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
     GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
+    GoRoute(path: '/email-confirm', builder: (_, __) => const EmailConfirmScreen()),
     GoRoute(
       path: '/read/:bookId',
       builder: (_, state) => ReaderScreen(bookId: state.pathParameters['bookId']!),
