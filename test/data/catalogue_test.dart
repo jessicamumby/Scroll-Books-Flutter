@@ -2,6 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:scroll_books/data/catalogue.dart';
 
 void main() {
+  test('every book has a coverGradient entry with 2 colours', () {
+    for (final book in catalogue) {
+      expect(
+        coverGradients.containsKey(book.id),
+        isTrue,
+        reason: 'Missing gradient for ${book.id}',
+      );
+      expect(coverGradients[book.id]!.length, equals(2));
+    }
+  });
+
   group('catalogue', () {
     test('has 6 books', () {
       expect(catalogue.length, 6);
