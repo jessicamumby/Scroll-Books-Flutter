@@ -41,7 +41,7 @@ class _BookRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.go('/app/library/${book.id}'),
+      onTap: () => context.push('/app/library/${book.id}'),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(

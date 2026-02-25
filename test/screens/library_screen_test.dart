@@ -53,5 +53,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Add to Library'), findsWidgets);
     });
+
+    testWidgets('tapping a book navigates to book detail', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Moby Dick'));
+      await tester.pumpAndSettle();
+      expect(find.text('detail'), findsOneWidget);
+    });
   });
 }
