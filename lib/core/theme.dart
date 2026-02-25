@@ -90,6 +90,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: amber,
+        foregroundColor: surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
         textStyle: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w700),
