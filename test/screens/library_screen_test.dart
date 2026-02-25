@@ -37,15 +37,18 @@ void main() {
     testWidgets('shows all 6 catalogue books', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.text('Moby Dick'), findsOneWidget);
-      expect(find.text('Pride and Prejudice'), findsOneWidget);
-      expect(find.text('Frankenstein'), findsOneWidget);
+      expect(find.text('Moby Dick'), findsWidgets);
+      expect(find.text('Pride and Prejudice'), findsWidgets);
+      expect(find.text('Jane Eyre'), findsWidgets);
+      expect(find.text('Don Quixote'), findsWidgets);
+      expect(find.text('The Great Gatsby'), findsWidgets);
+      expect(find.text('Frankenstein'), findsWidgets);
     });
 
     testWidgets('shows In Library badge for saved books', (tester) async {
       await tester.pumpWidget(_wrap(library: ['moby-dick']));
       await tester.pumpAndSettle();
-      expect(find.text('In Library'), findsOneWidget);
+      expect(find.text('In Library'), findsNWidgets(2));
     });
 
     testWidgets('shows Add to Library for unsaved books', (tester) async {
@@ -57,9 +60,17 @@ void main() {
     testWidgets('tapping a book navigates to book detail', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Moby Dick'));
+      await tester.tap(find.text('Moby Dick').first);
       await tester.pumpAndSettle();
       expect(find.text('detail'), findsOneWidget);
+    });
+
+    testWidgets('shows section headers', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('FREE BOOKS'), findsOneWidget);
+      expect(find.text('TRENDING'), findsOneWidget);
+      expect(find.text('NEW'), findsOneWidget);
     });
   });
 }
