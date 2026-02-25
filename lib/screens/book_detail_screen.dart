@@ -41,7 +41,7 @@ class BookDetailScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF2C3E50), Color(0xFF4A1942)],
+                      colors: [AppTheme.coverDeep, AppTheme.coverRich],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),

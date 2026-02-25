@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
-import '../core/supabase_client.dart';
 import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
 
@@ -23,7 +23,7 @@ class LibraryScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final book = catalogue[index];
               final inLibrary = provider.library.contains(book.id);
-              return _BookRow(book: book, inLibrary: inLibrary, provider: provider);
+              return _BookRow(book: book, inLibrary: inLibrary);
             },
           );
         },
@@ -35,9 +35,8 @@ class LibraryScreen extends StatelessWidget {
 class _BookRow extends StatelessWidget {
   final Book book;
   final bool inLibrary;
-  final AppProvider provider;
 
-  const _BookRow({required this.book, required this.inLibrary, required this.provider});
+  const _BookRow({required this.book, required this.inLibrary});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +52,7 @@ class _BookRow extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF2C3E50), Color(0xFF4A1942)],
+                  colors: [AppTheme.coverDeep, AppTheme.coverRich],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -81,8 +80,8 @@ class _BookRow extends StatelessWidget {
             else
               TextButton(
                 onPressed: () {
-                  final userId = supabase.auth.currentUser?.id;
-                  if (userId != null) provider.addToLibrary(userId, book.id);
+                  final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+                  Provider.of<AppProvider>(context, listen: false).addToLibrary(userId, book.id);
                 },
                 child: const Text('Add to Library'),
               ),

@@ -23,6 +23,10 @@ class AppTheme {
   static const Color amberPale   = Color(0xFFE8D4A0);
   static const Color amberWash   = Color(0xFFF0E6C4);   // very light amber wash
 
+  // ── Cover art ──
+  static const Color coverDeep   = Color(0xFF2C3E50);
+  static const Color coverRich   = Color(0xFF4A1942);
+
   // ── Supporting ──
   static const Color sienna      = Color(0xFF7A3325);
   static const Color forest      = Color(0xFF3A5A30);
