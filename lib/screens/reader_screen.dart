@@ -121,11 +121,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   }
 
   void _goBack(BuildContext context) {
-    try {
-      context.pop();
-    } catch (_) {
-      Navigator.of(context).maybePop();
-    }
+    context.go('/app/library');
   }
 
   @override
