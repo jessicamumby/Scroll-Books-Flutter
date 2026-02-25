@@ -221,6 +221,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
       onPageChanged: _onPageChanged,
       itemBuilder: (_, index) => ReaderCard(
         text: _chunks[index],
+        chunkIndex: index,
+        totalChunks: _chunks.length,
         onShare: () => _share(_chunks[index]),
       ),
     );
