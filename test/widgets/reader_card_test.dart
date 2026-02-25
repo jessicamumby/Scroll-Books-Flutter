@@ -54,6 +54,7 @@ void main() {
         ),
       );
       await tester.tap(find.byIcon(Icons.share_outlined));
+      await tester.pump();
       expect(tapped, isTrue);
     });
 
