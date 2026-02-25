@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../screens/landing_screen.dart';
 import '../screens/login_screen.dart';
@@ -21,20 +22,43 @@ class _AuthNotifier extends ChangeNotifier {
   }
 }
 
+class _OnboardingNotifier extends ChangeNotifier {
+  void notify() => notifyListeners();
+}
+
 final _authNotifier = _AuthNotifier();
+final _onboardingNotifier = _OnboardingNotifier();
+
+bool _onboardingCompleted = false;
+bool get isOnboardingCompleted => _onboardingCompleted;
 
 bool get _isAuthenticated =>
     Supabase.instance.client.auth.currentSession != null;
 
+Future<void> loadOnboardingCompleted() async {
+  final prefs = await SharedPreferences.getInstance();
+  _onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+}
+
+Future<void> completeOnboarding() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('onboarding_completed', true);
+  _onboardingCompleted = true;
+  _onboardingNotifier.notify();
+}
+
 final router = GoRouter(
-  refreshListenable: _authNotifier,
+  refreshListenable: Listenable.merge([_authNotifier, _onboardingNotifier]),
   redirect: (context, state) {
     final loc = state.matchedLocation;
     final authed = _isAuthenticated;
+    final onboarded = _onboardingCompleted;
     final publicOnly = ['/', '/login', '/signup', '/forgot-password', '/email-confirm'];
-    final requiresAuth = loc.startsWith('/app') || loc.startsWith('/read');
+    final requiresAuth = loc.startsWith('/app') || loc.startsWith('/read') || loc == '/onboarding';
     if (!authed && requiresAuth) return '/login';
-    if (authed && publicOnly.contains(loc)) return '/app/library';
+    if (authed && publicOnly.contains(loc)) {
+      return onboarded ? '/app/library' : '/onboarding';
+    }
     return null;
   },
   routes: [
@@ -43,6 +67,10 @@ final router = GoRouter(
     GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
     GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
     GoRoute(path: '/email-confirm', builder: (_, __) => const EmailConfirmScreen()),
+    GoRoute(
+      path: '/onboarding',
+      builder: (_, __) => const Scaffold(body: Center(child: Text('onboarding'))),
+    ),
     GoRoute(
       path: '/read/:bookId',
       builder: (_, state) => ReaderScreen(bookId: state.pathParameters['bookId']!),
