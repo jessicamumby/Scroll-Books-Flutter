@@ -32,7 +32,6 @@ class ReaderCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: Container(
@@ -48,13 +47,17 @@ class ReaderCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          text,
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: 18,
-                            height: 1.75,
-                            color: AppTheme.ink,
-                            fontStyle: FontStyle.italic,
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: Text(
+                              text,
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 18,
+                                height: 1.75,
+                                color: AppTheme.ink,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
                           ),
                         ),
                       ],
