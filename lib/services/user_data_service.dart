@@ -40,7 +40,7 @@ class UserDataService {
   static Future<void> addToLibrary(String userId, String bookId) async {
     await supabase
         .from('library')
-        .insert({'user_id': userId, 'book_id': bookId});
+        .upsert({'user_id': userId, 'book_id': bookId}, onConflict: 'user_id,book_id');
   }
 
   static Future<void> syncProgress(
