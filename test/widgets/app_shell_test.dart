@@ -5,30 +5,30 @@ import 'package:scroll_books/core/theme.dart';
 import 'package:scroll_books/widgets/app_shell.dart';
 import 'package:go_router/go_router.dart';
 
+GoRouter _buildRouter() => GoRouter(
+  routes: [
+    ShellRoute(
+      builder: (_, __, child) => AppShell(child: child),
+      routes: [
+        GoRoute(path: '/app/library', builder: (_, __) => const SizedBox()),
+        GoRoute(path: '/app/stats', builder: (_, __) => const SizedBox()),
+        GoRoute(path: '/app/profile', builder: (_, __) => const SizedBox()),
+      ],
+    ),
+  ],
+  initialLocation: '/app/library',
+);
+
 void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
   testWidgets('AppShell renders 3 navigation destinations', (tester) async {
-    final router = GoRouter(
-      routes: [
-        ShellRoute(
-          builder: (_, __, child) => AppShell(child: child),
-          routes: [
-            GoRoute(path: '/app/library', builder: (_, __) => const SizedBox()),
-            GoRoute(path: '/app/stats', builder: (_, __) => const SizedBox()),
-            GoRoute(path: '/app/profile', builder: (_, __) => const SizedBox()),
-          ],
-        ),
-      ],
-      initialLocation: '/app/library',
-    );
-
     await tester.pumpWidget(
       MaterialApp.router(
         theme: AppTheme.light,
-        routerConfig: router,
+        routerConfig: _buildRouter(),
       ),
     );
     await tester.pumpAndSettle();
@@ -36,5 +36,20 @@ void main() {
     expect(find.text('Library'), findsOneWidget);
     expect(find.text('Stats'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
+  });
+
+  testWidgets('AppShell wraps scaffold in PopScope', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: AppTheme.light,
+        routerConfig: _buildRouter(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byWidgetPredicate((widget) => widget is PopScope),
+      findsOneWidget,
+    );
   });
 }

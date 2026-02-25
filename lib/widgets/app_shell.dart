@@ -16,35 +16,42 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.page,
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex(context),
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0: context.go('/app/library'); break;
-            case 1: context.go('/app/stats'); break;
-            case 2: context.go('/app/profile'); break;
-          }
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.book_outlined),
-            selectedIcon: Icon(Icons.book),
-            label: 'Library',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+    final onHome = _selectedIndex(context) == 0;
+    return PopScope(
+      canPop: onHome,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go('/app/library');
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.page,
+        body: child,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex(context),
+          onDestinationSelected: (index) {
+            switch (index) {
+              case 0: context.go('/app/library'); break;
+              case 1: context.go('/app/stats'); break;
+              case 2: context.go('/app/profile'); break;
+            }
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.book_outlined),
+              selectedIcon: Icon(Icons.book),
+              label: 'Library',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart_outlined),
+              selectedIcon: Icon(Icons.bar_chart),
+              label: 'Stats',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
