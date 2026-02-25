@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Book {
   final String id;
   final String title;
@@ -103,3 +105,12 @@ Book? getBookById(String id) {
   final matches = catalogue.where((b) => b.id == id);
   return matches.isEmpty ? null : matches.first;
 }
+
+const Map<String, List<Color>> coverGradients = {
+  'moby-dick':           [Color(0xFF1A3A5C), Color(0xFF2E7D9A)],
+  'pride-and-prejudice': [Color(0xFF8B5E6E), Color(0xFF5E7B6A)],
+  'jane-eyre':           [Color(0xFF3D2B4E), Color(0xFF7A6070)],
+  'don-quixote':         [Color(0xFF8B4513), Color(0xFFC4956A)],
+  'great-gatsby':        [Color(0xFFB8952A), Color(0xFF2C4A3E)],
+  'frankenstein':        [Color(0xFF1A3322), Color(0xFF4A5568)],
+};
