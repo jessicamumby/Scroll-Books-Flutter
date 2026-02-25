@@ -17,7 +17,8 @@ int calculateStreak(List<String> readDays) {
   DateTime? prev;
 
   for (final dateStr in sorted) {
-    final date = DateTime.parse(dateStr);
+    final date = DateTime.tryParse(dateStr);
+    if (date == null) continue;
     if (prev == null) {
       streak = 1;
       prev = date;

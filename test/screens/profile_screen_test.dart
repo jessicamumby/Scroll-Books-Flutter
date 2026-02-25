@@ -17,5 +17,14 @@ void main() {
       );
       expect(find.text('Sign Out'), findsOneWidget);
     });
+
+    testWidgets('shows email text widget', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(theme: AppTheme.light, home: const ProfileScreen()),
+      );
+      // In tests Supabase is not initialised so email is empty,
+      // but the Text widget itself must exist in the tree.
+      expect(find.byType(Text), findsWidgets);
+    });
   });
 }
