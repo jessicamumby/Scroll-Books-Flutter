@@ -53,7 +53,7 @@ final router = GoRouter(
     final loc = state.matchedLocation;
     final authed = _isAuthenticated;
     final onboarded = _onboardingCompleted;
-    final publicOnly = ['/', '/login', '/signup', '/forgot-password', '/email-confirm'];
+    final publicOnly = ['/', '/login', '/signup', '/forgot-password'];
     final requiresAuth = loc.startsWith('/app') || loc.startsWith('/read') || loc == '/onboarding';
     if (!authed && requiresAuth) return '/login';
     if (authed && publicOnly.contains(loc)) {

@@ -28,6 +28,11 @@ void main() {
     );
   });
 
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    await loadOnboardingCompleted();
+  });
+
   test('router is a GoRouter instance', () {
     expect(router, isA<GoRouter>());
   });
