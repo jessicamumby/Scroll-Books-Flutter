@@ -11,6 +11,7 @@ import '../screens/book_detail_screen.dart';
 import '../screens/reader_screen.dart';
 import '../screens/stats_screen.dart';
 import '../screens/email_confirm_screen.dart';
+import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -74,7 +75,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (_, __) => const Scaffold(body: Center(child: Text('onboarding'))),
+      builder: (_, __) => OnboardingScreen(onComplete: completeOnboarding),
     ),
     GoRoute(
       path: '/read/:bookId',
