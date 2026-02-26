@@ -18,7 +18,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   final _pageController = PageController(viewportFraction: 0.88);
   late final AnimationController _previewController;
   late final Animation<Offset> _verticalOut;
@@ -81,7 +81,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Future<void> _complete() async {
-    await widget.onStyleSelected(_selectedStyle!);
+    final style = _selectedStyle;
+    if (style == null) return;
+    await widget.onStyleSelected(style);
     await widget.onComplete();
     if (mounted) context.go('/app/library');
   }
@@ -96,7 +98,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           controller: _pageController,
           scrollDirection: Axis.vertical,
           itemCount: totalCards,
-          onPageChanged: (i) => setState(() => _page = i),
+          onPageChanged: (i) {
+            setState(() => _page = i);
+            if (i == _featureCards.length) {
+              _previewController.reset();
+              _previewController.forward();
+            }
+          },
           itemBuilder: (context, index) {
             final isStylePicker = index == _featureCards.length;
             return Padding(

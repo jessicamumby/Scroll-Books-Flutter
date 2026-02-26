@@ -5,7 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:scroll_books/core/theme.dart';
 import 'package:scroll_books/screens/onboarding_screen.dart';
 
-Widget _wrap() => MaterialApp.router(
+Widget _wrapWithCallback({Future<void> Function(String)? onStyleSelected}) =>
+    MaterialApp.router(
       theme: AppTheme.light,
       routerConfig: GoRouter(
         initialLocation: '/onboarding',
@@ -14,7 +15,7 @@ Widget _wrap() => MaterialApp.router(
             path: '/onboarding',
             builder: (_, __) => OnboardingScreen(
               onComplete: () async {},
-              onStyleSelected: (style) async {},
+              onStyleSelected: onStyleSelected ?? (style) async {},
             ),
           ),
           GoRoute(
@@ -24,6 +25,19 @@ Widget _wrap() => MaterialApp.router(
         ],
       ),
     );
+
+Widget _wrap() => _wrapWithCallback();
+
+Future<void> _scrollToStyleCard(WidgetTester tester) async {
+  final pageView = find.byType(PageView);
+  final size = tester.getSize(pageView);
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
+}
 
 void main() {
   setUpAll(() {
@@ -52,28 +66,14 @@ void main() {
     testWidgets('4th card shows style picker headline', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      final pageView = find.byType(PageView);
-      final size = tester.getSize(pageView);
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
       expect(find.text('How do you like to read?'), findsOneWidget);
     });
 
     testWidgets('Start reading is disabled before style selected', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      final pageView = find.byType(PageView);
-      final size = tester.getSize(pageView);
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
       final button = tester.widget<ElevatedButton>(
         find.widgetWithText(ElevatedButton, 'Start reading →'),
       );
@@ -83,14 +83,7 @@ void main() {
     testWidgets('tapping style tile enables Start reading', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      final pageView = find.byType(PageView);
-      final size = tester.getSize(pageView);
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
       await tester.tap(find.text('Swipe down'));
       await tester.pumpAndSettle();
       final button = tester.widget<ElevatedButton>(
@@ -99,22 +92,19 @@ void main() {
       expect(button.onPressed, isNotNull);
     });
 
-    testWidgets('tapping Start reading after selection navigates to library',
+    testWidgets('tapping Start reading passes correct style and navigates to library',
         (tester) async {
-      await tester.pumpWidget(_wrap());
+      String? capturedStyle;
+      await tester.pumpWidget(_wrapWithCallback(
+        onStyleSelected: (style) async { capturedStyle = style; },
+      ));
       await tester.pumpAndSettle();
-      final pageView = find.byType(PageView);
-      final size = tester.getSize(pageView);
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
-      await tester.drag(pageView, Offset(0, -size.height));
-      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
       await tester.tap(find.text('Swipe down'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Start reading →'));
       await tester.pumpAndSettle();
+      expect(capturedStyle, 'vertical');
       expect(find.text('library'), findsOneWidget);
     });
   });
