@@ -217,7 +217,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
 
     final style =
-        Provider.of<AppProvider>(context, listen: false).readingStyle;
+        Provider.of<AppProvider>(context).readingStyle;
     final isHorizontal = style == 'horizontal';
 
     final pageView = PageView.builder(
@@ -244,6 +244,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
               Expanded(
                 flex: 3,
                 child: GestureDetector(
+                  // HitTestBehavior.translucent lets drag/swipe gestures pass
+                  // through to the underlying PageView so horizontal swiping
+                  // still works, while still capturing discrete taps here.
                   behavior: HitTestBehavior.translucent,
                   onTap: () => _pageController.previousPage(
                     duration: const Duration(milliseconds: 300),
@@ -255,6 +258,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
               Expanded(
                 flex: 3,
                 child: GestureDetector(
+                  // Same reasoning as the left zone: translucent preserves
+                  // swipe/drag while capturing taps for page advancement.
                   behavior: HitTestBehavior.translucent,
                   onTap: () => _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),

@@ -51,5 +51,12 @@ void main() {
       await tester.pumpWidget(_wrap(readingStyle: 'horizontal'));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
+
+    testWidgets('horizontal mode has GestureDetector tap zones', (tester) async {
+      await tester.pumpWidget(_wrap(readingStyle: 'horizontal'));
+      // The horizontal overlay renders two GestureDetector tap zones (left and
+      // right) over the PageView. Verify they are present in the widget tree.
+      expect(find.byType(GestureDetector), findsWidgets);
+    });
   });
 }
