@@ -67,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               const SizedBox(height: 64),
               Text(
-                'Scroll.Books',
+                'Scroll Books',
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
