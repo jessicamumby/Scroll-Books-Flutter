@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/app_provider.dart';
 import '../screens/landing_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
@@ -75,7 +77,16 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (_, __) => OnboardingScreen(onComplete: completeOnboarding),
+      builder: (context, __) => OnboardingScreen(
+        onComplete: completeOnboarding,
+        onStyleSelected: (style) async {
+          final userId = Supabase.instance.client.auth.currentUser?.id;
+          if (userId != null) {
+            await Provider.of<AppProvider>(context, listen: false)
+                .setReadingStyle(userId, style);
+          }
+        },
+      ),
     ),
     GoRoute(
       path: '/read/:bookId',
