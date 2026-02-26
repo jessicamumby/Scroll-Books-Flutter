@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:scroll_books/core/router.dart';
 
@@ -27,7 +28,18 @@ void main() {
     );
   });
 
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    await loadOnboardingCompleted();
+  });
+
   test('router is a GoRouter instance', () {
     expect(router, isA<GoRouter>());
+  });
+
+  test('loadOnboardingCompleted defaults to false when prefs are empty', () async {
+    SharedPreferences.setMockInitialValues({});
+    await loadOnboardingCompleted();
+    expect(isOnboardingCompleted, isFalse);
   });
 }

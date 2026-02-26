@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../core/supabase_client.dart';
@@ -26,15 +28,34 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(email, style: TextStyle(color: AppTheme.tobacco, fontSize: 15)),
-            const SizedBox(height: 32),
+            Text(
+              email,
+              style: TextStyle(color: AppTheme.tobacco, fontSize: 15),
+            ),
+            const SizedBox(height: 24),
+            const Divider(color: AppTheme.borderSoft),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'How Scroll Books works',
+                style: GoogleFonts.dmSans(
+                  color: AppTheme.ink,
+                  fontSize: 15,
+                ),
+              ),
+              trailing: Icon(Icons.chevron_right, color: AppTheme.pewter),
+              onTap: () => context.push('/onboarding'),
+            ),
+            const Divider(color: AppTheme.borderSoft),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () async {
                   await supabase.auth.signOut();
                 },
-                style: OutlinedButton.styleFrom(foregroundColor: AppTheme.sienna),
+                style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.sienna),
                 child: const Text('Sign Out'),
               ),
             ),
