@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../core/supabase_client.dart';
+import '../providers/app_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -45,6 +47,34 @@ class ProfileScreen extends StatelessWidget {
               ),
               trailing: Icon(Icons.chevron_right, color: AppTheme.pewter),
               onTap: () => context.push('/onboarding'),
+            ),
+            const Divider(color: AppTheme.borderSoft),
+            Consumer<AppProvider>(
+              builder: (context, provider, _) {
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    'Reading style',
+                    style: GoogleFonts.dmSans(
+                      color: AppTheme.ink,
+                      fontSize: 15,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        provider.readingStyle == 'horizontal'
+                            ? 'Stories Style'
+                            : 'Scroll Style',
+                        style: TextStyle(color: AppTheme.pewter),
+                      ),
+                      Icon(Icons.chevron_right, color: AppTheme.pewter),
+                    ],
+                  ),
+                  onTap: () => context.push('/app/profile/reading-style'),
+                );
+              },
             ),
             const Divider(color: AppTheme.borderSoft),
             const SizedBox(height: 24),

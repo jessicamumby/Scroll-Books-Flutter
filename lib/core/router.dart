@@ -15,6 +15,7 @@ import '../screens/stats_screen.dart';
 import '../screens/email_confirm_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/reading_style_screen.dart';
 import '../widgets/app_shell.dart';
 
 class _AuthNotifier extends ChangeNotifier {
@@ -102,6 +103,10 @@ final router = GoRouter(
         ),
         GoRoute(path: '/app/stats', builder: (_, __) => const StatsScreen()),
         GoRoute(path: '/app/profile', builder: (_, __) => const ProfileScreen()),
+        GoRoute(
+          path: '/app/profile/reading-style',
+          builder: (_, __) => const ReadingStyleScreen(),
+        ),
       ],
     ),
   ],
