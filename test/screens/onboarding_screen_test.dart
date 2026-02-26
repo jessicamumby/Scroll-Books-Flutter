@@ -49,16 +49,16 @@ void main() {
     });
 
     testWidgets('tapping Start reading navigates to library', (tester) async {
-      SharedPreferences.setMockInitialValues({});
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      // Swipe up twice to reach the last card
-      await tester.fling(
-          find.byType(PageView), const Offset(0, -500), 2000);
+      // Drag to card 2 then card 3 using exact viewport height
+      final pageView = find.byType(PageView);
+      final size = tester.getSize(pageView);
+      await tester.drag(pageView, Offset(0, -size.height));
       await tester.pumpAndSettle();
-      await tester.fling(
-          find.byType(PageView), const Offset(0, -500), 2000);
+      await tester.drag(pageView, Offset(0, -size.height));
       await tester.pumpAndSettle();
+      expect(find.text('Start reading →'), findsOneWidget);
       await tester.tap(find.text('Start reading →'));
       await tester.pumpAndSettle();
       expect(find.text('library'), findsOneWidget);
