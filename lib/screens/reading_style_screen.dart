@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/supabase_client.dart';
 import '../core/theme.dart';
 import '../providers/app_provider.dart';
 
@@ -9,7 +10,7 @@ class ReadingStyleScreen extends StatelessWidget {
   const ReadingStyleScreen({super.key});
 
   void _select(BuildContext context, String style) async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = supabase.auth.currentUser?.id;
     if (userId == null) return;
     await Provider.of<AppProvider>(context, listen: false)
         .setReadingStyle(userId, style);
@@ -27,16 +28,28 @@ class ReadingStyleScreen extends StatelessWidget {
           return Column(
             children: [
               ListTile(
-                title: const Text('Scroll Style'),
-                subtitle: const Text('Swipe down'),
+                title: Text(
+                  'Scroll Style',
+                  style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+                ),
+                subtitle: Text(
+                  'Swipe down',
+                  style: GoogleFonts.dmSans(color: AppTheme.tobacco),
+                ),
                 trailing: current == 'vertical'
                     ? const Icon(Icons.check, color: AppTheme.amber)
                     : null,
                 onTap: () => _select(context, 'vertical'),
               ),
               ListTile(
-                title: const Text('Stories Style'),
-                subtitle: const Text('Tap across'),
+                title: Text(
+                  'Stories Style',
+                  style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+                ),
+                subtitle: Text(
+                  'Tap across',
+                  style: GoogleFonts.dmSans(color: AppTheme.tobacco),
+                ),
                 trailing: current == 'horizontal'
                     ? const Icon(Icons.check, color: AppTheme.amber)
                     : null,

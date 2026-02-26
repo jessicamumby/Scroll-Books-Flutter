@@ -48,27 +48,31 @@ void main() {
     testWidgets('Scroll Style tile has check when readingStyle is vertical', (tester) async {
       await tester.pumpWidget(_wrap(readingStyle: 'vertical'));
       await tester.pump();
-      // Icons.check should appear (on the Scroll Style tile)
-      expect(find.byIcon(Icons.check), findsOneWidget);
-      // The Stories Style tile should NOT have a check
+      final scrollTile = find.ancestor(
+        of: find.text('Scroll Style'),
+        matching: find.byType(ListTile),
+      );
       final storiesTile = find.ancestor(
         of: find.text('Stories Style'),
         matching: find.byType(ListTile),
       );
-      expect(storiesTile, findsOneWidget);
+      expect(find.descendant(of: scrollTile, matching: find.byIcon(Icons.check)), findsOneWidget);
+      expect(find.descendant(of: storiesTile, matching: find.byIcon(Icons.check)), findsNothing);
     });
 
     testWidgets('Stories Style tile has check when readingStyle is horizontal', (tester) async {
       await tester.pumpWidget(_wrap(readingStyle: 'horizontal'));
       await tester.pump();
-      // Icons.check should appear (on the Stories Style tile)
-      expect(find.byIcon(Icons.check), findsOneWidget);
-      // The Scroll Style tile should NOT have a check
       final scrollTile = find.ancestor(
         of: find.text('Scroll Style'),
         matching: find.byType(ListTile),
       );
-      expect(scrollTile, findsOneWidget);
+      final storiesTile = find.ancestor(
+        of: find.text('Stories Style'),
+        matching: find.byType(ListTile),
+      );
+      expect(find.descendant(of: storiesTile, matching: find.byIcon(Icons.check)), findsOneWidget);
+      expect(find.descendant(of: scrollTile, matching: find.byIcon(Icons.check)), findsNothing);
     });
   });
 }
