@@ -66,7 +66,12 @@ final router = GoRouter(
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
     GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
-    GoRoute(path: '/email-confirm', builder: (_, __) => const EmailConfirmScreen()),
+    GoRoute(
+      path: '/email-confirm',
+      builder: (_, state) => EmailConfirmScreen(
+        email: state.uri.queryParameters['email'] ?? '',
+      ),
+    ),
     GoRoute(
       path: '/onboarding',
       builder: (_, __) => const Scaffold(body: Center(child: Text('onboarding'))),
