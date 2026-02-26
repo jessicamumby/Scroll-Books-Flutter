@@ -51,5 +51,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Already confirmed? Log in'), findsOneWidget);
     });
+
+    testWidgets('tapping Already confirmed navigates to login', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Already confirmed? Log in'));
+      await tester.pumpAndSettle();
+      expect(find.text('login'), findsOneWidget);
+    });
   });
 }

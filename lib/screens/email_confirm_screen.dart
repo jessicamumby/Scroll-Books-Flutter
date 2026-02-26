@@ -15,15 +15,20 @@ class EmailConfirmScreen extends StatefulWidget {
 
 class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
   bool _resent = false;
+  bool _loading = false;
 
   Future<void> _resend() async {
+    if (_loading) return;
+    setState(() => _loading = true);
     try {
       await supabase.auth.resend(
         type: OtpType.signup,
         email: widget.email,
       );
-      if (mounted) setState(() => _resent = true);
-    } catch (_) {}
+      if (mounted) setState(() { _resent = true; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -78,7 +83,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                   )
                 else
                   TextButton(
-                    onPressed: _resend,
+                    onPressed: _loading ? null : _resend,
                     child: Text(
                       'Resend email',
                       style: TextStyle(color: AppTheme.amber),
