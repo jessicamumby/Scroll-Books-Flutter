@@ -6,6 +6,7 @@ class AppProvider extends ChangeNotifier {
   Map<String, int> progress = {};
   List<String> readDays = [];
   bool loading = false;
+  String readingStyle = 'vertical';
 
   Future<void> load(String userId) async {
     loading = true;
@@ -15,6 +16,7 @@ class AppProvider extends ChangeNotifier {
       library = data.library;
       progress = data.progress;
       readDays = data.readDays;
+      readingStyle = data.readingStyle;
     } finally {
       loading = false;
       notifyListeners();
@@ -40,5 +42,11 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     }
     await UserDataService.markReadToday(userId);
+  }
+
+  Future<void> setReadingStyle(String userId, String style) async {
+    readingStyle = style;
+    notifyListeners();
+    await UserDataService.saveReadingStyle(userId, style);
   }
 }

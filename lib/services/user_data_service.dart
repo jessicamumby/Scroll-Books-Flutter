@@ -5,20 +5,27 @@ class UserData {
   final List<String> library;
   final Map<String, int> progress;
   final List<String> readDays;
+  final String readingStyle;
 
   const UserData({
     required this.library,
     required this.progress,
     required this.readDays,
+    this.readingStyle = 'vertical',
   });
 }
 
 class UserDataService {
   static Future<UserData> fetchAll(String userId) async {
-    final results = await Future.wait([
+    final results = await Future.wait(<Future<dynamic>>[
       supabase.from('library').select('book_id').eq('user_id', userId),
       supabase.from('progress').select('book_id, chunk_index').eq('user_id', userId),
       supabase.from('read_days').select('date').eq('user_id', userId),
+      supabase
+          .from('user_preferences')
+          .select('reading_style')
+          .eq('user_id', userId)
+          .maybeSingle(),
     ]);
 
     final library = (results[0] as List)
@@ -34,7 +41,15 @@ class UserDataService {
         .map((r) => r['date'] as String)
         .toList();
 
-    return UserData(library: library, progress: progress, readDays: readDays);
+    final prefs = results[3] as Map<String, dynamic>?;
+    final readingStyle = prefs?['reading_style'] as String? ?? 'vertical';
+
+    return UserData(
+      library: library,
+      progress: progress,
+      readDays: readDays,
+      readingStyle: readingStyle,
+    );
   }
 
   static Future<void> addToLibrary(String userId, String bookId) async {
@@ -61,6 +76,13 @@ class UserDataService {
     await supabase.from('read_days').upsert(
       {'user_id': userId, 'date': today},
       onConflict: 'user_id,date',
+    );
+  }
+
+  static Future<void> saveReadingStyle(String userId, String style) async {
+    await supabase.from('user_preferences').upsert(
+      {'user_id': userId, 'reading_style': style},
+      onConflict: 'user_id',
     );
   }
 }
