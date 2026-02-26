@@ -50,6 +50,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _error = e.message;
       });
+    } catch (_) {
+      setState(() {
+        _error = 'Something went wrong. Please try again.';
+      });
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -100,8 +104,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       decoration: const InputDecoration(labelText: 'Email'),
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? 'Required' : null,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        if (!v.contains('@')) return 'Enter a valid email';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -119,8 +126,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               setState(() => _obscure = !_obscure),
                         ),
                       ),
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? 'Required' : null,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        if (v.length < 6) return 'At least 6 characters';
+                        return null;
+                      },
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 12),

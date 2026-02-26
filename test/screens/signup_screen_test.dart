@@ -52,5 +52,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Already have an account? Log in'), findsOneWidget);
     });
+
+    testWidgets('shows validation error when form is empty', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create account'));
+      await tester.pumpAndSettle();
+      expect(find.text('Required'), findsWidgets);
+    });
+
+    testWidgets('tapping login link navigates to login', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Already have an account? Log in'));
+      await tester.pumpAndSettle();
+      expect(find.text('login'), findsOneWidget);
+    });
   });
 }
