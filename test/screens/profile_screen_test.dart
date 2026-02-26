@@ -26,5 +26,12 @@ void main() {
       // but the Text widget itself must exist in the tree.
       expect(find.byType(Text), findsWidgets);
     });
+
+    testWidgets('shows How Scroll Books works tile', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(theme: AppTheme.light, home: const ProfileScreen()),
+      );
+      expect(find.text('How Scroll Books works'), findsOneWidget);
+    });
   });
 }
