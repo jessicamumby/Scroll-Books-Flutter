@@ -14,6 +14,18 @@ void main() {
       expect(data.progress['moby-dick'], 42);
       expect(data.readDays, ['2026-02-25']);
     });
+
+    test('readingStyle defaults to vertical', () {
+      final data = UserData(library: [], progress: {}, readDays: []);
+      expect(data.readingStyle, 'vertical');
+    });
+
+    test('readingStyle can be set to horizontal', () {
+      final data = UserData(
+        library: [], progress: {}, readDays: [], readingStyle: 'horizontal',
+      );
+      expect(data.readingStyle, 'horizontal');
+    });
   });
 
   group('AppProvider', () {
@@ -30,6 +42,17 @@ void main() {
       final provider = AppProvider();
       provider.readDays = [];
       expect(provider.readDays, isEmpty);
+    });
+
+    test('readingStyle defaults to vertical', () {
+      final provider = AppProvider();
+      expect(provider.readingStyle, 'vertical');
+    });
+
+    test('readingStyle field can be updated', () {
+      final provider = AppProvider();
+      provider.readingStyle = 'horizontal';
+      expect(provider.readingStyle, 'horizontal');
     });
   });
 }

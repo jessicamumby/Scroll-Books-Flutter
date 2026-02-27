@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/app_provider.dart';
 import '../screens/landing_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
@@ -13,6 +15,7 @@ import '../screens/stats_screen.dart';
 import '../screens/email_confirm_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/reading_style_screen.dart';
 import '../widgets/app_shell.dart';
 
 class _AuthNotifier extends ChangeNotifier {
@@ -75,7 +78,16 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (_, __) => OnboardingScreen(onComplete: completeOnboarding),
+      builder: (context, __) => OnboardingScreen(
+        onComplete: completeOnboarding,
+        onStyleSelected: (style) async {
+          final userId = Supabase.instance.client.auth.currentUser?.id;
+          if (userId != null) {
+            await Provider.of<AppProvider>(context, listen: false)
+                .setReadingStyle(userId, style);
+          }
+        },
+      ),
     ),
     GoRoute(
       path: '/read/:bookId',
@@ -91,6 +103,10 @@ final router = GoRouter(
         ),
         GoRoute(path: '/app/stats', builder: (_, __) => const StatsScreen()),
         GoRoute(path: '/app/profile', builder: (_, __) => const ProfileScreen()),
+        GoRoute(
+          path: '/app/profile/reading-style',
+          builder: (_, __) => const ReadingStyleScreen(),
+        ),
       ],
     ),
   ],

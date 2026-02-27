@@ -5,12 +5,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 import '../core/theme.dart';
 import '../data/catalogue.dart';
+import '../providers/app_provider.dart';
 import '../services/user_data_service.dart';
 import '../widgets/reader/reader_card.dart';
 
@@ -214,9 +216,13 @@ class _ReaderScreenState extends State<ReaderScreen> {
       );
     }
 
-    return PageView.builder(
+    final style =
+        Provider.of<AppProvider>(context).readingStyle;
+    final isHorizontal = style == 'horizontal';
+
+    final pageView = PageView.builder(
       controller: _pageController,
-      scrollDirection: Axis.vertical,
+      scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
       itemCount: _chunks.length,
       onPageChanged: _onPageChanged,
       itemBuilder: (_, index) => ReaderCard(
@@ -225,6 +231,46 @@ class _ReaderScreenState extends State<ReaderScreen> {
         totalChunks: _chunks.length,
         onShare: () => _share(_chunks[index]),
       ),
+    );
+
+    if (!isHorizontal) return pageView;
+
+    return Stack(
+      children: [
+        pageView,
+        Positioned.fill(
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: GestureDetector(
+                  // HitTestBehavior.translucent lets drag/swipe gestures pass
+                  // through to the underlying PageView so horizontal swiping
+                  // still works, while still capturing discrete taps here.
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  ),
+                ),
+              ),
+              const Spacer(flex: 4),
+              Expanded(
+                flex: 3,
+                child: GestureDetector(
+                  // Same reasoning as the left zone: translucent preserves
+                  // swipe/drag while capturing taps for page advancement.
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
