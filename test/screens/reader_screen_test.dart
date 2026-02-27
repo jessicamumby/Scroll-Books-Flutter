@@ -80,5 +80,10 @@ void main() {
       // Verify the screen builds without error.
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
+
+    testWidgets('no share icon visible in reader (share via long press)', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.byIcon(Icons.share_outlined), findsNothing);
+    });
   });
 }

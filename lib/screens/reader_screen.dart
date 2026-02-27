@@ -29,7 +29,6 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool _loading = true;
   bool _fetchError = false;
   int _startIndex = 0;
-  int _currentIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
 
@@ -89,7 +88,6 @@ class _ReaderScreenState extends State<ReaderScreen> {
         setState(() {
           _chunks = chunks;
           _startIndex = savedIndex.clamp(0, chunks.length - 1);
-          _currentIndex = _startIndex;
           _loading = false;
         });
 
@@ -105,7 +103,6 @@ class _ReaderScreenState extends State<ReaderScreen> {
   }
 
   void _onPageChanged(int index) {
-    setState(() => _currentIndex = index);
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
@@ -227,51 +224,46 @@ class _ReaderScreenState extends State<ReaderScreen> {
       scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
       itemCount: _chunks.length,
       onPageChanged: _onPageChanged,
-      itemBuilder: (_, index) => ReaderCard(
-        text: _chunks[index],
-        chunkIndex: index,
-        totalChunks: _chunks.length,
+      itemBuilder: (_, index) => GestureDetector(
+        onLongPress: () => _share(_chunks[index]),
+        child: ReaderCard(
+          text: _chunks[index],
+          chunkIndex: index,
+          totalChunks: _chunks.length,
+        ),
       ),
     );
+
+    if (!isHorizontal) return pageView;
 
     return Stack(
       children: [
         pageView,
-        if (isHorizontal)
-          Positioned.fill(
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    ),
+        Positioned.fill(
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
                   ),
                 ),
-                const Spacer(flex: 4),
-                Expanded(
-                  flex: 3,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    ),
+              ),
+              const Spacer(flex: 4),
+              Expanded(
+                flex: 3,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
                   ),
                 ),
-              ],
-            ),
-          ),
-        Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 20,
-          right: 8,
-          child: IconButton(
-            icon: const Icon(Icons.share_outlined),
-            color: AppTheme.pewter,
-            onPressed: () => _share(_chunks[_currentIndex]),
+              ),
+            ],
           ),
         ),
       ],
