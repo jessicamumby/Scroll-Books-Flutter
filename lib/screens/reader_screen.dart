@@ -267,7 +267,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
           ),
         Positioned(
           bottom: MediaQuery.of(context).padding.bottom + 20,
-          right: 4,
+          right: 8,
           child: IconButton(
             icon: const Icon(Icons.share_outlined),
             color: AppTheme.pewter,
