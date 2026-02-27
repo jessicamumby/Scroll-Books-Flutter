@@ -65,13 +65,19 @@ class ReaderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: Text(
-                  _pageLabel,
-                  style: GoogleFonts.dmMono(
-                    fontSize: 12,
-                    color: AppTheme.pewter,
+              SizedBox(
+                height: 48,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      _pageLabel,
+                      style: GoogleFonts.dmMono(
+                        fontSize: 12,
+                        color: AppTheme.pewter,
+                      ),
+                    ),
                   ),
                 ),
               ),

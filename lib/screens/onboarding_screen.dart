@@ -20,7 +20,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final _pageController = PageController(viewportFraction: 0.88);
   late final AnimationController _previewController;
   late final Animation<Offset> _verticalOut;
@@ -29,6 +29,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final Animation<Offset> _horizontalIn;
   String? _selectedStyle;
   Timer? _previewPauseTimer;
+  late final AnimationController _shareController;
+  Timer? _sharePauseTimer;
+  late final Animation<double> _pressOpacity;
+  late final Animation<double> _pressScale;
+  late final Animation<double> _shareIconOpacity;
 
   static const _featureCards = [
     _CardData(
@@ -67,6 +72,40 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       }
     });
     _previewController.forward();
+    _shareController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    );
+    _shareController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _sharePauseTimer = Timer(const Duration(milliseconds: 600), () {
+          if (mounted) {
+            _shareController.reset();
+            _shareController.forward();
+          }
+        });
+      }
+    });
+    _pressOpacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 25),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
+      TweenSequenceItem(tween: ConstantTween(0.0), weight: 35),
+    ]).animate(_shareController);
+    _pressScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 1.4)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 45,
+      ),
+      TweenSequenceItem(tween: ConstantTween(1.4), weight: 55),
+    ]).animate(_shareController);
+    _shareIconOpacity = TweenSequence<double>([
+      TweenSequenceItem(tween: ConstantTween(0.0), weight: 55),
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 10),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 15),
+    ]).animate(_shareController);
     _verticalOut = Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1))
         .animate(CurvedAnimation(
             parent: _previewController,
@@ -89,6 +128,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void dispose() {
     _previewPauseTimer?.cancel();
+    _sharePauseTimer?.cancel();
+    _shareController.dispose();
     _pageController.dispose();
     _previewController.dispose();
     super.dispose();
@@ -108,7 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final totalCards = _featureCards.length + 1;
+    final totalCards = _featureCards.length + 2;
     return Scaffold(
       backgroundColor: AppTheme.page,
       body: SafeArea(
@@ -117,16 +158,29 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           scrollDirection: Axis.vertical,
           itemCount: totalCards,
           onPageChanged: (i) {
+            _previewPauseTimer?.cancel();
+            _sharePauseTimer?.cancel();
             if (i == _featureCards.length) {
-              _previewPauseTimer?.cancel();
               setState(() {
+                _shareController.reset();
+                _shareController.forward();
+              });
+            } else if (i == _featureCards.length + 1) {
+              setState(() {
+                _shareController.reset();
                 _previewController.reset();
                 _previewController.forward();
+              });
+            } else {
+              setState(() {
+                _shareController.reset();
+                _previewController.reset();
               });
             }
           },
           itemBuilder: (context, index) {
-            final isStylePicker = index == _featureCards.length;
+            final isShareCard = index == _featureCards.length;
+            final isStylePicker = index == _featureCards.length + 1;
             return Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -140,7 +194,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 ),
                 child: isStylePicker
                     ? _buildStylePickerCard(totalCards)
-                    : _buildFeatureCard(index, totalCards),
+                    : isShareCard
+                        ? _buildShareTipCard(totalCards)
+                        : _buildFeatureCard(index, totalCards),
               ),
             );
           },
@@ -172,6 +228,78 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ),
         const Spacer(),
         _DotRow(current: index, total: totalCards),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildShareTipCard(int totalCards) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Icon(Icons.share_outlined, size: 56, color: AppTheme.amber),
+        const SizedBox(height: 32),
+        Text(
+          'Long press to share.',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.ink,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Hold any passage to share it with a friend.',
+          style: GoogleFonts.dmSans(fontSize: 16, color: AppTheme.tobacco),
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: SizedBox(
+            height: 80,
+            width: 120,
+            child: ClipRect(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const _MiniReaderCard(),
+                  FadeTransition(
+                    opacity: _pressOpacity,
+                    child: ScaleTransition(
+                      scale: _pressScale,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppTheme.amber.withOpacity(0.25),
+                          border: Border.all(
+                            color: AppTheme.amber.withOpacity(0.6),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: FadeTransition(
+                      opacity: _shareIconOpacity,
+                      child: const Icon(
+                        Icons.share_outlined,
+                        size: 14,
+                        color: AppTheme.amber,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const Spacer(),
+        _DotRow(current: _featureCards.length, total: totalCards),
         const SizedBox(height: 8),
       ],
     );
@@ -222,7 +350,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
         ),
         const Spacer(),
-        _DotRow(current: _featureCards.length, total: totalCards),
+        _DotRow(current: _featureCards.length + 1, total: totalCards),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,

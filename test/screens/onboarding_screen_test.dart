@@ -37,6 +37,19 @@ Future<void> _scrollToStyleCard(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.drag(pageView, Offset(0, -size.height));
   await tester.pumpAndSettle();
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _scrollToShareCard(WidgetTester tester) async {
+  final pageView = find.byType(PageView);
+  final size = tester.getSize(pageView);
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
+  await tester.drag(pageView, Offset(0, -size.height));
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -63,7 +76,14 @@ void main() {
       );
     });
 
-    testWidgets('4th card shows style picker headline', (tester) async {
+    testWidgets('4th card shows share tip headline', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await _scrollToShareCard(tester);
+      expect(find.text('Long press to share.'), findsOneWidget);
+    });
+
+    testWidgets('5th card shows style picker headline', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
       await _scrollToStyleCard(tester);
