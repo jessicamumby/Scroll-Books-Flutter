@@ -9,7 +9,7 @@ import '../providers/app_provider.dart';
 class ReadingStyleScreen extends StatelessWidget {
   const ReadingStyleScreen({super.key});
 
-  void _select(BuildContext context, String style) async {
+  Future<void> _select(BuildContext context, String style) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return;
     await Provider.of<AppProvider>(context, listen: false)

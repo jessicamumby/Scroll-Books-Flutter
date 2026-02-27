@@ -107,5 +107,17 @@ void main() {
       expect(capturedStyle, 'vertical');
       expect(find.text('library'), findsOneWidget);
     });
+
+    testWidgets('tapping Tap across passes horizontal style', (tester) async {
+      String? capturedStyle;
+      await tester.pumpWidget(_wrapWithCallback(onStyleSelected: (s) async => capturedStyle = s));
+      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
+      await tester.tap(find.text('Tap across'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Start reading →'));
+      await tester.pumpAndSettle();
+      expect(capturedStyle, 'horizontal');
+    });
   });
 }

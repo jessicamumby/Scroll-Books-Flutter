@@ -25,7 +25,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final Animation<Offset> _verticalIn;
   late final Animation<Offset> _horizontalOut;
   late final Animation<Offset> _horizontalIn;
-  int _page = 0;
   String? _selectedStyle;
 
   static const _featureCards = [
@@ -99,10 +98,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           scrollDirection: Axis.vertical,
           itemCount: totalCards,
           onPageChanged: (i) {
-            setState(() => _page = i);
             if (i == _featureCards.length) {
-              _previewController.reset();
-              _previewController.forward();
+              setState(() {
+                _previewController.reset();
+                _previewController.forward();
+              });
             }
           },
           itemBuilder: (context, index) {
