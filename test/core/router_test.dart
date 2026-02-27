@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:scroll_books/core/router.dart';
+import 'package:scroll_books/core/onboarding_state.dart';
 
 class _NoOpAsyncStorage extends GotrueAsyncStorage {
   const _NoOpAsyncStorage();
