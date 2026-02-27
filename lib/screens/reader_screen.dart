@@ -29,6 +29,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool _loading = true;
   bool _fetchError = false;
   int _startIndex = 0;
+  int _currentIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
 
@@ -88,6 +89,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
         setState(() {
           _chunks = chunks;
           _startIndex = savedIndex.clamp(0, chunks.length - 1);
+          _currentIndex = _startIndex;
           _loading = false;
         });
 
@@ -103,6 +105,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   }
 
   void _onPageChanged(int index) {
+    setState(() => _currentIndex = index);
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
@@ -216,8 +219,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
       );
     }
 
-    final style =
-        Provider.of<AppProvider>(context).readingStyle;
+    final style = Provider.of<AppProvider>(context).readingStyle;
     final isHorizontal = style == 'horizontal';
 
     final pageView = PageView.builder(
@@ -232,41 +234,44 @@ class _ReaderScreenState extends State<ReaderScreen> {
       ),
     );
 
-    if (!isHorizontal) return pageView;
-
     return Stack(
       children: [
         pageView,
-        Positioned.fill(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  // HitTestBehavior.translucent lets drag/swipe gestures pass
-                  // through to the underlying PageView so horizontal swiping
-                  // still works, while still capturing discrete taps here.
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
+        if (isHorizontal)
+          Positioned.fill(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(flex: 4),
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  // Same reasoning as the left zone: translucent preserves
-                  // swipe/drag while capturing taps for page advancement.
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
+                const Spacer(flex: 4),
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+        Positioned(
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+          right: 4,
+          child: IconButton(
+            icon: const Icon(Icons.share_outlined),
+            color: AppTheme.pewter,
+            onPressed: () => _share(_chunks[_currentIndex]),
           ),
         ),
       ],
