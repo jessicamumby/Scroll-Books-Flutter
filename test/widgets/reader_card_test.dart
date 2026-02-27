@@ -18,30 +18,13 @@ void main() {
             text: 'Call me Ishmael.',
             chunkIndex: 0,
             totalChunks: 100,
-            onShare: () {},
           ),
         ),
       );
       expect(find.text('Call me Ishmael.'), findsOneWidget);
     });
 
-    testWidgets('shows share button', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.light,
-          home: ReaderCard(
-            text: 'Test chunk.',
-            chunkIndex: 0,
-            totalChunks: 100,
-            onShare: () {},
-          ),
-        ),
-      );
-      expect(find.byIcon(Icons.share_outlined), findsOneWidget);
-    });
-
-    testWidgets('tapping share calls onShare callback', (tester) async {
-      bool tapped = false;
+    testWidgets('does not render share icon (hoisted to ReaderScreen)', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
@@ -49,13 +32,10 @@ void main() {
             text: 'Test.',
             chunkIndex: 0,
             totalChunks: 100,
-            onShare: () { tapped = true; },
           ),
         ),
       );
-      await tester.tap(find.byIcon(Icons.share_outlined));
-      await tester.pump();
-      expect(tapped, isTrue);
+      expect(find.byIcon(Icons.share_outlined), findsNothing);
     });
 
     testWidgets('shows page number and percentage', (tester) async {
@@ -66,11 +46,9 @@ void main() {
             text: 'Test.',
             chunkIndex: 49,
             totalChunks: 100,
-            onShare: () {},
           ),
         ),
       );
-      // chunkIndex 49 → p. 50 · 50%
       expect(find.textContaining('p. 50'), findsOneWidget);
       expect(find.textContaining('50%'), findsOneWidget);
     });

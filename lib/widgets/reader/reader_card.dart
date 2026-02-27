@@ -6,14 +6,12 @@ class ReaderCard extends StatelessWidget {
   final String text;
   final int chunkIndex;
   final int totalChunks;
-  final VoidCallback onShare;
 
   const ReaderCard({
     super.key,
     required this.text,
     required this.chunkIndex,
     required this.totalChunks,
-    required this.onShare,
   });
 
   String get _pageLabel {
@@ -67,25 +65,15 @@ class ReaderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Text(
-                      _pageLabel,
-                      style: GoogleFonts.dmMono(
-                        fontSize: 12,
-                        color: AppTheme.pewter,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.share_outlined),
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  _pageLabel,
+                  style: GoogleFonts.dmMono(
+                    fontSize: 12,
                     color: AppTheme.pewter,
-                    onPressed: onShare,
                   ),
-                ],
+                ),
               ),
             ],
           ),
