@@ -58,5 +58,27 @@ void main() {
       // right) over the PageView. Verify they are present in the widget tree.
       expect(find.byType(GestureDetector), findsWidgets);
     });
+
+    testWidgets('shows coming soon screen for book without chunks (ReaderScreen level)', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AppProvider>.value(
+          value: AppProvider(),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ReaderScreen(bookId: 'pride-and-prejudice'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Coming Soon state — no share button because chunks aren't loaded
+      expect(find.textContaining('Coming Soon'), findsOneWidget);
+    });
+
+    testWidgets('horizontal mode shows loading indicator on init', (tester) async {
+      await tester.pumpWidget(_wrap(readingStyle: 'horizontal'));
+      // Still in loading state — share button only appears post-load.
+      // Verify the screen builds without error.
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
   });
 }
