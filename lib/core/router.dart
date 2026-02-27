@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/app_provider.dart';
 import '../screens/landing_screen.dart';
@@ -17,6 +16,7 @@ import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/reading_style_screen.dart';
 import '../widgets/app_shell.dart';
+import 'onboarding_state.dart';
 
 class _AuthNotifier extends ChangeNotifier {
   _AuthNotifier() {
@@ -26,43 +26,22 @@ class _AuthNotifier extends ChangeNotifier {
   }
 }
 
-class _OnboardingNotifier extends ChangeNotifier {
-  void notify() => notifyListeners();
-}
-
 final _authNotifier = _AuthNotifier();
-final _onboardingNotifier = _OnboardingNotifier();
-
-bool _onboardingCompleted = false;
-bool get isOnboardingCompleted => _onboardingCompleted;
 
 bool get _isAuthenticated =>
     Supabase.instance.client.auth.currentSession != null;
 
-Future<void> loadOnboardingCompleted() async {
-  final prefs = await SharedPreferences.getInstance();
-  _onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-}
-
-Future<void> completeOnboarding() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('onboarding_completed', true);
-  _onboardingCompleted = true;
-  _onboardingNotifier.notify();
-}
-
 final router = GoRouter(
-  refreshListenable: Listenable.merge([_authNotifier, _onboardingNotifier]),
+  refreshListenable: Listenable.merge([_authNotifier, onboardingNotifier]),
   redirect: (context, state) {
     final loc = state.matchedLocation;
     final authed = _isAuthenticated;
-    final onboarded = _onboardingCompleted;
+    final onboarded = onboardingCompleted;
     final publicOnly = ['/', '/login', '/signup', '/forgot-password'];
     final requiresAuth = loc.startsWith('/app') || loc.startsWith('/read') || loc == '/onboarding';
     if (!authed && requiresAuth) return '/login';
-    if (authed && publicOnly.contains(loc)) {
-      return onboarded ? '/app/library' : '/onboarding';
-    }
+    if (authed && !onboarded && loc != '/onboarding' && loc != '/email-confirm') return '/onboarding';
+    if (authed && publicOnly.contains(loc)) return '/app/library';
     return null;
   },
   routes: [

@@ -61,5 +61,10 @@ void main() {
       await tester.pumpWidget(_wrap());
       expect(find.text('Reading style'), findsOneWidget);
     });
+
+    testWidgets('shows Reset onboarding tile', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.text('Reset onboarding'), findsOneWidget);
+    });
   });
 }
