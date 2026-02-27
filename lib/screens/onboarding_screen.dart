@@ -97,7 +97,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _complete() async {
     final style = _selectedStyle;
     if (style == null) return;
-    await widget.onStyleSelected(style);
+    try {
+      await widget.onStyleSelected(style);
+    } catch (_) {
+      // Preference save failed — still navigate
+    }
     await widget.onComplete();
     if (mounted) context.go('/app/library');
   }
@@ -114,6 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           itemCount: totalCards,
           onPageChanged: (i) {
             if (i == _featureCards.length) {
+              _previewPauseTimer?.cancel();
               setState(() {
                 _previewController.reset();
                 _previewController.forward();

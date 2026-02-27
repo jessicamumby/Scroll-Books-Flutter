@@ -119,5 +119,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(capturedStyle, 'horizontal');
     });
+
+    testWidgets('Start reading navigates even if onStyleSelected throws',
+        (tester) async {
+      await tester.pumpWidget(_wrapWithCallback(
+        onStyleSelected: (_) async => throw Exception('save failed'),
+      ));
+      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
+      await tester.tap(find.text('Swipe down'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Start reading →'));
+      await tester.pumpAndSettle();
+      expect(find.text('library'), findsOneWidget);
+    });
   });
 }
