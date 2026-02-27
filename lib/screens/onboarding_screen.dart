@@ -350,7 +350,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
         ),
         const Spacer(),
-        _DotRow(current: _featureCards.length, total: totalCards),
+        _DotRow(current: _featureCards.length + 1, total: totalCards),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
