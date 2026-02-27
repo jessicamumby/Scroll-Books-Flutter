@@ -42,4 +42,18 @@ void main() {
     await loadOnboardingCompleted();
     expect(isOnboardingCompleted, isFalse);
   });
+
+  group('resetOnboarding', () {
+    test('clears SharedPreferences flag and resets isOnboardingCompleted', () async {
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      await loadOnboardingCompleted();
+      expect(isOnboardingCompleted, true);
+
+      await resetOnboarding();
+
+      expect(isOnboardingCompleted, false);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('onboarding_completed'), isNull);
+    });
+  });
 }

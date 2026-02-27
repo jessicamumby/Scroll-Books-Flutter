@@ -51,6 +51,13 @@ Future<void> completeOnboarding() async {
   _onboardingNotifier.notify();
 }
 
+Future<void> resetOnboarding() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('onboarding_completed');
+  _onboardingCompleted = false;
+  _onboardingNotifier.notify();
+}
+
 final router = GoRouter(
   refreshListenable: Listenable.merge([_authNotifier, _onboardingNotifier]),
   redirect: (context, state) {
@@ -60,9 +67,8 @@ final router = GoRouter(
     final publicOnly = ['/', '/login', '/signup', '/forgot-password'];
     final requiresAuth = loc.startsWith('/app') || loc.startsWith('/read') || loc == '/onboarding';
     if (!authed && requiresAuth) return '/login';
-    if (authed && publicOnly.contains(loc)) {
-      return onboarded ? '/app/library' : '/onboarding';
-    }
+    if (authed && !onboarded && loc != '/onboarding') return '/onboarding';
+    if (authed && publicOnly.contains(loc)) return '/app/library';
     return null;
   },
   routes: [
