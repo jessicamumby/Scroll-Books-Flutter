@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../core/supabase_client.dart';
+import '../core/router.dart';
 import '../providers/app_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -75,6 +76,16 @@ class ProfileScreen extends StatelessWidget {
                   onTap: () => context.push('/app/profile/reading-style'),
                 );
               },
+            ),
+            const Divider(color: AppTheme.borderSoft),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'Reset onboarding',
+                style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+              ),
+              trailing: Icon(Icons.chevron_right, color: AppTheme.pewter),
+              onTap: () => resetOnboarding(),
             ),
             const Divider(color: AppTheme.borderSoft),
             const SizedBox(height: 24),
