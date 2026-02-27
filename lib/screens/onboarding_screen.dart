@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,6 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final Animation<Offset> _horizontalOut;
   late final Animation<Offset> _horizontalIn;
   String? _selectedStyle;
+  Timer? _previewPauseTimer;
 
   static const _featureCards = [
     _CardData(
@@ -52,7 +55,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _previewController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2500),
-    )..forward();
+    );
+    _previewController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _previewPauseTimer = Timer(const Duration(milliseconds: 600), () {
+          if (mounted) {
+            _previewController.reset();
+            _previewController.forward();
+          }
+        });
+      }
+    });
+    _previewController.forward();
     _verticalOut = Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1))
         .animate(CurvedAnimation(
             parent: _previewController,
@@ -74,6 +88,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   void dispose() {
+    _previewPauseTimer?.cancel();
     _pageController.dispose();
     _previewController.dispose();
     super.dispose();
