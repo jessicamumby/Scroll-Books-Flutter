@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router.dart';
+import 'core/onboarding_state.dart';
 import 'core/theme.dart';
 import 'providers/app_provider.dart';
 
