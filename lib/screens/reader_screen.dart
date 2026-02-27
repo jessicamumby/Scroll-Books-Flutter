@@ -229,7 +229,6 @@ class _ReaderScreenState extends State<ReaderScreen> {
         text: _chunks[index],
         chunkIndex: index,
         totalChunks: _chunks.length,
-        onShare: () => _share(_chunks[index]),
       ),
     );
 
