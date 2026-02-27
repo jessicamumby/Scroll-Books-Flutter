@@ -59,7 +59,7 @@ void main() {
       expect(find.byType(GestureDetector), findsWidgets);
     });
 
-    testWidgets('share icon is not in ReaderCard (no onShare param)', (tester) async {
+    testWidgets('shows coming soon screen for book without chunks (ReaderScreen level)', (tester) async {
       await tester.pumpWidget(
         ChangeNotifierProvider<AppProvider>.value(
           value: AppProvider(),
@@ -74,7 +74,7 @@ void main() {
       expect(find.textContaining('Coming Soon'), findsOneWidget);
     });
 
-    testWidgets('horizontal mode renders share icon above tap zones', (tester) async {
+    testWidgets('horizontal mode shows loading indicator on init', (tester) async {
       await tester.pumpWidget(_wrap(readingStyle: 'horizontal'));
       // Still in loading state — share button only appears post-load.
       // Verify the screen builds without error.
