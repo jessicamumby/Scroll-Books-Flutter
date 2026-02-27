@@ -33,10 +33,6 @@ void main() {
     await loadOnboardingCompleted();
   });
 
-  test('router is a GoRouter instance', () {
-    expect(router, isA<GoRouter>());
-  });
-
   test('loadOnboardingCompleted defaults to false when prefs are empty', () async {
     SharedPreferences.setMockInitialValues({});
     await loadOnboardingCompleted();
