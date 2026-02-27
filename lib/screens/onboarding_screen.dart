@@ -135,16 +135,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.dispose();
   }
 
-  Future<void> _complete() async {
-    final style = _selectedStyle;
-    if (style == null) return;
+  Future<void> _goSignUp() async {
+    final style = _selectedStyle!;
     try {
       await widget.onStyleSelected(style);
-    } catch (_) {
-      // Preference save failed — still navigate
-    }
+    } catch (_) {}
     await widget.onComplete();
-    if (mounted) context.go('/app/library');
+    if (mounted) context.go('/signup');
+  }
+
+  Future<void> _goLogIn() async {
+    await widget.onComplete();
+    if (mounted) context.go('/login');
   }
 
   @override
@@ -309,7 +311,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           'How do you like to read?',
           style: GoogleFonts.playfairDisplay(
@@ -323,7 +325,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           'Pick a style. You can change it any time in Settings.',
           style: GoogleFonts.dmSans(fontSize: 16, color: AppTheme.tobacco),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -351,12 +353,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ),
         const Spacer(),
         _DotRow(current: _featureCards.length + 1, total: totalCards),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _selectedStyle != null ? _complete : null,
-            child: const Text('Start reading →'),
+            onPressed: _selectedStyle != null ? _goSignUp : null,
+            child: const Text('Sign up'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            onPressed: _goLogIn,
+            child: const Text('Log in'),
           ),
         ),
       ],

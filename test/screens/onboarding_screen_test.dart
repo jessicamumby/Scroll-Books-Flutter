@@ -22,6 +22,14 @@ Widget _wrapWithCallback({Future<void> Function(String)? onStyleSelected}) =>
             path: '/app/library',
             builder: (_, __) => const Scaffold(body: Text('library')),
           ),
+          GoRoute(
+            path: '/signup',
+            builder: (_, __) => const Scaffold(body: Text('signup')),
+          ),
+          GoRoute(
+            path: '/login',
+            builder: (_, __) => const Scaffold(body: Text('login')),
+          ),
         ],
       ),
     );
@@ -90,29 +98,29 @@ void main() {
       expect(find.text('How do you like to read?'), findsOneWidget);
     });
 
-    testWidgets('Start reading is disabled before style selected', (tester) async {
+    testWidgets('Sign up is disabled before style selected', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
       await _scrollToStyleCard(tester);
       final button = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Start reading →'),
+        find.widgetWithText(ElevatedButton, 'Sign up'),
       );
       expect(button.onPressed, isNull);
     });
 
-    testWidgets('tapping style tile enables Start reading', (tester) async {
+    testWidgets('tapping style tile enables Sign up', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
       await _scrollToStyleCard(tester);
       await tester.tap(find.text('Swipe down'));
       await tester.pumpAndSettle();
       final button = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Start reading →'),
+        find.widgetWithText(ElevatedButton, 'Sign up'),
       );
       expect(button.onPressed, isNotNull);
     });
 
-    testWidgets('tapping Start reading passes correct style and navigates to library',
+    testWidgets('tapping Sign up passes correct style and navigates to /signup',
         (tester) async {
       String? capturedStyle;
       await tester.pumpWidget(_wrapWithCallback(
@@ -122,10 +130,10 @@ void main() {
       await _scrollToStyleCard(tester);
       await tester.tap(find.text('Swipe down'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Start reading →'));
+      await tester.tap(find.text('Sign up'));
       await tester.pumpAndSettle();
       expect(capturedStyle, 'vertical');
-      expect(find.text('library'), findsOneWidget);
+      expect(find.text('signup'), findsOneWidget);
     });
 
     testWidgets('tapping Tap across passes horizontal style', (tester) async {
@@ -135,12 +143,12 @@ void main() {
       await _scrollToStyleCard(tester);
       await tester.tap(find.text('Tap across'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Start reading →'));
+      await tester.tap(find.text('Sign up'));
       await tester.pumpAndSettle();
       expect(capturedStyle, 'horizontal');
     });
 
-    testWidgets('Start reading navigates even if onStyleSelected throws',
+    testWidgets('Sign up navigates even if onStyleSelected throws',
         (tester) async {
       await tester.pumpWidget(_wrapWithCallback(
         onStyleSelected: (_) async => throw Exception('save failed'),
@@ -149,9 +157,28 @@ void main() {
       await _scrollToStyleCard(tester);
       await tester.tap(find.text('Swipe down'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Start reading →'));
+      await tester.tap(find.text('Sign up'));
       await tester.pumpAndSettle();
-      expect(find.text('library'), findsOneWidget);
+      expect(find.text('signup'), findsOneWidget);
+    });
+
+    testWidgets('Log in is always enabled without a style selected', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
+      final button = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Log in'),
+      );
+      expect(button.onPressed, isNotNull);
+    });
+
+    testWidgets('tapping Log in navigates to /login', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await _scrollToStyleCard(tester);
+      await tester.tap(find.text('Log in'));
+      await tester.pumpAndSettle();
+      expect(find.text('login'), findsOneWidget);
     });
   });
 }
