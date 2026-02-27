@@ -81,8 +81,17 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('no share icon visible in reader (share via long press)', (tester) async {
-      await tester.pumpWidget(_wrap());
+    testWidgets('no share icon in coming soon state (share via long press)', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AppProvider>.value(
+          value: AppProvider(),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ReaderScreen(bookId: 'pride-and-prejudice'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.byIcon(Icons.share_outlined), findsNothing);
     });
   });
