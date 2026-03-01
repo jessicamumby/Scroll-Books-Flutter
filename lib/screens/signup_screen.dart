@@ -40,6 +40,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         email: _email.text.trim(),
         password: _password.text,
         data: {'display_name': _name.text.trim()},
+        emailRedirectTo: 'scrollbooks://auth-callback',
       );
       if (mounted) {
         context.go(
