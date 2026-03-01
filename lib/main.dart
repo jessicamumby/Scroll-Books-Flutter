@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -58,6 +59,21 @@ class _AppWithAuthState extends State<_AppWithAuth> {
         context.read<AppProvider>().load(session.user.id);
       });
     }
+    _handleDeepLinks();
+  }
+
+  void _handleDeepLinks() {
+    final appLinks = AppLinks();
+    // Cold start: app was opened via the deep link
+    appLinks.getInitialAppLink().then((uri) async {
+      if (uri != null) {
+        await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      }
+    });
+    // Warm start: app was already running when the link arrived
+    appLinks.uriLinkStream.listen((uri) async {
+      await Supabase.instance.client.auth.getSessionFromUrl(uri);
+    });
   }
 
   @override
