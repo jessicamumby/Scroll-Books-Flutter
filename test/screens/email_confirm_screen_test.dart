@@ -4,6 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scroll_books/core/theme.dart';
 import 'package:scroll_books/screens/email_confirm_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class _NoOpAsyncStorage extends GotrueAsyncStorage {
+  const _NoOpAsyncStorage();
+  @override
+  Future<String?> getItem({required String key}) async => null;
+  @override
+  Future<void> setItem({required String key, required String value}) async {}
+  @override
+  Future<void> removeItem({required String key}) async {}
+}
 
 Widget _wrap({String email = 'test@example.com'}) => MaterialApp.router(
       theme: AppTheme.light,
@@ -18,13 +29,26 @@ Widget _wrap({String email = 'test@example.com'}) => MaterialApp.router(
             path: '/login',
             builder: (_, __) => const Scaffold(body: Text('login')),
           ),
+          GoRoute(
+            path: '/app/library',
+            builder: (_, __) => const Scaffold(body: Text('library')),
+          ),
         ],
       ),
     );
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
     GoogleFonts.config.allowRuntimeFetching = false;
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await Supabase.initialize(
+      url: 'https://example.supabase.co',
+      anonKey: 'test-anon-key',
+      authOptions: const FlutterAuthClientOptions(
+        localStorage: EmptyLocalStorage(),
+        pkceAsyncStorage: _NoOpAsyncStorage(),
+      ),
+    );
   });
 
   group('EmailConfirmScreen', () {
