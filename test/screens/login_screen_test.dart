@@ -10,6 +10,7 @@ Widget _wrap() => MaterialApp.router(
       routerConfig: GoRouter(routes: [
         GoRoute(path: '/', builder: (_, __) => const LoginScreen()),
         GoRoute(path: '/forgot-password', builder: (_, __) => const Scaffold(body: Text('forgot'))),
+        GoRoute(path: '/signup', builder: (_, __) => const Scaffold(body: Text('signup'))),
       ]),
     );
 
@@ -37,6 +38,18 @@ void main() {
       await tester.tap(find.textContaining('Forgot'));
       await tester.pumpAndSettle();
       expect(find.text('forgot'), findsOneWidget);
+    });
+
+    testWidgets('shows sign up link', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.textContaining('Sign up'), findsOneWidget);
+    });
+
+    testWidgets('tapping sign up navigates to /signup', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.tap(find.textContaining('Sign up'));
+      await tester.pumpAndSettle();
+      expect(find.text('signup'), findsOneWidget);
     });
   });
 }
