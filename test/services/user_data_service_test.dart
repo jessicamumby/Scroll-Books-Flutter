@@ -15,9 +15,9 @@ void main() {
       expect(data.readDays, ['2026-02-25']);
     });
 
-    test('readingStyle defaults to vertical', () {
+    test('readingStyle is null when not provided', () {
       final data = UserData(library: [], progress: {}, readDays: []);
-      expect(data.readingStyle, 'vertical');
+      expect(data.readingStyle, isNull);
     });
 
     test('readingStyle can be set to horizontal', () {
@@ -54,5 +54,6 @@ void main() {
       provider.readingStyle = 'horizontal';
       expect(provider.readingStyle, 'horizontal');
     });
+
   });
 }

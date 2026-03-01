@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/app_provider.dart';
 import '../screens/landing_screen.dart';
@@ -65,6 +66,9 @@ final router = GoRouter(
           if (userId != null) {
             await Provider.of<AppProvider>(context, listen: false)
                 .setReadingStyle(userId, style);
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('pending_reading_style', style);
           }
         },
       ),

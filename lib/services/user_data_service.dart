@@ -5,13 +5,13 @@ class UserData {
   final List<String> library;
   final Map<String, int> progress;
   final List<String> readDays;
-  final String readingStyle;
+  final String? readingStyle;
 
   const UserData({
     required this.library,
     required this.progress,
     required this.readDays,
-    this.readingStyle = 'vertical',
+    this.readingStyle,
   });
 }
 
@@ -42,7 +42,7 @@ class UserDataService {
         .toList();
 
     final prefs = results[3] as Map<String, dynamic>?;
-    final readingStyle = prefs?['reading_style'] as String? ?? 'vertical';
+    final readingStyle = prefs?['reading_style'] as String?;
 
     return UserData(
       library: library,

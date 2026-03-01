@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/user_data_service.dart';
 
 class AppProvider extends ChangeNotifier {
@@ -16,7 +17,19 @@ class AppProvider extends ChangeNotifier {
       library = data.library;
       progress = data.progress;
       readDays = data.readDays;
-      readingStyle = data.readingStyle;
+      if (data.readingStyle != null) {
+        readingStyle = data.readingStyle!;
+      } else {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          final pending = prefs.getString('pending_reading_style');
+          if (pending != null) {
+            readingStyle = pending;
+            await prefs.remove('pending_reading_style');
+            UserDataService.saveReadingStyle(userId, pending).catchError((_) {}); // fire-and-forget
+          }
+        } catch (_) {}
+      }
     } finally {
       loading = false;
       notifyListeners();
