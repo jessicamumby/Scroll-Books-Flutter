@@ -26,7 +26,7 @@ class AppProvider extends ChangeNotifier {
           if (pending != null) {
             readingStyle = pending;
             await prefs.remove('pending_reading_style');
-            UserDataService.saveReadingStyle(userId, pending); // fire-and-forget
+            UserDataService.saveReadingStyle(userId, pending).catchError((_) {}); // fire-and-forget
           }
         } catch (_) {}
       }
