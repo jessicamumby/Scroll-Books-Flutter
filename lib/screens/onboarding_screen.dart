@@ -136,16 +136,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Future<void> _goSignUp() async {
+    if (_selectedStyle == null) return;
     final style = _selectedStyle!;
     try {
       await widget.onStyleSelected(style);
     } catch (_) {}
-    await widget.onComplete();
+    try {
+      await widget.onComplete();
+    } catch (_) {}
     if (mounted) context.go('/signup');
   }
 
   Future<void> _goLogIn() async {
-    await widget.onComplete();
+    try {
+      await widget.onComplete();
+    } catch (_) {}
     if (mounted) context.go('/login');
   }
 

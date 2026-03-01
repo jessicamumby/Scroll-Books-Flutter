@@ -19,10 +19,6 @@ Widget _wrapWithCallback({Future<void> Function(String)? onStyleSelected}) =>
             ),
           ),
           GoRoute(
-            path: '/app/library',
-            builder: (_, __) => const Scaffold(body: Text('library')),
-          ),
-          GoRoute(
             path: '/signup',
             builder: (_, __) => const Scaffold(body: Text('signup')),
           ),
@@ -138,7 +134,7 @@ void main() {
 
     testWidgets('tapping Tap across passes horizontal style', (tester) async {
       String? capturedStyle;
-      await tester.pumpWidget(_wrapWithCallback(onStyleSelected: (s) async => capturedStyle = s));
+      await tester.pumpWidget(_wrapWithCallback(onStyleSelected: (s) async { capturedStyle = s; }));
       await tester.pumpAndSettle();
       await _scrollToStyleCard(tester);
       await tester.tap(find.text('Tap across'));
