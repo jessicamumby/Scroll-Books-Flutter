@@ -16,7 +16,7 @@ class AppProvider extends ChangeNotifier {
       library = data.library;
       progress = data.progress;
       readDays = data.readDays;
-      readingStyle = data.readingStyle;
+      readingStyle = data.readingStyle ?? 'vertical';
     } finally {
       loading = false;
       notifyListeners();
