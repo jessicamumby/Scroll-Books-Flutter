@@ -65,7 +65,7 @@ class _AppWithAuthState extends State<_AppWithAuth> {
   void _handleDeepLinks() {
     final appLinks = AppLinks();
     // Cold start: app was opened via the deep link
-    appLinks.getInitialAppLink().then((uri) async {
+    appLinks.getInitialLink().then((uri) async {
       if (uri != null) {
         await Supabase.instance.client.auth.getSessionFromUrl(uri);
       }
