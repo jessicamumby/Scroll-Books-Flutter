@@ -54,5 +54,11 @@ void main() {
       provider.readingStyle = 'horizontal';
       expect(provider.readingStyle, 'horizontal');
     });
+
+    test('readingStyle can be set directly (pending style simulation)', () {
+      final provider = AppProvider();
+      provider.readingStyle = 'horizontal';
+      expect(provider.readingStyle, 'horizontal');
+    });
   });
 }
