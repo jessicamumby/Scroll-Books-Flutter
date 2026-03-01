@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,23 @@ class EmailConfirmScreen extends StatefulWidget {
 class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
   bool _resent = false;
   bool _loading = false;
+  StreamSubscription? _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      if (event.session != null && mounted) {
+        context.go('/app/library');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> _resend() async {
     if (_loading) return;
