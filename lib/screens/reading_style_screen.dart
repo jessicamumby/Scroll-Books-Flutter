@@ -30,11 +30,11 @@ class ReadingStyleScreen extends StatelessWidget {
               ListTile(
                 title: Text(
                   'Scroll Style',
-                  style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+                  style: GoogleFonts.nunito(color: AppTheme.ink, fontSize: 15),
                 ),
                 subtitle: Text(
                   'Swipe down',
-                  style: GoogleFonts.dmSans(color: AppTheme.tobacco),
+                  style: GoogleFonts.nunito(color: AppTheme.tobacco),
                 ),
                 trailing: current == 'vertical'
                     ? const Icon(Icons.check, color: AppTheme.brand)
@@ -44,11 +44,11 @@ class ReadingStyleScreen extends StatelessWidget {
               ListTile(
                 title: Text(
                   'Stories Style',
-                  style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+                  style: GoogleFonts.nunito(color: AppTheme.ink, fontSize: 15),
                 ),
                 subtitle: Text(
                   'Tap across',
-                  style: GoogleFonts.dmSans(color: AppTheme.tobacco),
+                  style: GoogleFonts.nunito(color: AppTheme.tobacco),
                 ),
                 trailing: current == 'horizontal'
                     ? const Icon(Icons.check, color: AppTheme.brand)

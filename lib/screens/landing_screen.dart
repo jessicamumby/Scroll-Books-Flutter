@@ -19,7 +19,7 @@ class LandingScreen extends StatelessWidget {
               children: [
                 Text.rich(
                   TextSpan(
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.lora(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,
                       color: AppTheme.ink,

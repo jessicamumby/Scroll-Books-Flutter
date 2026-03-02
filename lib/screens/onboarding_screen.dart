@@ -222,7 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         const SizedBox(height: 32),
         Text(
           card.headline,
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.lora(
             fontSize: 32,
             fontWeight: FontWeight.w700,
             color: AppTheme.ink,
@@ -231,7 +231,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         const SizedBox(height: 16),
         Text(
           card.body,
-          style: GoogleFonts.dmSans(fontSize: 16, color: AppTheme.tobacco),
+          style: GoogleFonts.nunito(fontSize: 16, color: AppTheme.tobacco),
         ),
         const Spacer(),
         _DotRow(current: index, total: totalCards),
@@ -249,7 +249,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         const SizedBox(height: 32),
         Text(
           'Long press to share.',
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.lora(
             fontSize: 32,
             fontWeight: FontWeight.w700,
             color: AppTheme.ink,
@@ -258,7 +258,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         const SizedBox(height: 16),
         Text(
           'Hold any passage to share it with a friend.',
-          style: GoogleFonts.dmSans(fontSize: 16, color: AppTheme.tobacco),
+          style: GoogleFonts.nunito(fontSize: 16, color: AppTheme.tobacco),
         ),
         const SizedBox(height: 24),
         Center(
@@ -319,7 +319,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         const SizedBox(height: 12),
         Text(
           'How do you like to read?',
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.lora(
             fontSize: 32,
             fontWeight: FontWeight.w700,
             color: AppTheme.ink,
@@ -328,7 +328,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         const SizedBox(height: 12),
         Text(
           'Pick a style. You can change it any time in Settings.',
-          style: GoogleFonts.dmSans(fontSize: 16, color: AppTheme.tobacco),
+          style: GoogleFonts.nunito(fontSize: 16, color: AppTheme.tobacco),
         ),
         const SizedBox(height: 12),
         Row(
@@ -429,7 +429,7 @@ class _StyleTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: GoogleFonts.dmSans(
+              style: GoogleFonts.nunito(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.ink),

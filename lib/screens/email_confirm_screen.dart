@@ -64,7 +64,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 const SizedBox(height: 32),
                 Text(
                   'Check your inbox.',
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.lora(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.ink,
@@ -74,7 +74,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 const SizedBox(height: 16),
                 Text.rich(
                   TextSpan(
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.nunito(
                       fontSize: 16,
                       color: AppTheme.tobacco,
                     ),
@@ -94,7 +94,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 if (_resent)
                   Text(
                     'Sent!',
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.nunito(
                       fontSize: 14,
                       color: AppTheme.forest,
                     ),
