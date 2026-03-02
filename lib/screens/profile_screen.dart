@@ -81,6 +81,16 @@ class ProfileScreen extends StatelessWidget {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(
+                'Change password',
+                style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+              ),
+              trailing: Icon(Icons.chevron_right, color: AppTheme.pewter),
+              onTap: () => context.push('/change-password'),
+            ),
+            const Divider(color: AppTheme.borderSoft),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
                 'Reset onboarding',
                 style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
               ),

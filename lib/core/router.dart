@@ -8,6 +8,7 @@ import '../screens/landing_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/forgot_password_screen.dart';
+import '../screens/change_password_screen.dart';
 import '../screens/library_screen.dart';
 import '../screens/book_detail_screen.dart';
 import '../screens/reader_screen.dart';
@@ -51,6 +52,7 @@ final router = GoRouter(
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
     GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
+    GoRoute(path: '/change-password', builder: (_, __) => const ChangePasswordScreen()),
     GoRoute(
       path: '/email-confirm',
       builder: (_, state) => EmailConfirmScreen(
