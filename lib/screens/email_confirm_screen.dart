@@ -60,11 +60,11 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.mail_outline, size: 72, color: AppTheme.amber),
+                Icon(Icons.mail_outline, size: 72, color: AppTheme.brand),
                 const SizedBox(height: 32),
                 Text(
                   'Check your inbox.',
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.lora(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.ink,
@@ -74,7 +74,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 const SizedBox(height: 16),
                 Text.rich(
                   TextSpan(
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.nunito(
                       fontSize: 16,
                       color: AppTheme.tobacco,
                     ),
@@ -94,7 +94,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 if (_resent)
                   Text(
                     'Sent!',
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.nunito(
                       fontSize: 14,
                       color: AppTheme.forest,
                     ),
@@ -104,7 +104,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                     onPressed: _loading ? null : _resend,
                     child: Text(
                       'Resend email',
-                      style: TextStyle(color: AppTheme.amber),
+                      style: TextStyle(color: AppTheme.brand),
                     ),
                   ),
                 const SizedBox(height: 8),
@@ -112,7 +112,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                   onPressed: () => context.go('/login'),
                   child: Text(
                     'Already confirmed? Log in',
-                    style: TextStyle(color: AppTheme.amber),
+                    style: TextStyle(color: AppTheme.brand),
                   ),
                 ),
               ],

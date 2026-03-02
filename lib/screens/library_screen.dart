@@ -53,11 +53,11 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Text(
         label,
-        style: GoogleFonts.dmSans(
+        style: GoogleFonts.nunito(
           fontSize: 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.2,
-          color: AppTheme.amber,
+          color: AppTheme.brand,
         ),
       ),
     );
@@ -111,7 +111,7 @@ class _BookCard extends StatelessWidget {
                         children: [
                           Text(
                             book.title,
-                            style: GoogleFonts.playfairDisplay(
+                            style: GoogleFonts.lora(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.ink,
@@ -120,7 +120,7 @@ class _BookCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             '${book.author} · ${book.year}',
-                            style: GoogleFonts.dmSans(
+                            style: GoogleFonts.nunito(
                               fontSize: 12,
                               color: AppTheme.tobacco,
                             ),
@@ -129,7 +129,7 @@ class _BookCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               book.blurb,
-                              style: GoogleFonts.dmSans(
+                              style: GoogleFonts.nunito(
                                 fontSize: 12,
                                 color: AppTheme.pewter,
                               ),
@@ -149,7 +149,7 @@ class _BookCard extends StatelessWidget {
                                     ),
                                     child: Text(
                                       'In Library',
-                                      style: GoogleFonts.dmSans(
+                                      style: GoogleFonts.nunito(
                                         fontSize: 11,
                                         color: AppTheme.forest,
                                         fontWeight: FontWeight.w500,
@@ -173,9 +173,9 @@ class _BookCard extends StatelessWidget {
                                     ),
                                     child: Text(
                                       'Add to Library',
-                                      style: GoogleFonts.dmSans(
+                                      style: GoogleFonts.nunito(
                                         fontSize: 12,
-                                        color: AppTheme.amber,
+                                        color: AppTheme.brand,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

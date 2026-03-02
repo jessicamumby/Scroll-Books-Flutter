@@ -28,10 +28,10 @@ class StatsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     '$streak',
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.lora(
                       fontSize: 72,
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.amber,
+                      color: AppTheme.brand,
                     ),
                   ),
                   Text(
@@ -41,7 +41,7 @@ class StatsScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   Text(
                     '${_monthName(now.month)} ${now.year}',
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.lora(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.ink,
@@ -64,7 +64,7 @@ class StatsScreen extends StatelessWidget {
                       final read = provider.readDays.contains(dateStr);
                       return Container(
                         decoration: BoxDecoration(
-                          color: read ? AppTheme.amber : AppTheme.surfaceAlt,
+                          color: read ? AppTheme.brand : AppTheme.surfaceAlt,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Center(

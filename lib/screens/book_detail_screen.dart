@@ -50,7 +50,7 @@ class BookDetailScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text(
                   book.title,
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.lora(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.ink,

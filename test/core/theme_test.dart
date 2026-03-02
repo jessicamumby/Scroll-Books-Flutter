@@ -10,19 +10,23 @@ void main() {
   });
 
   group('AppTheme colours', () {
-    test('page colour matches Antique Study token', () {
-      expect(AppTheme.page, const Color(0xFFF4EDD8));
+    test('page colour matches Warm Punch token', () {
+      expect(AppTheme.page, const Color(0xFFFFF9F2));
     });
 
-    test('amber colour matches Antique Study token', () {
-      expect(AppTheme.amber, const Color(0xFF9A6F2A));
+    test('amber colour matches secondary accent token', () {
+      expect(AppTheme.amber, const Color(0xFFFFB830));
     });
 
-    test('ink colour matches Antique Study token', () {
-      expect(AppTheme.ink, const Color(0xFF1E1A14));
+    test('brand colour matches Warm Punch token', () {
+      expect(AppTheme.brand, const Color(0xFFFF4D2E));
     });
 
-    test('sienna colour matches Antique Study token', () {
+    test('ink colour matches Warm Punch token', () {
+      expect(AppTheme.ink, const Color(0xFF1C0F00));
+    });
+
+    test('sienna colour matches Warm Punch token', () {
       expect(AppTheme.sienna, const Color(0xFF7A3325));
     });
 
@@ -37,16 +41,24 @@ void main() {
       expect(scaffold.backgroundColor, AppTheme.page);
     });
 
-    test('colorScheme primary is amber', () {
-      expect(AppTheme.light.colorScheme.primary, AppTheme.amber);
+    test('colorScheme primary is brand', () {
+      expect(AppTheme.light.colorScheme.primary, AppTheme.brand);
     });
 
     test('colorScheme error is sienna', () {
       expect(AppTheme.light.colorScheme.error, AppTheme.sienna);
     });
 
-    test('amberWash colour matches token', () {
-      expect(AppTheme.amberWash, const Color(0xFFF0E6C4));
+    test('brandDark colour matches Warm Punch token', () {
+      expect(AppTheme.brandDark, const Color(0xFFE03A1C));
+    });
+
+    test('brandPale colour matches Warm Punch token', () {
+      expect(AppTheme.brandPale, const Color(0xFFFFD0C8));
+    });
+
+    test('brandWash colour matches token', () {
+      expect(AppTheme.brandWash, const Color(0xFFFFF2F0));
     });
 
     test('forestPale colour matches token', () {

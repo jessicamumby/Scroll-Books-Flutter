@@ -41,7 +41,7 @@ class ProfileScreen extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'How Scroll Books works',
-                style: GoogleFonts.dmSans(
+                style: GoogleFonts.nunito(
                   color: AppTheme.ink,
                   fontSize: 15,
                 ),
@@ -56,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     'Reading style',
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.nunito(
                       color: AppTheme.ink,
                       fontSize: 15,
                     ),
@@ -82,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'Change password',
-                style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+                style: GoogleFonts.nunito(color: AppTheme.ink, fontSize: 15),
               ),
               trailing: Icon(Icons.chevron_right, color: AppTheme.pewter),
               onTap: () => context.push('/change-password'),
@@ -92,7 +92,7 @@ class ProfileScreen extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'Reset onboarding',
-                style: GoogleFonts.dmSans(color: AppTheme.ink, fontSize: 15),
+                style: GoogleFonts.nunito(color: AppTheme.ink, fontSize: 15),
               ),
               trailing: Icon(Icons.chevron_right, color: AppTheme.pewter),
               onTap: () async {

@@ -73,7 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 64),
               Text(
                 'Scroll Books',
-                style: GoogleFonts.playfairDisplay(
+                style: GoogleFonts.lora(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   color: AppTheme.ink,
@@ -83,7 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 8),
               Text(
                 'Create your account',
-                style: GoogleFonts.dmSans(fontSize: 16, color: AppTheme.tobacco),
+                style: GoogleFonts.nunito(fontSize: 16, color: AppTheme.tobacco),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -165,7 +165,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: () => context.go('/login'),
                 child: Text(
                   'Already have an account? Log in',
-                  style: TextStyle(color: AppTheme.amber),
+                  style: TextStyle(color: AppTheme.brand),
                 ),
               ),
             ],

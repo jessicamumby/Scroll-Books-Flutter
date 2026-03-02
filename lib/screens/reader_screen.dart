@@ -153,7 +153,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
         ),
         title: Text(
           book.title,
-          style: GoogleFonts.dmSans(fontSize: 15, fontWeight: FontWeight.w600),
+          style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       body: _buildBody(book),
@@ -200,7 +200,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
             const SizedBox(height: 12),
             Text(
               book.title,
-              style: GoogleFonts.playfairDisplay(
+              style: GoogleFonts.lora(
                 fontSize: 32,
                 fontWeight: FontWeight.w900,
                 color: AppTheme.ink,
