@@ -10,19 +10,19 @@ void main() {
   });
 
   group('AppTheme colours', () {
-    test('page colour matches Antique Study token', () {
-      expect(AppTheme.page, const Color(0xFFF4EDD8));
+    test('page colour matches Warm Punch token', () {
+      expect(AppTheme.page, const Color(0xFFFFF9F2));
     });
 
-    test('amber colour matches Antique Study token', () {
-      expect(AppTheme.amber, const Color(0xFF9A6F2A));
+    test('amber colour matches Warm Punch token', () {
+      expect(AppTheme.amber, const Color(0xFFFF4D2E));
     });
 
-    test('ink colour matches Antique Study token', () {
-      expect(AppTheme.ink, const Color(0xFF1E1A14));
+    test('ink colour matches Warm Punch token', () {
+      expect(AppTheme.ink, const Color(0xFF1C0F00));
     });
 
-    test('sienna colour matches Antique Study token', () {
+    test('sienna colour matches Warm Punch token', () {
       expect(AppTheme.sienna, const Color(0xFF7A3325));
     });
 
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('amberWash colour matches token', () {
-      expect(AppTheme.amberWash, const Color(0xFFF0E6C4));
+      expect(AppTheme.amberWash, const Color(0xFFFFF2F0));
     });
 
     test('forestPale colour matches token', () {
