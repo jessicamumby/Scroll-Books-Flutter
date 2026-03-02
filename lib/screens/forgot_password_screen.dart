@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../core/supabase_client.dart';
@@ -15,9 +17,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _loading = false;
   bool _sent = false;
   String? _error;
+  StreamSubscription? _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      if (mounted && event.event == AuthChangeEvent.passwordRecovery) {
+        context.go('/change-password');
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _authSub?.cancel();
     _email.dispose();
     super.dispose();
   }
@@ -26,7 +40,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { _loading = true; _error = null; });
     try {
-      await supabase.auth.resetPasswordForEmail(_email.text.trim());
+      await supabase.auth.resetPasswordForEmail(
+        _email.text.trim(),
+        redirectTo: 'scrollbooks://auth-callback',
+      );
       if (mounted) setState(() { _sent = true; });
     } on AuthException catch (e) {
       setState(() { _error = e.message; });
