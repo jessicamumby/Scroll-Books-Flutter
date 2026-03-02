@@ -28,6 +28,10 @@ Widget _wrap() {
             path: '/onboarding',
             builder: (_, __) => const Scaffold(body: Text('onboarding')),
           ),
+          GoRoute(
+            path: '/change-password',
+            builder: (_, __) => const Scaffold(body: Text('change-password')),
+          ),
         ],
       ),
     ),
@@ -65,6 +69,21 @@ void main() {
     testWidgets('shows Reset onboarding tile', (tester) async {
       await tester.pumpWidget(_wrap());
       expect(find.text('Reset onboarding'), findsOneWidget);
+    });
+
+    testWidgets('shows Change password tile', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('Change password'), findsOneWidget);
+    });
+
+    testWidgets('tapping Change password navigates to /change-password',
+        (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Change password'));
+      await tester.pumpAndSettle();
+      expect(find.text('change-password'), findsOneWidget);
     });
   });
 }
