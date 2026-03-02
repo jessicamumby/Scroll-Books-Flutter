@@ -14,8 +14,12 @@ void main() {
       expect(AppTheme.page, const Color(0xFFFFF9F2));
     });
 
-    test('amber colour matches Warm Punch token', () {
-      expect(AppTheme.amber, const Color(0xFFFF4D2E));
+    test('amber colour matches secondary accent token', () {
+      expect(AppTheme.amber, const Color(0xFFFFB830));
+    });
+
+    test('brand colour matches Warm Punch token', () {
+      expect(AppTheme.brand, const Color(0xFFFF4D2E));
     });
 
     test('ink colour matches Warm Punch token', () {
@@ -37,16 +41,24 @@ void main() {
       expect(scaffold.backgroundColor, AppTheme.page);
     });
 
-    test('colorScheme primary is amber', () {
-      expect(AppTheme.light.colorScheme.primary, AppTheme.amber);
+    test('colorScheme primary is brand', () {
+      expect(AppTheme.light.colorScheme.primary, AppTheme.brand);
     });
 
     test('colorScheme error is sienna', () {
       expect(AppTheme.light.colorScheme.error, AppTheme.sienna);
     });
 
-    test('amberWash colour matches token', () {
-      expect(AppTheme.amberWash, const Color(0xFFFFF2F0));
+    test('brandDark colour matches Warm Punch token', () {
+      expect(AppTheme.brandDark, const Color(0xFFE03A1C));
+    });
+
+    test('brandPale colour matches Warm Punch token', () {
+      expect(AppTheme.brandPale, const Color(0xFFFFD0C8));
+    });
+
+    test('brandWash colour matches token', () {
+      expect(AppTheme.brandWash, const Color(0xFFFFF2F0));
     });
 
     test('forestPale colour matches token', () {

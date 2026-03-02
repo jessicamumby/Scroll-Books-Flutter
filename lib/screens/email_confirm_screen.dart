@@ -60,7 +60,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.mail_outline, size: 72, color: AppTheme.amber),
+                Icon(Icons.mail_outline, size: 72, color: AppTheme.brand),
                 const SizedBox(height: 32),
                 Text(
                   'Check your inbox.',
@@ -104,7 +104,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                     onPressed: _loading ? null : _resend,
                     child: Text(
                       'Resend email',
-                      style: TextStyle(color: AppTheme.amber),
+                      style: TextStyle(color: AppTheme.brand),
                     ),
                   ),
                 const SizedBox(height: 8),
@@ -112,7 +112,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                   onPressed: () => context.go('/login'),
                   child: Text(
                     'Already confirmed? Log in',
-                    style: TextStyle(color: AppTheme.amber),
+                    style: TextStyle(color: AppTheme.brand),
                   ),
                 ),
               ],

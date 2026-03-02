@@ -31,7 +31,7 @@ class StatsScreen extends StatelessWidget {
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 72,
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.amber,
+                      color: AppTheme.brand,
                     ),
                   ),
                   Text(
@@ -64,7 +64,7 @@ class StatsScreen extends StatelessWidget {
                       final read = provider.readDays.contains(dateStr);
                       return Container(
                         decoration: BoxDecoration(
-                          color: read ? AppTheme.amber : AppTheme.surfaceAlt,
+                          color: read ? AppTheme.brand : AppTheme.surfaceAlt,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Center(

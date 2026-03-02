@@ -57,7 +57,7 @@ class _SectionHeader extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.2,
-          color: AppTheme.amber,
+          color: AppTheme.brand,
         ),
       ),
     );
@@ -175,7 +175,7 @@ class _BookCard extends StatelessWidget {
                                       'Add to Library',
                                       style: GoogleFonts.dmSans(
                                         fontSize: 12,
-                                        color: AppTheme.amber,
+                                        color: AppTheme.brand,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

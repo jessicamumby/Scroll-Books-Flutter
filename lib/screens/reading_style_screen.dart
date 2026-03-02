@@ -37,7 +37,7 @@ class ReadingStyleScreen extends StatelessWidget {
                   style: GoogleFonts.dmSans(color: AppTheme.tobacco),
                 ),
                 trailing: current == 'vertical'
-                    ? const Icon(Icons.check, color: AppTheme.amber)
+                    ? const Icon(Icons.check, color: AppTheme.brand)
                     : null,
                 onTap: () => _select(context, 'vertical'),
               ),
@@ -51,7 +51,7 @@ class ReadingStyleScreen extends StatelessWidget {
                   style: GoogleFonts.dmSans(color: AppTheme.tobacco),
                 ),
                 trailing: current == 'horizontal'
-                    ? const Icon(Icons.check, color: AppTheme.amber)
+                    ? const Icon(Icons.check, color: AppTheme.brand)
                     : null,
                 onTap: () => _select(context, 'horizontal'),
               ),

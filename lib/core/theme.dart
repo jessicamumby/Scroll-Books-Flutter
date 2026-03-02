@@ -17,11 +17,14 @@ class AppTheme {
   static const Color pewter      = Color(0xFFA08060);
   static const Color fog         = Color(0xFFBFB39D);
 
-  // ── Brand accent (values updated; names renamed in Task 2) ──
-  static const Color amber       = Color(0xFFFF4D2E);
-  static const Color amberRich   = Color(0xFFE03A1C);
-  static const Color amberPale   = Color(0xFFFFD0C8);
-  static const Color amberWash   = Color(0xFFFFF2F0);
+  // ── Brand accent ──
+  static const Color brand       = Color(0xFFFF4D2E);
+  static const Color brandDark   = Color(0xFFE03A1C);
+  static const Color brandPale   = Color(0xFFFFD0C8);
+  static const Color brandWash   = Color(0xFFFFF2F0);
+
+  // ── Secondary accent ──
+  static const Color amber       = Color(0xFFFFB830);
 
   // ── Cover art ──
   static const Color coverDeep   = Color(0xFF2C3E50);
@@ -36,7 +39,7 @@ class AppTheme {
     useMaterial3: true,
     scaffoldBackgroundColor: page,
     colorScheme: ColorScheme.light(
-      primary: amber,
+      primary: brand,
       onPrimary: surface,
       surface: surface,
       onSurface: ink,
@@ -58,7 +61,7 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: surface,
-      indicatorColor: amberPale,
+      indicatorColor: brandPale,
       labelTextStyle: WidgetStateProperty.all(
         GoogleFonts.nunito(fontSize: 12, color: tobacco),
       ),
@@ -84,12 +87,12 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: amber, width: 1.5),
+        borderSide: const BorderSide(color: brand, width: 1.5),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: amber,
+        backgroundColor: brand,
         foregroundColor: surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),

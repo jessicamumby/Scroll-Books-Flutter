@@ -165,7 +165,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: () => context.go('/login'),
                 child: Text(
                   'Already have an account? Log in',
-                  style: TextStyle(color: AppTheme.amber),
+                  style: TextStyle(color: AppTheme.brand),
                 ),
               ),
             ],

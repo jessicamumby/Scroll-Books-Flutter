@@ -218,7 +218,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Icon(card.icon, size: 56, color: AppTheme.amber),
+        Icon(card.icon, size: 56, color: AppTheme.brand),
         const SizedBox(height: 32),
         Text(
           card.headline,
@@ -245,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Icon(Icons.share_outlined, size: 56, color: AppTheme.amber),
+        Icon(Icons.share_outlined, size: 56, color: AppTheme.brand),
         const SizedBox(height: 32),
         Text(
           'Long press to share.',
@@ -279,9 +279,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppTheme.amber.withOpacity(0.25),
+                          color: AppTheme.brand.withOpacity(0.25),
                           border: Border.all(
-                            color: AppTheme.amber.withOpacity(0.6),
+                            color: AppTheme.brand.withOpacity(0.6),
                             width: 1.5,
                           ),
                         ),
@@ -296,7 +296,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       child: const Icon(
                         Icons.share_outlined,
                         size: 14,
-                        color: AppTheme.amber,
+                        color: AppTheme.brand,
                       ),
                     ),
                   ),
@@ -407,7 +407,7 @@ class _StyleTile extends StatelessWidget {
           color: AppTheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppTheme.amber : AppTheme.fog,
+            color: selected ? AppTheme.brand : AppTheme.fog,
             width: selected ? 2 : 1,
           ),
         ),
@@ -452,7 +452,7 @@ class _MiniReaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.amberWash,
+        color: AppTheme.brandWash,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: AppTheme.borderSoft),
       ),
@@ -506,7 +506,7 @@ class _DotRow extends StatelessWidget {
           width: current == i ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: current == i ? AppTheme.amber : AppTheme.fog,
+            color: current == i ? AppTheme.brand : AppTheme.fog,
             borderRadius: BorderRadius.circular(4),
           ),
         );

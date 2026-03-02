@@ -28,7 +28,7 @@ class LandingScreen extends StatelessWidget {
                       const TextSpan(text: 'Scroll'),
                       TextSpan(
                         text: '.',
-                        style: TextStyle(color: AppTheme.amber),
+                        style: TextStyle(color: AppTheme.brand),
                       ),
                       const TextSpan(text: 'Books'),
                     ],
@@ -54,7 +54,7 @@ class LandingScreen extends StatelessWidget {
                   child: Text(
                     'Log In',
                     style: TextStyle(
-                      color: AppTheme.amber,
+                      color: AppTheme.brand,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
