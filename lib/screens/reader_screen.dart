@@ -22,6 +22,9 @@ class ReaderScreen extends StatefulWidget {
 
   @override
   State<ReaderScreen> createState() => _ReaderScreenState();
+
+  static String formatShareText(String passage) =>
+      '$passage\n\n— Read on Scroll Books';
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
@@ -150,7 +153,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   }
 
   void _share(String text) {
-    Share.share('$text\n\n— Read on Scroll Books');
+    Share.share(ReaderScreen.formatShareText(text));
   }
 
   void _goBack(BuildContext context) {
