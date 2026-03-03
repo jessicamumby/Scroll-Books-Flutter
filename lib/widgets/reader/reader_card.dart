@@ -37,23 +37,13 @@ class ReaderCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.brand.withValues(alpha: 0.22),
-                        blurRadius: 18,
-                        spreadRadius: 2,
-                      ),
-                    ],
+                    border: Border.all(color: AppTheme.brandPale, width: 1.5),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Container(
-                          width: 3,
-                          color: AppTheme.brand,
-                        ),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
