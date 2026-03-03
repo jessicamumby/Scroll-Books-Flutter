@@ -54,6 +54,36 @@ void main() {
       provider.readingStyle = 'horizontal';
       expect(provider.readingStyle, 'horizontal');
     });
+  });
 
+  group('AppProvider local stats', () {
+    test('passagesRead starts at 0', () {
+      final provider = AppProvider();
+      expect(provider.passagesRead, 0);
+    });
+
+    test('longestStreak starts at 0', () {
+      final provider = AppProvider();
+      expect(provider.longestStreak, 0);
+    });
+
+    test('pendingMilestone starts null', () {
+      final provider = AppProvider();
+      expect(provider.pendingMilestone, isNull);
+    });
+
+    test('incrementPassagesRead adds to passagesRead', () {
+      final provider = AppProvider();
+      provider.incrementPassagesRead('2026-03-03');
+      expect(provider.passagesRead, 1);
+      expect(provider.dailyPassages['2026-03-03'], 1);
+    });
+
+    test('clearMilestone sets pendingMilestone to null', () {
+      final provider = AppProvider();
+      provider.pendingMilestone = 7;
+      provider.clearMilestone();
+      expect(provider.pendingMilestone, isNull);
+    });
   });
 }
