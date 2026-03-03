@@ -53,7 +53,7 @@ void main() {
       expect(find.textContaining('50%'), findsOneWidget);
     });
 
-    testWidgets('renders brand accent left bar using ClipRRect', (tester) async {
+    testWidgets('renders card content clipped with ClipRRect', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
@@ -90,6 +90,8 @@ void main() {
           reason: 'BoxShadow glow must be removed');
       expect(dec.border, isNotNull,
           reason: 'brandPale Border.all must be present');
+      expect(dec.border, isA<Border>(),
+          reason: 'Border should be a Border instance, not BorderDirectional');
       final border = dec.border! as Border;
       expect(border.top.color, AppTheme.brandPale,
           reason: 'Border color should be AppTheme.brandPale');
