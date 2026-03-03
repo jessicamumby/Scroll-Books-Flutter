@@ -32,6 +32,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   int _startIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
+  Timer? _hintTimer;
 
   Book? get _book => getBookById(widget.bookId);
   String? get _userId {
@@ -102,7 +103,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
             if (!shown && mounted) {
               setState(() => _showShareHint = true);
               await prefs.setBool('share_hint_shown', true);
-              Future.delayed(const Duration(seconds: 3), () {
+              _hintTimer = Timer(const Duration(seconds: 3), () {
                 if (mounted) setState(() => _showShareHint = false);
               });
             }
@@ -118,6 +119,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
   void _onPageChanged(int index) {
     _debounceTimer?.cancel();
+    _hintTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -188,7 +190,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppTheme.ink.withOpacity(0.75),
+                  color: AppTheme.ink.withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
