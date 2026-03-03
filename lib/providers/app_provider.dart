@@ -80,7 +80,9 @@ class AppProvider extends ChangeNotifier {
             await prefs.remove('pending_reading_style');
             UserDataService.saveReadingStyle(userId, pending).catchError((_) {}); // fire-and-forget
           }
-        } catch (_) {}
+        } catch (e, st) {
+          debugPrint('AppProvider.load pending_reading_style error: $e\n$st');
+        }
       }
       final current = calculateStreak(readDays);
       if (current > longestStreak) {
