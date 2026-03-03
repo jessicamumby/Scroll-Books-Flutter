@@ -51,5 +51,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('not found'), findsOneWidget);
     });
+
+    testWidgets('shows cover image as 150x220 portrait thumbnail', (tester) async {
+      await tester.pumpWidget(_wrap('moby-dick'));
+      await tester.pumpAndSettle();
+      final images = tester.widgetList<Image>(find.byType(Image)).toList();
+      expect(
+        images.any((img) => img.width == 150 && img.height == 220),
+        isTrue,
+        reason: 'Expected a 150×220 Image widget for the book cover thumbnail',
+      );
+    });
   });
 }

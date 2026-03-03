@@ -91,33 +91,27 @@ class _BookCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        AppTheme.amber.withValues(alpha: 0.3),
-                        BlendMode.multiply,
-                      ),
-                      child: Image.asset(
-                        'assets/covers/${book.id}.jpg',
-                        width: 80,
-                        height: 120,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) {
-                          final gradient = coverGradients[book.id] ??
-                              [AppTheme.coverDeep, AppTheme.coverRich];
-                          return Container(
-                            width: 80,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              gradient: LinearGradient(
-                                colors: gradient,
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                    child: Image.asset(
+                      'assets/covers/${book.id}.jpg',
+                      width: 80,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) {
+                        final gradient = coverGradients[book.id] ??
+                            [AppTheme.coverDeep, AppTheme.coverRich];
+                        return Container(
+                          width: 80,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            gradient: LinearGradient(
+                              colors: gradient,
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),

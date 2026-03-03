@@ -73,10 +73,11 @@ void main() {
       expect(find.text('NEW'), findsOneWidget);
     });
 
-    testWidgets('book cards use image assets with color filter', (tester) async {
+    testWidgets('book cards display image assets without color filter', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.byType(ColorFiltered), findsWidgets);
+      expect(find.byType(ColorFiltered), findsNothing,
+          reason: 'Amber ColorFilter should be removed; Gutenberg covers display true colours');
     });
   });
 }
