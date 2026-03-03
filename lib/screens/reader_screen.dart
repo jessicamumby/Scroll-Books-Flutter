@@ -131,9 +131,10 @@ class _ReaderScreenState extends State<ReaderScreen> {
     if (mounted) {
       Provider.of<AppProvider>(context, listen: false)
           .incrementPassagesRead(today);
+      _hintTimer?.cancel();
+      setState(() => _showShareHint = false);
     }
     _debounceTimer?.cancel();
-    _hintTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
         final prefs = await SharedPreferences.getInstance();

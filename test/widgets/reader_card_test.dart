@@ -64,5 +64,34 @@ void main() {
       );
       expect(find.byType(ClipRRect), findsWidgets);
     });
+
+    testWidgets('card decoration has brand glow shadow and no border', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: ReaderCard(text: 'Test passage', chunkIndex: 0, totalChunks: 10),
+          ),
+        ),
+      );
+
+      // Find the inner card Container (the one with the rounded BoxDecoration).
+      final containers = tester.widgetList<Container>(find.byType(Container)).toList();
+      final cardContainer = containers.firstWhere(
+        (c) =>
+            c.decoration is BoxDecoration &&
+            (c.decoration as BoxDecoration).borderRadius != null,
+        orElse: () => throw TestFailure(
+          'No Container with a rounded BoxDecoration found in the widget tree',
+        ),
+      );
+      final dec = cardContainer.decoration as BoxDecoration;
+
+      expect(dec.border, isNull,
+          reason: 'Border.all should be removed in favour of glow shadow');
+      expect(dec.boxShadow, isNotNull,
+          reason: 'BoxShadow brand glow must be present');
+      expect(dec.boxShadow, isNotEmpty);
+    });
   });
 }
