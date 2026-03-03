@@ -134,6 +134,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
     _debounceTimer?.cancel();
     _hintTimer?.cancel();
+    setState(() => _showShareHint = false);
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
         final prefs = await SharedPreferences.getInstance();
