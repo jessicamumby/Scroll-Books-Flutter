@@ -146,6 +146,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   void dispose() {
     _pageController.dispose();
     _debounceTimer?.cancel();
+    _hintTimer?.cancel();
     super.dispose();
   }
 
