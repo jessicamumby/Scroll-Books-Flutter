@@ -37,25 +37,39 @@ class ReaderCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.borderSoft),
+                    border: Border.all(color: AppTheme.border),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Flexible(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              text,
-                              style: GoogleFonts.lora(
-                                fontSize: 18,
-                                height: 1.75,
-                                color: AppTheme.ink,
-                                fontStyle: FontStyle.italic,
-                              ),
+                        Container(
+                          width: 3,
+                          color: AppTheme.brand,
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      text,
+                                      style: GoogleFonts.lora(
+                                        fontSize: 18,
+                                        height: 1.75,
+                                        color: AppTheme.ink,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -74,8 +88,8 @@ class ReaderCard extends StatelessWidget {
                     child: Text(
                       _pageLabel,
                       style: GoogleFonts.dmMono(
-                        fontSize: 12,
-                        color: AppTheme.pewter,
+                        fontSize: 13,
+                        color: AppTheme.tobacco,
                       ),
                     ),
                   ),

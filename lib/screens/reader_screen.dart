@@ -28,6 +28,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   List<String> _chunks = [];
   bool _loading = true;
   bool _fetchError = false;
+  bool _showShareHint = false;
   int _startIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
@@ -91,9 +92,22 @@ class _ReaderScreenState extends State<ReaderScreen> {
           _loading = false;
         });
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
           if (_pageController.hasClients) {
             _pageController.jumpToPage(_startIndex);
+          }
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            final shown = prefs.getBool('share_hint_shown') ?? false;
+            if (!shown && mounted) {
+              setState(() => _showShareHint = true);
+              await prefs.setBool('share_hint_shown', true);
+              Future.delayed(const Duration(seconds: 3), () {
+                if (mounted) setState(() => _showShareHint = false);
+              });
+            }
+          } catch (e, st) {
+            debugPrint('Share hint pref error: $e\n$st');
           }
         });
       }
@@ -157,6 +171,38 @@ class _ReaderScreenState extends State<ReaderScreen> {
         ),
       ),
       body: _buildBody(book),
+    );
+  }
+
+  Widget _wrapWithHint(Widget child) {
+    return Stack(
+      children: [
+        child,
+        AnimatedOpacity(
+          opacity: _showShareHint ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 400),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 72),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.ink.withOpacity(0.75),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Hold any passage to share it',
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    color: AppTheme.surface,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -234,9 +280,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
       ),
     );
 
-    if (!isHorizontal) return pageView;
+    if (!isHorizontal) return _wrapWithHint(pageView);
 
-    return Stack(
+    return _wrapWithHint(Stack(
       children: [
         pageView,
         Positioned.fill(
@@ -267,6 +313,6 @@ class _ReaderScreenState extends State<ReaderScreen> {
           ),
         ),
       ],
-    );
+    ));
   }
 }
