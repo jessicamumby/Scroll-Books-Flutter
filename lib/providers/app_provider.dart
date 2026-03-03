@@ -139,6 +139,7 @@ class AppProvider extends ChangeNotifier {
       dateStr: (dailyPassages[dateStr] ?? 0) + 1,
     };
     notifyListeners();
+    _saveLocalStats();
   }
 
   void clearMilestone() {
