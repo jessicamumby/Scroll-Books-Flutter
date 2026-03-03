@@ -22,21 +22,27 @@ class ReaderScreen extends StatefulWidget {
 
   @override
   State<ReaderScreen> createState() => _ReaderScreenState();
+
+  static String formatShareText(String passage) =>
+      '$passage\n\n— Read on Scroll Books';
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
   List<String> _chunks = [];
   bool _loading = true;
   bool _fetchError = false;
+  bool _showShareHint = false;
   int _startIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
+  Timer? _hintTimer;
 
   Book? get _book => getBookById(widget.bookId);
   String? get _userId {
     try {
       return supabase.auth.currentUser?.id;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('_userId error: $e\n$st');
       return null;
     }
   }
@@ -60,7 +66,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       savedIndex = prefs.getInt('progress_${widget.bookId}') ?? 0;
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('Load cached progress error: $e\n$st');
+    }
 
     // Fetch from Supabase if authenticated
     if (_userId != null) {
@@ -72,7 +80,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
             .eq('book_id', widget.bookId)
             .maybeSingle();
         if (res != null) savedIndex = res['chunk_index'] as int;
-      } catch (_) {}
+      } catch (e, st) {
+        debugPrint('Fetch remote progress error: $e\n$st');
+      }
     }
 
     // Fetch chunks from Supabase Storage
@@ -91,35 +101,59 @@ class _ReaderScreenState extends State<ReaderScreen> {
           _loading = false;
         });
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
           if (_pageController.hasClients) {
             _pageController.jumpToPage(_startIndex);
           }
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            final shown = prefs.getBool('share_hint_shown') ?? false;
+            if (!shown && mounted) {
+              setState(() => _showShareHint = true);
+              await prefs.setBool('share_hint_shown', true);
+              _hintTimer = Timer(const Duration(seconds: 3), () {
+                if (mounted) setState(() => _showShareHint = false);
+              });
+            }
+          } catch (e, st) {
+            debugPrint('Share hint pref error: $e\n$st');
+          }
         });
       }
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('Fetch chunks error: $e\n$st');
       if (mounted) setState(() { _loading = false; _fetchError = true; });
     }
   }
 
   void _onPageChanged(int index) {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (mounted) {
+      Provider.of<AppProvider>(context, listen: false)
+          .incrementPassagesRead(today);
+    }
     _debounceTimer?.cancel();
+    _hintTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setInt('progress_${widget.bookId}', index);
-      } catch (_) {}
+      } catch (e, st) {
+        debugPrint('Save local progress error: $e\n$st');
+      }
       if (_userId != null) {
         try {
           await UserDataService.syncProgress(_userId!, widget.bookId, index);
           await UserDataService.markReadToday(_userId!);
-        } catch (_) {}
+        } catch (e, st) {
+          debugPrint('Sync remote progress error: $e\n$st');
+        }
       }
     });
   }
 
   void _share(String text) {
-    Share.share('$text\n\n— Read on Scroll Books');
+    Share.share(ReaderScreen.formatShareText(text));
   }
 
   void _goBack(BuildContext context) {
@@ -130,6 +164,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   void dispose() {
     _pageController.dispose();
     _debounceTimer?.cancel();
+    _hintTimer?.cancel();
     super.dispose();
   }
 
@@ -157,6 +192,38 @@ class _ReaderScreenState extends State<ReaderScreen> {
         ),
       ),
       body: _buildBody(book),
+    );
+  }
+
+  Widget _wrapWithHint(Widget child) {
+    return Stack(
+      children: [
+        child,
+        AnimatedOpacity(
+          opacity: _showShareHint ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 400),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 72),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.ink.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Hold any passage to share it',
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    color: AppTheme.surface,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -234,9 +301,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
       ),
     );
 
-    if (!isHorizontal) return pageView;
+    if (!isHorizontal) return _wrapWithHint(pageView);
 
-    return Stack(
+    return _wrapWithHint(Stack(
       children: [
         pageView,
         Positioned.fill(
@@ -267,6 +334,6 @@ class _ReaderScreenState extends State<ReaderScreen> {
           ),
         ),
       ],
-    );
+    ));
   }
 }

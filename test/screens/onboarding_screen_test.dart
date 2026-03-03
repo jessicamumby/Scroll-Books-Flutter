@@ -176,5 +176,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('login'), findsOneWidget);
     });
+
+    testWidgets('feature cards have centred layout (equal spacers)', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: OnboardingScreen(
+              onComplete: () async {},
+              onStyleSelected: (_) async {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(Spacer), findsWidgets);
+    });
+
+    testWidgets('onboarding builds with animation controllers', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: OnboardingScreen(
+              onComplete: () async {},
+              onStyleSelected: (_) async {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(ScaleTransition), findsWidgets);
+    });
   });
 }

@@ -52,5 +52,17 @@ void main() {
       expect(find.textContaining('p. 50'), findsOneWidget);
       expect(find.textContaining('50%'), findsOneWidget);
     });
+
+    testWidgets('renders brand accent left bar using ClipRRect', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: ReaderCard(text: 'Test passage', chunkIndex: 0, totalChunks: 10),
+          ),
+        ),
+      );
+      expect(find.byType(ClipRRect), findsWidgets);
+    });
   });
 }

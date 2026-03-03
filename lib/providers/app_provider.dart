@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/user_data_service.dart';
+import '../utils/streak_calculator.dart';
 
 class AppProvider extends ChangeNotifier {
   List<String> library = [];
@@ -8,8 +10,58 @@ class AppProvider extends ChangeNotifier {
   List<String> readDays = [];
   bool loading = false;
   String readingStyle = 'vertical';
+  int passagesRead = 0;
+  int longestStreak = 0;
+  Map<String, int> dailyPassages = {};
+  int? pendingMilestone;
+
+  Future<void> _loadLocalStats() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      passagesRead = prefs.getInt('passages_read') ?? 0;
+      longestStreak = prefs.getInt('longest_streak') ?? 0;
+      final dailyJson = prefs.getString('daily_passages');
+      if (dailyJson != null) {
+        final decoded = jsonDecode(dailyJson) as Map<String, dynamic>;
+        dailyPassages = decoded.map((k, v) => MapEntry(k, v as int));
+      }
+    } catch (e, st) {
+      debugPrint('AppProvider._loadLocalStats error: $e\n$st');
+    }
+  }
+
+  Future<void> _saveLocalStats() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('passages_read', passagesRead);
+      await prefs.setInt('longest_streak', longestStreak);
+      await prefs.setString('daily_passages', jsonEncode(dailyPassages));
+    } catch (e, st) {
+      debugPrint('AppProvider._saveLocalStats error: $e\n$st');
+    }
+  }
+
+  Future<void> _checkMilestone(int currentStreak) async {
+    const milestones = [7, 30, 100];
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastCelebrated = prefs.getInt('last_celebrated_milestone') ?? 0;
+      int? next;
+      for (final m in milestones) {
+        if (currentStreak >= m && m > lastCelebrated) next = m;
+      }
+      if (next != null) {
+        pendingMilestone = next;
+        await prefs.setInt('last_celebrated_milestone', next);
+        notifyListeners();
+      }
+    } catch (e, st) {
+      debugPrint('AppProvider._checkMilestone error: $e\n$st');
+    }
+  }
 
   Future<void> load(String userId) async {
+    await _loadLocalStats();
     loading = true;
     notifyListeners();
     try {
@@ -26,10 +78,20 @@ class AppProvider extends ChangeNotifier {
           if (pending != null) {
             readingStyle = pending;
             await prefs.remove('pending_reading_style');
-            UserDataService.saveReadingStyle(userId, pending).catchError((_) {}); // fire-and-forget
+            UserDataService.saveReadingStyle(userId, pending).catchError((e, st) {
+              debugPrint('saveReadingStyle error: $e\n$st');
+            }); // fire-and-forget
           }
-        } catch (_) {}
+        } catch (e, st) {
+          debugPrint('AppProvider.load pending_reading_style error: $e\n$st');
+        }
       }
+      final current = calculateStreak(readDays);
+      if (current > longestStreak) {
+        longestStreak = current;
+        await _saveLocalStats();
+      }
+      await _checkMilestone(current);
     } finally {
       loading = false;
       notifyListeners();
@@ -55,11 +117,33 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     }
     await UserDataService.markReadToday(userId);
+    final current = calculateStreak(readDays);
+    if (current > longestStreak) {
+      longestStreak = current;
+      await _saveLocalStats();
+      notifyListeners();
+    }
+    await _checkMilestone(current);
   }
 
   Future<void> setReadingStyle(String userId, String style) async {
     readingStyle = style;
     notifyListeners();
     await UserDataService.saveReadingStyle(userId, style);
+  }
+
+  void incrementPassagesRead(String dateStr) {
+    passagesRead++;
+    dailyPassages = {
+      ...dailyPassages,
+      dateStr: (dailyPassages[dateStr] ?? 0) + 1,
+    };
+    notifyListeners();
+    _saveLocalStats();
+  }
+
+  void clearMilestone() {
+    pendingMilestone = null;
+    notifyListeners();
   }
 }

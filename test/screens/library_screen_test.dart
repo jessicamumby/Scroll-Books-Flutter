@@ -72,5 +72,11 @@ void main() {
       expect(find.text('TRENDING'), findsOneWidget);
       expect(find.text('NEW'), findsOneWidget);
     });
+
+    testWidgets('book cards use image assets with color filter', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.byType(ColorFiltered), findsWidgets);
+    });
   });
 }

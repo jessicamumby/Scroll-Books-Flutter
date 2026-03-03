@@ -35,6 +35,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late final Animation<double> _pressScale;
   late final Animation<double> _shareIconOpacity;
 
+  // Task 9: per-card animation controllers and animations
+  late final AnimationController _chunksController;
+  late final AnimationController _streakController;
+  late final AnimationController _classicsController;
+  late final Animation<double> _chunksScale;
+  late final Animation<double> _streakScale;
+  late final Animation<double> _classicsOpacity;
+  Timer? _chunksPauseTimer;
+  Timer? _streakPauseTimer;
+  Timer? _classicsPauseTimer;
+
   static const _featureCards = [
     _CardData(
       icon: Icons.menu_book_outlined,
@@ -123,15 +134,82 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         .animate(CurvedAnimation(
             parent: _previewController,
             curve: const Interval(0.4, 0.8, curve: Curves.easeOut)));
+
+    // Task 9: per-card animation setup
+    _chunksController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _chunksScale = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _chunksController, curve: Curves.easeInOut),
+    );
+    _chunksController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _chunksPauseTimer = Timer(const Duration(milliseconds: 200), () {
+          if (mounted) _chunksController.reverse();
+        });
+      } else if (status == AnimationStatus.dismissed) {
+        _chunksPauseTimer = Timer(const Duration(milliseconds: 200), () {
+          if (mounted) _chunksController.forward();
+        });
+      }
+    });
+
+    _streakController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _streakScale = Tween<double>(begin: 1.0, end: 1.35).animate(
+      CurvedAnimation(parent: _streakController, curve: Curves.elasticOut),
+    );
+    _streakController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _streakPauseTimer = Timer(const Duration(milliseconds: 200), () {
+          if (mounted) _streakController.reverse();
+        });
+      } else if (status == AnimationStatus.dismissed) {
+        _streakPauseTimer = Timer(const Duration(milliseconds: 200), () {
+          if (mounted) _streakController.forward();
+        });
+      }
+    });
+
+    _classicsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _classicsOpacity = Tween<double>(begin: 0.45, end: 1.0).animate(
+      CurvedAnimation(parent: _classicsController, curve: Curves.easeInOut),
+    );
+    _classicsController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _classicsPauseTimer = Timer(const Duration(milliseconds: 200), () {
+          if (mounted) _classicsController.reverse();
+        });
+      } else if (status == AnimationStatus.dismissed) {
+        _classicsPauseTimer = Timer(const Duration(milliseconds: 200), () {
+          if (mounted) _classicsController.forward();
+        });
+      }
+    });
+
+    // Auto-start for first card (index 0 = chunks card)
+    _chunksController.forward();
   }
 
   @override
   void dispose() {
     _previewPauseTimer?.cancel();
     _sharePauseTimer?.cancel();
+    _chunksPauseTimer?.cancel();
+    _streakPauseTimer?.cancel();
+    _classicsPauseTimer?.cancel();
     _shareController.dispose();
     _pageController.dispose();
     _previewController.dispose();
+    _chunksController.dispose();
+    _streakController.dispose();
+    _classicsController.dispose();
     super.dispose();
   }
 
@@ -140,17 +218,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final style = _selectedStyle!;
     try {
       await widget.onStyleSelected(style);
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('onStyleSelected error: $e\n$st');
+    }
     try {
       await widget.onComplete();
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('onComplete (signUp) error: $e\n$st');
+    }
     if (mounted) context.go('/signup');
   }
 
   Future<void> _goLogIn() async {
     try {
       await widget.onComplete();
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('onComplete (logIn) error: $e\n$st');
+    }
     if (mounted) context.go('/login');
   }
 
@@ -167,6 +251,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           onPageChanged: (i) {
             _previewPauseTimer?.cancel();
             _sharePauseTimer?.cancel();
+
+            // Stop all card-specific animations first
+            _chunksPauseTimer?.cancel();
+            _streakPauseTimer?.cancel();
+            _classicsPauseTimer?.cancel();
+            _chunksController.stop();
+            _streakController.stop();
+            _classicsController.stop();
+            // Start the right one for the new page
+            if (i == 0) {
+              _chunksController.forward();
+            } else if (i == 1) {
+              _streakController.forward();
+            } else if (i == 2) {
+              _classicsController.forward();
+            }
+
             if (i == _featureCards.length) {
               setState(() {
                 _shareController.reset();
@@ -214,11 +315,34 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Widget _buildFeatureCard(int index, int totalCards) {
     final card = _featureCards[index];
+
+    Widget animatedIcon;
+    switch (index) {
+      case 0: // Read in chunks — pulsing book icon
+        animatedIcon = ScaleTransition(
+          scale: _chunksScale,
+          child: Icon(card.icon, size: 56, color: AppTheme.brand),
+        );
+      case 1: // Build a streak — pulsing fire emoji
+        animatedIcon = ScaleTransition(
+          scale: _streakScale,
+          child: const Text('🔥', style: TextStyle(fontSize: 56)),
+        );
+      case 2: // The classics, free — shimmering icon
+        animatedIcon = FadeTransition(
+          opacity: _classicsOpacity,
+          child: Icon(card.icon, size: 56, color: AppTheme.amber),
+        );
+      default:
+        animatedIcon = Icon(card.icon, size: 56, color: AppTheme.brand);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Spacer(),
         const SizedBox(height: 16),
-        Icon(card.icon, size: 56, color: AppTheme.brand),
+        animatedIcon,
         const SizedBox(height: 32),
         Text(
           card.headline,
@@ -244,6 +368,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Spacer(),
         const SizedBox(height: 16),
         Icon(Icons.share_outlined, size: 56, color: AppTheme.brand),
         const SizedBox(height: 32),
@@ -279,9 +404,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppTheme.brand.withOpacity(0.25),
+                          color: AppTheme.brand.withValues(alpha: 0.25),
                           border: Border.all(
-                            color: AppTheme.brand.withOpacity(0.6),
+                            color: AppTheme.brand.withValues(alpha: 0.6),
                             width: 1.5,
                           ),
                         ),

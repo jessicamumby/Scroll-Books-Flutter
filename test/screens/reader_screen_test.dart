@@ -94,5 +94,40 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.share_outlined), findsNothing);
     });
+
+    test('formatShareText appends attribution', () {
+      const passage = 'Call me Ishmael.';
+      final result = ReaderScreen.formatShareText(passage);
+      expect(result, contains('Call me Ishmael.'));
+      expect(result, contains('— Read on Scroll Books'));
+    });
+
+    test('formatShareText separates passage and attribution with blank line', () {
+      const passage = 'Test passage.';
+      final result = ReaderScreen.formatShareText(passage);
+      expect(result, contains('\n\n'));
+    });
+
+    testWidgets('coming soon state shows Coming Soon text', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AppProvider>.value(
+          value: AppProvider(),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ReaderScreen(bookId: 'pride-and-prejudice'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Coming Soon'), findsOneWidget);
+    });
+
+    test('incrementPassagesRead is exposed on AppProvider', () {
+      final provider = AppProvider();
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      provider.incrementPassagesRead(today);
+      expect(provider.passagesRead, 1);
+      expect(provider.dailyPassages[today], 1);
+    });
   });
 }
