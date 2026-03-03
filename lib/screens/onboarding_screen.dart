@@ -140,17 +140,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final style = _selectedStyle!;
     try {
       await widget.onStyleSelected(style);
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('onStyleSelected error: $e\n$st');
+    }
     try {
       await widget.onComplete();
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('onComplete (signUp) error: $e\n$st');
+    }
     if (mounted) context.go('/signup');
   }
 
   Future<void> _goLogIn() async {
     try {
       await widget.onComplete();
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('onComplete (logIn) error: $e\n$st');
+    }
     if (mounted) context.go('/login');
   }
 

@@ -38,7 +38,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
   String? get _userId {
     try {
       return supabase.auth.currentUser?.id;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('_userId error: $e\n$st');
       return null;
     }
   }
@@ -62,7 +63,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       savedIndex = prefs.getInt('progress_${widget.bookId}') ?? 0;
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('Load cached progress error: $e\n$st');
+    }
 
     // Fetch from Supabase if authenticated
     if (_userId != null) {
@@ -74,7 +77,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
             .eq('book_id', widget.bookId)
             .maybeSingle();
         if (res != null) savedIndex = res['chunk_index'] as int;
-      } catch (_) {}
+      } catch (e, st) {
+        debugPrint('Fetch remote progress error: $e\n$st');
+      }
     }
 
     // Fetch chunks from Supabase Storage
@@ -112,24 +117,34 @@ class _ReaderScreenState extends State<ReaderScreen> {
           }
         });
       }
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('Fetch chunks error: $e\n$st');
       if (mounted) setState(() { _loading = false; _fetchError = true; });
     }
   }
 
   void _onPageChanged(int index) {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (mounted) {
+      Provider.of<AppProvider>(context, listen: false)
+          .incrementPassagesRead(today);
+    }
     _debounceTimer?.cancel();
     _hintTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setInt('progress_${widget.bookId}', index);
-      } catch (_) {}
+      } catch (e, st) {
+        debugPrint('Save local progress error: $e\n$st');
+      }
       if (_userId != null) {
         try {
           await UserDataService.syncProgress(_userId!, widget.bookId, index);
           await UserDataService.markReadToday(_userId!);
-        } catch (_) {}
+        } catch (e, st) {
+          debugPrint('Sync remote progress error: $e\n$st');
+        }
       }
     });
   }
