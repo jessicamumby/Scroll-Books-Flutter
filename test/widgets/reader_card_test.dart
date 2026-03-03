@@ -81,6 +81,9 @@ void main() {
         (c) =>
             c.decoration is BoxDecoration &&
             (c.decoration as BoxDecoration).borderRadius != null,
+        orElse: () => throw TestFailure(
+          'No Container with a rounded BoxDecoration found in the widget tree',
+        ),
       );
       final dec = cardContainer.decoration as BoxDecoration;
 
