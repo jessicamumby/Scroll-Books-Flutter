@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   // ── Core palette (Warm Punch) ──
   static const Color page        = Color(0xFFFFF9F2);
-  static const Color surface     = Color(0xFFFFF0E0);
+  static const Color surface     = Color(0xFFFFF5E6);
   static const Color surfaceAlt  = Color(0xFFF0E0CC);
   static const Color border      = Color(0xFFF0E0CC);
   static const Color borderSoft  = Color(0xFFF5EDE0);
