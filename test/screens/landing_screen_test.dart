@@ -46,5 +46,23 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('login'), findsOneWidget);
     });
+
+    testWidgets('shows tagline text', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.textContaining('One page at a time'), findsOneWidget);
+    });
+
+    testWidgets('shows social proof text', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.textContaining('readers'), findsOneWidget);
+    });
+
+    testWidgets('shows a rotating passage card', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.byType(AnimatedSwitcher), findsOneWidget);
+    });
   });
 }
