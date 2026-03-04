@@ -95,6 +95,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
       final chunks = data.map((e) => e['text'] as String).toList();
 
       if (mounted) {
+        Provider.of<AppProvider>(context, listen: false)
+            .setBookTotalChunks(widget.bookId, chunks.length);
         setState(() {
           _chunks = chunks;
           _startIndex = savedIndex.clamp(0, chunks.length - 1);
