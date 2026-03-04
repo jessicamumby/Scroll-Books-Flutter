@@ -267,6 +267,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   void setLastReadBook(String bookId) {
+    if (lastReadBookId == bookId) return;
     lastReadBookId = bookId;
     notifyListeners();
     SharedPreferences.getInstance().then(

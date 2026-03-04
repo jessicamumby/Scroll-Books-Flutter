@@ -120,6 +120,9 @@ void main() {
     });
   });
 
+  // Note: the SharedPreferences load path (_loadLocalStats) is not tested here
+  // because _loadLocalStats is private and load() requires Supabase.
+  // Integration coverage of the load path is provided by the ReadTabScreen widget tests.
   group('AppProvider.lastReadBookId', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});
