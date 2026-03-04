@@ -54,7 +54,7 @@ class _ContinueReadingShelfState extends State<ContinueReadingShelf> {
               ),
             ),
             SizedBox(
-              height: 220,
+              height: 300,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: books.length,
@@ -95,18 +95,16 @@ class _ShelfCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardWidth = isActive ? 180.0 : 140.0;
-    // Cover height chosen so entire card (cover + text + progress) fits within
-    // the 220px PageView height: 220 - 8 (spacer) - ~22 (text) - 6 (spacer) - 4 (bar) = 180
-    final coverHeight = isActive ? 180.0 : 140.0;
+    final coverHeight = cardWidth * (4 / 3);
 
     return Center(
-      child: AnimatedOpacity(
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        opacity: isActive ? 1.0 : 0.6,
-        child: AnimatedContainer(
+        curve: Curves.easeOut,
+        width: cardWidth,
+        child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          width: cardWidth,
+          opacity: isActive ? 1.0 : 0.6,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

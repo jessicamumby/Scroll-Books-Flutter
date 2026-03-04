@@ -61,7 +61,7 @@ void main() {
     testWidgets('shows book title in shelf', (tester) async {
       await tester.pumpWidget(_wrap(progress: {'moby-dick': 50}));
       await tester.pumpAndSettle();
-      expect(find.textContaining('Moby Dick'), findsWidgets);
+      expect(find.textContaining('Moby Dick'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('only hasChunks books with progress appear', (tester) async {
