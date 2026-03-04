@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
-import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
 
 class ReadTabScreen extends StatefulWidget {
@@ -17,35 +16,17 @@ class _ReadTabScreenState extends State<ReadTabScreen> {
   bool _navigated = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_navigated) return;
-
-    final provider = context.read<AppProvider>();
-    // Find the most recently read book (highest progress)
-    String? lastBookId;
-    int maxProgress = 0;
-    for (final entry in provider.progress.entries) {
-      if (entry.value > maxProgress) {
-        maxProgress = entry.value;
-        lastBookId = entry.key;
-      }
-    }
-
-    if (lastBookId != null) {
-      final book = getBookById(lastBookId);
-      if (book != null && book.hasChunks) {
-        _navigated = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) context.go('/read/$lastBookId');
-        });
-        return;
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AppProvider>();
+    final lastBookId = provider.lastReadBookId;
+
+    if (!_navigated && lastBookId != null) {
+      _navigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go('/read/$lastBookId');
+      });
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.warmWhite,
       body: SafeArea(
