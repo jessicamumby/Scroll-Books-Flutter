@@ -177,7 +177,6 @@ class _BookCard extends StatelessWidget {
                 width: 38,
                 height: 54,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
                   gradient: LinearGradient(
                     colors: [color, color.withValues(alpha: 0.7)],
                     begin: Alignment.topCenter,
