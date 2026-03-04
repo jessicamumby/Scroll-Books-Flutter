@@ -108,6 +108,7 @@ class _StreaksTab extends StatelessWidget {
                 const SizedBox(height: 16),
                 BookmarkCard(
                   bookmarksRemaining: provider.bookmarkTokens,
+                  bookmarkResetAt: provider.bookmarkResetAt,
                   onUseBookmark: () => provider.useBookmarkToken(),
                 ),
                 const SizedBox(height: 24),
