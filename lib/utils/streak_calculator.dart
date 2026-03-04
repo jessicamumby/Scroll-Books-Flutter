@@ -1,5 +1,7 @@
-int calculateStreak(List<String> readDays) {
-  if (readDays.isEmpty) return 0;
+int calculateStreak(List<String> readDays, {List<String> frozenDays = const []}) {
+  // Merge frozen days with read days for streak continuity
+  final allDays = {...readDays, ...frozenDays}.toList();
+  if (allDays.isEmpty) return 0;
 
   final today = DateTime.now();
   final todayStr = today.toIso8601String().substring(0, 10);
@@ -8,7 +10,7 @@ int calculateStreak(List<String> readDays) {
       .toIso8601String()
       .substring(0, 10);
 
-  final sorted = readDays.toSet().toList()..sort((a, b) => b.compareTo(a));
+  final sorted = allDays.toSet().toList()..sort((a, b) => b.compareTo(a));
 
   // Streak must end today or yesterday to be active
   if (sorted.first != todayStr && sorted.first != yesterdayStr) return 0;

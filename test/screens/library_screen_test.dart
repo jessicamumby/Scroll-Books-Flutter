@@ -34,50 +34,38 @@ void main() {
   setUpAll(() { GoogleFonts.config.allowRuntimeFetching = false; });
 
   group('LibraryScreen', () {
-    testWidgets('shows all 6 catalogue books', (tester) async {
+    testWidgets('shows My Library and Discover tabs', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.text('Moby Dick'), findsWidgets);
-      expect(find.text('Pride and Prejudice'), findsWidgets);
-      expect(find.text('Jane Eyre'), findsWidgets);
-      expect(find.text('Don Quixote'), findsWidgets);
-      expect(find.text('The Great Gatsby'), findsWidgets);
-      expect(find.text('Frankenstein'), findsWidgets);
+      expect(find.text('My Library'), findsOneWidget);
+      expect(find.text('Discover'), findsOneWidget);
     });
 
-    testWidgets('shows In Library badge for saved books', (tester) async {
-      await tester.pumpWidget(_wrap(library: ['moby-dick']));
-      await tester.pumpAndSettle();
-      expect(find.text('In Library'), findsNWidgets(2));
-    });
-
-    testWidgets('shows Add to Library for unsaved books', (tester) async {
-      await tester.pumpWidget(_wrap(library: []));
-      await tester.pumpAndSettle();
-      expect(find.text('Add to Library'), findsWidgets);
-    });
-
-    testWidgets('tapping a book navigates to book detail', (tester) async {
+    testWidgets('shows Your Library header', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Moby Dick').first);
-      await tester.pumpAndSettle();
-      expect(find.text('detail'), findsOneWidget);
+      expect(find.text('Your Library'), findsOneWidget);
     });
 
-    testWidgets('shows section headers', (tester) async {
+    testWidgets('My Library tab shows mock books', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.text('FREE BOOKS'), findsOneWidget);
-      expect(find.text('TRENDING'), findsOneWidget);
-      expect(find.text('NEW'), findsOneWidget);
+      expect(find.text('Moby Dick'), findsOneWidget);
+      expect(find.text('Pride and Prejudice'), findsOneWidget);
     });
 
-    testWidgets('book cards display image assets without color filter', (tester) async {
+    testWidgets('My Library tab shows stats bar', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.byType(ColorFiltered), findsNothing,
-          reason: 'Amber ColorFilter should be removed; Gutenberg covers display true colours');
+      expect(find.text('BOOKS'), findsOneWidget);
+      expect(find.text('FINISHED'), findsOneWidget);
+      expect(find.text('READING'), findsOneWidget);
+    });
+
+    testWidgets('shows RECENTLY READ label', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('RECENTLY READ'), findsOneWidget);
     });
   });
 }

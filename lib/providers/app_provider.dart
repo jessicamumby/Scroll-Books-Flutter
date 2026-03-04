@@ -15,12 +15,21 @@ class AppProvider extends ChangeNotifier {
   Map<String, int> dailyPassages = {};
   Map<String, int> bookTotalChunks = {};
   int? pendingMilestone;
+  int dailyGoal = 10;
+  int bookmarkTokens = 2;
+  List<String> frozenDays = [];
 
   Future<void> _loadLocalStats() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       passagesRead = prefs.getInt('passages_read') ?? 0;
       longestStreak = prefs.getInt('longest_streak') ?? 0;
+      dailyGoal = prefs.getInt('daily_goal') ?? 10;
+      bookmarkTokens = prefs.getInt('bookmark_tokens') ?? 2;
+      final frozenJson = prefs.getString('frozen_days');
+      if (frozenJson != null) {
+        frozenDays = (jsonDecode(frozenJson) as List).cast<String>();
+      }
       final dailyJson = prefs.getString('daily_passages');
       if (dailyJson != null) {
         final decoded = jsonDecode(dailyJson) as Map<String, dynamic>;
@@ -158,6 +167,32 @@ class AppProvider extends ChangeNotifier {
   void clearMilestone() {
     pendingMilestone = null;
     notifyListeners();
+  }
+
+  Future<void> setDailyGoal(int goal) async {
+    dailyGoal = goal;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('daily_goal', goal);
+    } catch (e, st) {
+      debugPrint('AppProvider.setDailyGoal error: $e\n$st');
+    }
+  }
+
+  Future<void> useBookmarkToken() async {
+    if (bookmarkTokens <= 0) return;
+    bookmarkTokens--;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    frozenDays = [...frozenDays, today];
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('bookmark_tokens', bookmarkTokens);
+      await prefs.setString('frozen_days', jsonEncode(frozenDays));
+    } catch (e, st) {
+      debugPrint('AppProvider.useBookmarkToken error: $e\n$st');
+    }
   }
 
   void setBookTotalChunks(String bookId, int total) {

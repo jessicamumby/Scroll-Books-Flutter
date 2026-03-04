@@ -10,13 +10,14 @@ GoRouter _buildRouter() => GoRouter(
     ShellRoute(
       builder: (_, __, child) => AppShell(child: child),
       routes: [
+        GoRoute(path: '/app/read', builder: (_, __) => const SizedBox()),
+        GoRoute(path: '/app/streaks', builder: (_, __) => const SizedBox()),
         GoRoute(path: '/app/library', builder: (_, __) => const SizedBox()),
-        GoRoute(path: '/app/stats', builder: (_, __) => const SizedBox()),
         GoRoute(path: '/app/profile', builder: (_, __) => const SizedBox()),
       ],
     ),
   ],
-  initialLocation: '/app/library',
+  initialLocation: '/app/read',
 );
 
 void main() {
@@ -24,7 +25,7 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  testWidgets('AppShell renders 3 navigation destinations', (tester) async {
+  testWidgets('AppShell renders 4 navigation tabs', (tester) async {
     await tester.pumpWidget(
       MaterialApp.router(
         theme: AppTheme.light,
@@ -33,8 +34,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Read'), findsOneWidget);
+    expect(find.text('Streaks'), findsOneWidget);
     expect(find.text('Library'), findsOneWidget);
-    expect(find.text('Stats'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
   });
 
