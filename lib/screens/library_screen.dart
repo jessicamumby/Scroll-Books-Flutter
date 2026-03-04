@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
+import '../widgets/continue_reading_shelf.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -28,6 +29,7 @@ class LibraryScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const ContinueReadingShelf(),
                 for (final section in _sections) ...[
                   _SectionHeader(label: _labels[section]!),
                   for (final book in catalogue.where((b) => b.sections.contains(section)))
