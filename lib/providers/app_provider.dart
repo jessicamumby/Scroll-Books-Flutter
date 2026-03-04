@@ -83,6 +83,11 @@ class AppProvider extends ChangeNotifier {
       library = data.library;
       progress = data.progress;
       readDays = data.readDays;
+      // Bookmark state — backend is source of truth, overrides local
+      bookmarkTokens = data.bookmarkTokens;
+      bookmarkResetAt = data.bookmarkResetAt;
+      frozenDays = data.frozenDays;
+      await resetBookmarksIfExpired();
       // Hydrate total chunks from SharedPreferences
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -184,7 +189,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> useBookmarkToken() async {
+  Future<void> useBookmarkToken([String userId = '']) async {
     if (bookmarkTokens <= 0) return;
     final isFirstUse = bookmarkTokens == 2;
     bookmarkTokens--;
@@ -206,6 +211,16 @@ class AppProvider extends ChangeNotifier {
       }
     } catch (e, st) {
       debugPrint('AppProvider.useBookmarkToken error: $e\n$st');
+    }
+    if (userId.isNotEmpty) {
+      UserDataService.saveBookmarkState(
+        userId,
+        bookmarkTokens: bookmarkTokens,
+        bookmarkResetAt: bookmarkResetAt,
+        frozenDays: frozenDays,
+      ).catchError((Object e, StackTrace st) {
+        debugPrint('AppProvider.useBookmarkToken remote error: $e\n$st');
+      });
     }
   }
 

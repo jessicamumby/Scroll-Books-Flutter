@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../providers/app_provider.dart';
 import '../utils/streak_calculator.dart';
@@ -109,7 +110,11 @@ class _StreaksTab extends StatelessWidget {
                 BookmarkCard(
                   bookmarksRemaining: provider.bookmarkTokens,
                   bookmarkResetAt: provider.bookmarkResetAt,
-                  onUseBookmark: () => provider.useBookmarkToken(),
+                  onUseBookmark: () {
+                    final userId =
+                        Supabase.instance.client.auth.currentUser?.id ?? '';
+                    provider.useBookmarkToken(userId);
+                  },
                 ),
                 const SizedBox(height: 24),
                 MilestonesList(currentStreak: streak),
