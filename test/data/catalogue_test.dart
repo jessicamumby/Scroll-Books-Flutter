@@ -36,6 +36,25 @@ void main() {
       for (final book in catalogue) {
         expect(coverGradients.containsKey(book.id), isTrue,
             reason: '${book.id} missing from coverGradients');
+        expect(coverGradients[book.id]!.length, equals(2),
+            reason: '${book.id} gradient must have exactly 2 colours');
+      }
+    });
+
+    test('getBookById returns correct book by id', () {
+      final book = getBookById('moby-dick');
+      expect(book, isNotNull);
+      expect(book!.title, 'Moby Dick');
+      expect(book.author, 'Herman Melville');
+    });
+
+    test('getBookById returns null for unknown id', () {
+      expect(getBookById('unknown'), isNull);
+    });
+
+    test('every book has a non-empty genres list', () {
+      for (final book in catalogue) {
+        expect(book.genres, isNotEmpty, reason: '${book.id} has no genres');
       }
     });
   });
