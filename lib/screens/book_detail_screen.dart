@@ -7,6 +7,38 @@ import '../core/supabase_client.dart';
 import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
 
+Future<void> _showRemoveDialog(
+  BuildContext context,
+  AppProvider provider,
+  Book book,
+) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Remove from library?'),
+      content: Text(
+        'This will remove ${book.title} from your library. '
+        'Your reading progress will be kept.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: TextButton.styleFrom(foregroundColor: AppTheme.tomato),
+          child: const Text('Remove'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed == true && context.mounted) {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId != null) provider.removeFromLibrary(userId, book.id);
+  }
+}
+
 class BookDetailScreen extends StatelessWidget {
   final String bookId;
   const BookDetailScreen({super.key, required this.bookId});
@@ -110,15 +142,22 @@ class BookDetailScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: inLibrary
-                        ? null
-                        : () {
+                  child: inLibrary
+                      ? OutlinedButton(
+                          onPressed: () => _showRemoveDialog(context, provider, book),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.tomato,
+                            side: const BorderSide(color: AppTheme.tomato),
+                          ),
+                          child: const Text('Remove from Library'),
+                        )
+                      : OutlinedButton(
+                          onPressed: () {
                             final userId = supabase.auth.currentUser?.id;
                             if (userId != null) provider.addToLibrary(userId, book.id);
                           },
-                    child: Text(inLibrary ? 'In Library' : 'Add to Library'),
-                  ),
+                          child: const Text('Add to Library'),
+                        ),
                 ),
               ],
             ),
