@@ -1,43 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../core/theme.dart';
-
-class _LibraryBook {
-  final String title;
-  final String author;
-  final Color color;
-  final String lastRead;
-  final int progress; // 0-100
-
-  const _LibraryBook({
-    required this.title,
-    required this.author,
-    required this.color,
-    required this.lastRead,
-    required this.progress,
-  });
-}
-
-const _mockBooks = [
-  _LibraryBook(title: 'Moby Dick', author: 'Herman Melville', color: Color(0xFF4A6FA5), lastRead: 'Today', progress: 72),
-  _LibraryBook(title: 'Pride and Prejudice', author: 'Jane Austen', color: Color(0xFF9B6B8E), lastRead: 'Yesterday', progress: 45),
-  _LibraryBook(title: 'Frankenstein', author: 'Mary Shelley', color: Color(0xFF5A7A5A), lastRead: '3 days ago', progress: 88),
-  _LibraryBook(title: 'The Odyssey', author: 'Homer', color: Color(0xFFC4762B), lastRead: '1 week ago', progress: 23),
-  _LibraryBook(title: 'Dracula', author: 'Bram Stoker', color: Color(0xFF6B4152), lastRead: '2 weeks ago', progress: 100),
-  _LibraryBook(title: '1984', author: 'George Orwell', color: Color(0xFF7A8B99), lastRead: '2 weeks ago', progress: 100),
-  _LibraryBook(title: 'Jane Eyre', author: 'Charlotte Brontë', color: Color(0xFFA0785A), lastRead: '1 month ago', progress: 56),
-  _LibraryBook(title: 'Don Quixote', author: 'Miguel de Cervantes', color: Color(0xFFB85C3A), lastRead: '1 month ago', progress: 12),
-];
+import '../data/catalogue.dart';
+import '../providers/app_provider.dart';
 
 class MyLibraryList extends StatelessWidget {
   const MyLibraryList({super.key});
 
-  int get _totalBooks => _mockBooks.length;
-  int get _finishedBooks => _mockBooks.where((b) => b.progress == 100).length;
-  int get _readingBooks => _mockBooks.where((b) => b.progress > 0 && b.progress < 100).length;
-
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AppProvider>();
+    final libraryIds = provider.library;
+
+    if (libraryIds.isEmpty) {
+      return Container(
+        color: AppTheme.warmWhite,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(
+              'Your library is empty — discover a book to get started.',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 15,
+                color: AppTheme.inkMid,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final books = libraryIds.map(getBookById).whereType<Book>().toList();
+
+    int finished = 0;
+    int reading = 0;
+    for (final book in books) {
+      final p = provider.progress[book.id] ?? 0;
+      final t = provider.bookTotalChunks[book.id] ?? 0;
+      if (t > 0 && p >= t - 1) {
+        finished++;
+      } else if (p > 0) {
+        reading++;
+      }
+    }
+
     return Container(
       color: AppTheme.warmWhite,
       child: SingleChildScrollView(
@@ -45,26 +54,42 @@ class MyLibraryList extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Stats bar
             Row(
               children: [
-                _StatCard(value: _totalBooks, label: 'BOOKS'),
+                _StatCard(value: books.length, label: 'BOOKS'),
                 const SizedBox(width: 10),
-                _StatCard(value: _finishedBooks, label: 'FINISHED'),
+                _StatCard(value: finished, label: 'FINISHED'),
                 const SizedBox(width: 10),
-                _StatCard(value: _readingBooks, label: 'READING'),
+                _StatCard(value: reading, label: 'READING'),
               ],
             ),
             const SizedBox(height: 24),
             Text(
-              'RECENTLY READ',
+              'MY BOOKS',
               style: AppTheme.monoLabel(fontSize: 10, color: AppTheme.inkLight),
             ),
             const SizedBox(height: 12),
-            ...List.generate(_mockBooks.length, (i) {
+            ...books.asMap().entries.map((entry) {
+              final i = entry.key;
+              final book = entry.value;
+              final p = provider.progress[book.id] ?? 0;
+              final t = provider.bookTotalChunks[book.id] ?? 0;
+              final pct = t > 0 ? (p / t * 100).clamp(0.0, 100.0).round() : 0;
+              final color = (coverGradients[book.id] ??
+                      [AppTheme.coverDeep, AppTheme.coverRich])
+                  .first;
               return Padding(
-                padding: EdgeInsets.only(bottom: i < _mockBooks.length - 1 ? 10 : 0),
-                child: _BookCard(book: _mockBooks[i]),
+                padding:
+                    EdgeInsets.only(bottom: i < books.length - 1 ? 10 : 0),
+                child: GestureDetector(
+                  onTap: () => context.go('/app/library/${book.id}'),
+                  child: _BookCard(
+                    title: book.title,
+                    author: book.author,
+                    color: color,
+                    progressPct: pct,
+                  ),
+                ),
               );
             }),
             const SizedBox(height: 24),
@@ -112,44 +137,45 @@ class _StatCard extends StatelessWidget {
 }
 
 class _BookCard extends StatelessWidget {
-  final _LibraryBook book;
-  const _BookCard({required this.book});
+  final String title;
+  final String author;
+  final Color color;
+  final int progressPct;
+  const _BookCard({
+    required this.title,
+    required this.author,
+    required this.color,
+    required this.progressPct,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isComplete = book.progress == 100;
-    final progressFraction = book.progress / 100.0;
+    final isComplete = progressPct == 100;
+    final progressFraction = progressPct / 100.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       decoration: BoxDecoration(
         color: AppTheme.cream,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: book.color.withValues(alpha: 0.06),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.06)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Book spine
           Container(
             width: 38,
             height: 54,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
               gradient: LinearGradient(
-                colors: [
-                  book.color,
-                  book.color.withValues(alpha: 0.7),
-                ],
+                colors: [color, color.withValues(alpha: 0.7)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
             ),
             child: Stack(
               children: [
-                // Spine line
                 Positioned(
                   left: 3,
                   top: 0,
@@ -159,7 +185,6 @@ class _BookCard extends StatelessWidget {
                     color: AppTheme.warmGold.withValues(alpha: 0.40),
                   ),
                 ),
-                // Checkmark if complete
                 if (isComplete)
                   const Center(
                     child: Icon(Icons.check, color: Colors.white, size: 18),
@@ -168,13 +193,12 @@ class _BookCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          // Book info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  book.title,
+                  title,
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -185,14 +209,13 @@ class _BookCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  book.author,
+                  author,
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 11.5,
                     color: AppTheme.inkMid,
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Progress bar row
                 Row(
                   children: [
                     Expanded(
@@ -214,7 +237,10 @@ class _BookCard extends StatelessWidget {
                                         colors: [AppTheme.sage, AppTheme.sage],
                                       )
                                     : const LinearGradient(
-                                        colors: [AppTheme.tomato, AppTheme.amber],
+                                        colors: [
+                                          AppTheme.tomato,
+                                          AppTheme.amber,
+                                        ],
                                       ),
                               ),
                             ),
@@ -224,7 +250,7 @@ class _BookCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${book.progress}%',
+                      '$progressPct%',
                       style: AppTheme.monoLabel(
                         fontSize: 10,
                         color: AppTheme.inkLight,
@@ -234,16 +260,6 @@ class _BookCard extends StatelessWidget {
                   ],
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          // Last read
-          Text(
-            book.lastRead,
-            style: AppTheme.monoLabel(
-              fontSize: 10,
-              color: AppTheme.inkLight,
-              letterSpacing: 0,
             ),
           ),
         ],
