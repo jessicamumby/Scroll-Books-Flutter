@@ -13,6 +13,7 @@ class AppProvider extends ChangeNotifier {
   int passagesRead = 0;
   int longestStreak = 0;
   Map<String, int> dailyPassages = {};
+  Map<String, int> bookTotalChunks = {};
   int? pendingMilestone;
 
   Future<void> _loadLocalStats() async {
@@ -69,6 +70,18 @@ class AppProvider extends ChangeNotifier {
       library = data.library;
       progress = data.progress;
       readDays = data.readDays;
+      // Hydrate total chunks from SharedPreferences
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final Map<String, int> chunks = {};
+        for (final id in library) {
+          final total = prefs.getInt('total_chunks_$id');
+          if (total != null) chunks[id] = total;
+        }
+        bookTotalChunks = chunks;
+      } catch (e, st) {
+        debugPrint('AppProvider.load bookTotalChunks error: $e\n$st');
+      }
       if (data.readingStyle != null) {
         readingStyle = data.readingStyle!;
       } else {
@@ -145,5 +158,15 @@ class AppProvider extends ChangeNotifier {
   void clearMilestone() {
     pendingMilestone = null;
     notifyListeners();
+  }
+
+  void setBookTotalChunks(String bookId, int total) {
+    bookTotalChunks = {...bookTotalChunks, bookId: total};
+    notifyListeners();
+    SharedPreferences.getInstance().then(
+      (prefs) => prefs.setInt('total_chunks_$bookId', total),
+    ).catchError((Object e, StackTrace st) {
+      debugPrint('AppProvider.setBookTotalChunks error: $e\n$st');
+    });
   }
 }
