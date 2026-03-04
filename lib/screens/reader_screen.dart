@@ -87,8 +87,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
     // Fetch chunks from Supabase Storage
     try {
-      final url = dotenv.env['BOOKS_BUCKET_URL'] ?? '';
-      if (url.isEmpty) throw Exception('BOOKS_BUCKET_URL not set');
+      final baseUrl = dotenv.env['BOOKS_BUCKET_BASE_URL'] ?? '';
+      if (baseUrl.isEmpty) throw Exception('BOOKS_BUCKET_BASE_URL not set');
+      final url = '$baseUrl/${widget.bookId}.json';
       final response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) throw Exception('fetch failed');
       final data = jsonDecode(response.body) as List;

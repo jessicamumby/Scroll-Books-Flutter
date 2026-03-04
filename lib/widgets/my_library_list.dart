@@ -82,8 +82,9 @@ class MyLibraryList extends StatelessWidget {
                 padding:
                     EdgeInsets.only(bottom: i < books.length - 1 ? 10 : 0),
                 child: GestureDetector(
-                  onTap: () => context.go('/app/library/${book.id}'),
+                  onTap: () => context.push('/app/library/${book.id}'),
                   child: _BookCard(
+                    bookId: book.id,
                     title: book.title,
                     author: book.author,
                     color: color,
@@ -137,11 +138,13 @@ class _StatCard extends StatelessWidget {
 }
 
 class _BookCard extends StatelessWidget {
+  final String bookId;
   final String title;
   final String author;
   final Color color;
   final int progressPct;
   const _BookCard({
+    required this.bookId,
     required this.title,
     required this.author,
     required this.color,
@@ -163,33 +166,29 @@ class _BookCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 38,
-            height: 54,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              gradient: LinearGradient(
-                colors: [color, color.withValues(alpha: 0.7)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 3,
-                  top: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 1.5,
-                    color: AppTheme.warmGold.withValues(alpha: 0.40),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: Image.asset(
+              'assets/covers/$bookId.jpg',
+              width: 38,
+              height: 54,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 38,
+                height: 54,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [color, color.withValues(alpha: 0.7)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
-                if (isComplete)
-                  const Center(
-                    child: Icon(Icons.check, color: Colors.white, size: 18),
-                  ),
-              ],
+                child: isComplete
+                    ? const Center(
+                        child: Icon(Icons.check, color: Colors.white, size: 18),
+                      )
+                    : null,
+              ),
             ),
           ),
           const SizedBox(width: 14),
