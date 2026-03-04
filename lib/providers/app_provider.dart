@@ -276,4 +276,10 @@ class AppProvider extends ChangeNotifier {
       debugPrint('AppProvider.setLastReadBook error: $e\n$st');
     });
   }
+
+  Future<void> removeFromLibrary(String userId, String bookId) async {
+    library = library.where((id) => id != bookId).toList();
+    notifyListeners();
+    // TODO: wire up UserDataService.removeFromLibrary in Task 2
+  }
 }

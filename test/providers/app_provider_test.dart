@@ -146,4 +146,25 @@ void main() {
       expect(provider.lastReadBookId, 'frankenstein');
     });
   });
+
+  group('AppProvider.removeFromLibrary', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('removes book from library list', () {
+      final provider = AppProvider();
+      provider.library = ['moby-dick', 'frankenstein'];
+      provider.removeFromLibrary('', 'moby-dick');
+      expect(provider.library, ['frankenstein']);
+      expect(provider.library.contains('moby-dick'), isFalse);
+    });
+
+    test('is a no-op if book not in library', () {
+      final provider = AppProvider();
+      provider.library = ['moby-dick'];
+      provider.removeFromLibrary('', 'frankenstein');
+      expect(provider.library, ['moby-dick']);
+    });
+  });
 }
