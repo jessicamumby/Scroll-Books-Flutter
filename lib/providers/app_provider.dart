@@ -165,6 +165,8 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
     SharedPreferences.getInstance().then(
       (prefs) => prefs.setInt('total_chunks_$bookId', total),
-    );
+    ).catchError((Object e, StackTrace st) {
+      debugPrint('AppProvider.setBookTotalChunks error: $e\n$st');
+    });
   }
 }
