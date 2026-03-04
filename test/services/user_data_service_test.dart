@@ -26,6 +26,34 @@ void main() {
       );
       expect(data.readingStyle, 'horizontal');
     });
+
+    // NEW TESTS — bookmark fields
+    test('bookmarkTokens defaults to 2 when not provided', () {
+      final data = UserData(library: [], progress: {}, readDays: []);
+      expect(data.bookmarkTokens, 2);
+    });
+
+    test('bookmarkResetAt is null when not provided', () {
+      final data = UserData(library: [], progress: {}, readDays: []);
+      expect(data.bookmarkResetAt, isNull);
+    });
+
+    test('frozenDays defaults to empty list when not provided', () {
+      final data = UserData(library: [], progress: {}, readDays: []);
+      expect(data.frozenDays, isEmpty);
+    });
+
+    test('bookmark fields are stored when provided', () {
+      final data = UserData(
+        library: [], progress: {}, readDays: [],
+        bookmarkTokens: 1,
+        bookmarkResetAt: '2026-03-11',
+        frozenDays: ['2026-03-04'],
+      );
+      expect(data.bookmarkTokens, 1);
+      expect(data.bookmarkResetAt, '2026-03-11');
+      expect(data.frozenDays, ['2026-03-04']);
+    });
   });
 
   group('AppProvider', () {

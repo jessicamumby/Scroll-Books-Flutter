@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 
@@ -6,12 +7,18 @@ class UserData {
   final Map<String, int> progress;
   final List<String> readDays;
   final String? readingStyle;
+  final int bookmarkTokens;
+  final String? bookmarkResetAt;
+  final List<String> frozenDays;
 
   const UserData({
     required this.library,
     required this.progress,
     required this.readDays,
     this.readingStyle,
+    this.bookmarkTokens = 2,
+    this.bookmarkResetAt,
+    this.frozenDays = const [],
   });
 }
 
@@ -43,12 +50,23 @@ class UserDataService {
 
     final prefs = results[3] as Map<String, dynamic>?;
     final readingStyle = prefs?['reading_style'] as String?;
+    final bookmarkTokens = (prefs?['bookmark_tokens'] as int?) ?? 2;
+    final bookmarkResetAt = prefs?['bookmark_reset_at'] as String?;
+    final frozenDaysRaw = prefs?['frozen_days'];
+    final frozenDays = frozenDaysRaw == null
+        ? <String>[]
+        : (frozenDaysRaw is List
+            ? frozenDaysRaw.cast<String>()
+            : (jsonDecode(frozenDaysRaw as String) as List).cast<String>());
 
     return UserData(
       library: library,
       progress: progress,
       readDays: readDays,
       readingStyle: readingStyle,
+      bookmarkTokens: bookmarkTokens,
+      bookmarkResetAt: bookmarkResetAt,
+      frozenDays: frozenDays,
     );
   }
 
@@ -82,6 +100,23 @@ class UserDataService {
   static Future<void> saveReadingStyle(String userId, String style) async {
     await supabase.from('user_preferences').upsert(
       {'user_id': userId, 'reading_style': style},
+      onConflict: 'user_id',
+    );
+  }
+
+  static Future<void> saveBookmarkState(
+    String userId, {
+    required int bookmarkTokens,
+    required String? bookmarkResetAt,
+    required List<String> frozenDays,
+  }) async {
+    await supabase.from('user_preferences').upsert(
+      {
+        'user_id': userId,
+        'bookmark_tokens': bookmarkTokens,
+        'bookmark_reset_at': bookmarkResetAt,
+        'frozen_days': frozenDays,
+      },
       onConflict: 'user_id',
     );
   }

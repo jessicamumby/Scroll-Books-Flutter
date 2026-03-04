@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../providers/app_provider.dart';
 import '../utils/streak_calculator.dart';
@@ -54,14 +55,16 @@ class _StreaksScreenState extends State<StreaksScreen> {
 class _StreaksTab extends StatelessWidget {
   const _StreaksTab({super.key});
 
-  List<bool> _getWeeklyCompletion(List<String> readDays) {
+  List<bool> _getWeeklyCompletion(
+    List<String> readDays,
+    List<String> frozenDays,
+  ) {
     final now = DateTime.now();
-    // Find Monday of current week
     final monday = now.subtract(Duration(days: now.weekday - 1));
     return List.generate(7, (i) {
       final day = monday.add(Duration(days: i));
       final dayStr = day.toIso8601String().substring(0, 10);
-      return readDays.contains(dayStr);
+      return readDays.contains(dayStr) || frozenDays.contains(dayStr);
     });
   }
 
@@ -80,7 +83,10 @@ class _StreaksTab extends StatelessWidget {
         );
         final todayStr = DateTime.now().toIso8601String().substring(0, 10);
         final passagesToday = provider.dailyPassages[todayStr] ?? 0;
-        final weeklyCompletion = _getWeeklyCompletion(provider.readDays);
+        final weeklyCompletion = _getWeeklyCompletion(
+          provider.readDays,
+          provider.frozenDays,
+        );
 
         return Container(
           color: AppTheme.warmWhite,
@@ -103,7 +109,12 @@ class _StreaksTab extends StatelessWidget {
                 const SizedBox(height: 16),
                 BookmarkCard(
                   bookmarksRemaining: provider.bookmarkTokens,
-                  onUseBookmark: () => provider.useBookmarkToken(),
+                  bookmarkResetAt: provider.bookmarkResetAt,
+                  onUseBookmark: () {
+                    final userId =
+                        Supabase.instance.client.auth.currentUser?.id ?? '';
+                    provider.useBookmarkToken(userId);
+                  },
                 ),
                 const SizedBox(height: 24),
                 MilestonesList(currentStreak: streak),
@@ -135,7 +146,7 @@ class _BadgesTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const GenreBadgesGrid(),
+                GenreBadgesGrid(genreCounts: provider.genreCounts),
                 const SizedBox(height: 28),
                 LongevityBadgesList(currentStreak: streak),
                 const SizedBox(height: 24),

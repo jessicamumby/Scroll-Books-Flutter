@@ -4,17 +4,28 @@ import '../core/theme.dart';
 
 class BookmarkCard extends StatelessWidget {
   final int bookmarksRemaining;
+  final String? bookmarkResetAt;
   final VoidCallback onUseBookmark;
 
   const BookmarkCard({
     super.key,
     required this.bookmarksRemaining,
+    this.bookmarkResetAt,
     required this.onUseBookmark,
   });
 
   void _handleUse(BuildContext context) {
     onUseBookmark();
     _showBookmarkToast(context);
+  }
+
+  String _emptyLabel() {
+    if (bookmarkResetAt == null) return 'No Bookmarks Left';
+    final today = DateTime.now();
+    final resetDate = DateTime.parse(bookmarkResetAt!);
+    final days = resetDate.difference(DateTime(today.year, today.month, today.day)).inDays;
+    if (days <= 1) return 'Resets tomorrow';
+    return 'Resets in $days days';
   }
 
   void _showBookmarkToast(BuildContext context) {
@@ -111,7 +122,7 @@ class BookmarkCard extends StatelessWidget {
                 child: Text(
                   hasBookmarks
                       ? 'Use Bookmark ($bookmarksRemaining remaining)'
-                      : 'No Bookmarks Left',
+                      : _emptyLabel(),
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,

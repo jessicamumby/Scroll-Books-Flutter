@@ -11,6 +11,7 @@ class Book {
   final bool hasChunks;
   final String cover;
   final List<String> sections;
+  final List<String> genres;
 
   const Book({
     required this.id,
@@ -23,6 +24,7 @@ class Book {
     required this.hasChunks,
     required this.cover,
     required this.sections,
+    required this.genres,
   });
 }
 
@@ -38,6 +40,7 @@ const List<Book> catalogue = [
     hasChunks: true,
     cover: 'moby-dick',
     sections: ['Free Books', 'Trending'],
+    genres: ['Adventure', 'Gothic'],
   ),
   Book(
     id: 'pride-and-prejudice',
@@ -50,6 +53,7 @@ const List<Book> catalogue = [
     hasChunks: false,
     cover: 'pride-and-prejudice',
     sections: ['Free Books', 'New'],
+    genres: ['Romance'],
   ),
   Book(
     id: 'jane-eyre',
@@ -62,6 +66,7 @@ const List<Book> catalogue = [
     hasChunks: false,
     cover: 'jane-eyre',
     sections: ['Free Books', 'Trending'],
+    genres: ['Gothic', 'Romance'],
   ),
   Book(
     id: 'don-quixote',
@@ -74,6 +79,7 @@ const List<Book> catalogue = [
     hasChunks: false,
     cover: 'don-quixote',
     sections: ['Free Books', 'New'],
+    genres: ['Adventure', 'Satire'],
   ),
   Book(
     id: 'great-gatsby',
@@ -86,6 +92,7 @@ const List<Book> catalogue = [
     hasChunks: false,
     cover: 'great-gatsby',
     sections: ['New', 'Trending'],
+    genres: ['Satire'],
   ),
   Book(
     id: 'frankenstein',
@@ -98,6 +105,7 @@ const List<Book> catalogue = [
     hasChunks: false,
     cover: 'frankenstein',
     sections: ['Free Books', 'Trending'],
+    genres: ['Gothic', 'Sci-Fi'],
   ),
 ];
 
