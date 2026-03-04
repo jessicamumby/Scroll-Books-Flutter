@@ -140,7 +140,7 @@ class _BadgesTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const GenreBadgesGrid(),
+                GenreBadgesGrid(genreCounts: provider.genreCounts),
                 const SizedBox(height: 28),
                 LongevityBadgesList(currentStreak: streak),
                 const SizedBox(height: 24),
