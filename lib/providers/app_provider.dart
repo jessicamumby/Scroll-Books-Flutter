@@ -20,6 +20,7 @@ class AppProvider extends ChangeNotifier {
   int bookmarkTokens = 2;
   List<String> frozenDays = [];
   String? bookmarkResetAt;
+  String? lastReadBookId;
 
   Future<void> _loadLocalStats() async {
     try {
@@ -29,6 +30,7 @@ class AppProvider extends ChangeNotifier {
       dailyGoal = prefs.getInt('daily_goal') ?? 10;
       bookmarkTokens = prefs.getInt('bookmark_tokens') ?? 2;
       bookmarkResetAt = prefs.getString('bookmark_reset_at');
+      lastReadBookId = prefs.getString('last_read_book_id');
       await resetBookmarksIfExpired();
       final frozenJson = prefs.getString('frozen_days');
       if (frozenJson != null) {
@@ -261,6 +263,17 @@ class AppProvider extends ChangeNotifier {
       (prefs) => prefs.setInt('total_chunks_$bookId', total),
     ).catchError((Object e, StackTrace st) {
       debugPrint('AppProvider.setBookTotalChunks error: $e\n$st');
+    });
+  }
+
+  void setLastReadBook(String bookId) {
+    if (lastReadBookId == bookId) return;
+    lastReadBookId = bookId;
+    notifyListeners();
+    SharedPreferences.getInstance().then(
+      (prefs) => prefs.setString('last_read_book_id', bookId),
+    ).catchError((Object e, StackTrace st) {
+      debugPrint('AppProvider.setLastReadBook error: $e\n$st');
     });
   }
 }
