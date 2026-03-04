@@ -50,7 +50,12 @@ class BookDetailScreen extends StatelessWidget {
     if (book == null) {
       return Scaffold(
         backgroundColor: AppTheme.page,
-        appBar: AppBar(),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () => context.pop(),
+          ),
+        ),
         body: const Center(child: Text('Book not found')),
       );
     }
@@ -61,7 +66,12 @@ class BookDetailScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppTheme.page,
-          appBar: AppBar(),
+          appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () => context.pop(),
+          ),
+        ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(

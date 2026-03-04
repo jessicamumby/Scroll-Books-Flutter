@@ -82,7 +82,7 @@ class MyLibraryList extends StatelessWidget {
                 padding:
                     EdgeInsets.only(bottom: i < books.length - 1 ? 10 : 0),
                 child: GestureDetector(
-                  onTap: () => context.go('/app/library/${book.id}'),
+                  onTap: () => context.push('/app/library/${book.id}'),
                   child: _BookCard(
                     bookId: book.id,
                     title: book.title,
