@@ -19,6 +19,7 @@ class AppProvider extends ChangeNotifier {
   int dailyGoal = 10;
   int bookmarkTokens = 2;
   List<String> frozenDays = [];
+  String? bookmarkResetAt;
 
   Future<void> _loadLocalStats() async {
     try {
@@ -27,6 +28,8 @@ class AppProvider extends ChangeNotifier {
       longestStreak = prefs.getInt('longest_streak') ?? 0;
       dailyGoal = prefs.getInt('daily_goal') ?? 10;
       bookmarkTokens = prefs.getInt('bookmark_tokens') ?? 2;
+      bookmarkResetAt = prefs.getString('bookmark_reset_at');
+      await resetBookmarksIfExpired();
       final frozenJson = prefs.getString('frozen_days');
       if (frozenJson != null) {
         frozenDays = (jsonDecode(frozenJson) as List).cast<String>();
@@ -183,16 +186,43 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> useBookmarkToken() async {
     if (bookmarkTokens <= 0) return;
+    final isFirstUse = bookmarkTokens == 2;
     bookmarkTokens--;
     final today = DateTime.now().toIso8601String().substring(0, 10);
     frozenDays = [...frozenDays, today];
+    if (isFirstUse) {
+      bookmarkResetAt = DateTime.now()
+          .add(const Duration(days: 7))
+          .toIso8601String()
+          .substring(0, 10);
+    }
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('bookmark_tokens', bookmarkTokens);
       await prefs.setString('frozen_days', jsonEncode(frozenDays));
+      if (isFirstUse) {
+        await prefs.setString('bookmark_reset_at', bookmarkResetAt!);
+      }
     } catch (e, st) {
       debugPrint('AppProvider.useBookmarkToken error: $e\n$st');
+    }
+  }
+
+  Future<void> resetBookmarksIfExpired() async {
+    if (bookmarkResetAt == null) return;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (today.compareTo(bookmarkResetAt!) >= 0) {
+      bookmarkTokens = 2;
+      bookmarkResetAt = null;
+      notifyListeners();
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('bookmark_tokens', 2);
+        await prefs.remove('bookmark_reset_at');
+      } catch (e, st) {
+        debugPrint('AppProvider.resetBookmarksIfExpired error: $e\n$st');
+      }
     }
   }
 
