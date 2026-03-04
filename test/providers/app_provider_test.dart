@@ -152,18 +152,18 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('removes book from library list', () {
+    test('removes book from library list', () async {
       final provider = AppProvider();
       provider.library = ['moby-dick', 'frankenstein'];
-      provider.removeFromLibrary('', 'moby-dick');
+      await provider.removeFromLibrary('', 'moby-dick');
       expect(provider.library, ['frankenstein']);
       expect(provider.library.contains('moby-dick'), isFalse);
     });
 
-    test('is a no-op if book not in library', () {
+    test('is a no-op if book not in library', () async {
       final provider = AppProvider();
       provider.library = ['moby-dick'];
-      provider.removeFromLibrary('', 'frankenstein');
+      await provider.removeFromLibrary('', 'frankenstein');
       expect(provider.library, ['moby-dick']);
     });
   });
