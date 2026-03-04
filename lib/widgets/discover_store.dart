@@ -222,6 +222,7 @@ class _DiscoverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: wire tap → context.go('/app/library/:id') when Discover books have real IDs
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.cream,
