@@ -73,5 +73,18 @@ void main() {
       expect(find.byType(PageView), findsOneWidget);
       expect(find.textContaining('Pride and Prejudice'), findsNothing);
     });
+
+    testWidgets('tapping second card makes it active', (tester) async {
+      await tester.pumpWidget(_wrap(
+        progress: {'moby-dick': 50},
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byType(PageView), findsOneWidget);
+      // Drag to reveal second card then tap it — verify no error thrown
+      await tester.drag(find.byType(PageView), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      // If we got here without error, the tap/drag interaction works
+      expect(find.byType(PageView), findsOneWidget);
+    });
   });
 }

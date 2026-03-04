@@ -70,6 +70,11 @@ class _ContinueReadingShelfState extends State<ContinueReadingShelf> {
                     book: book,
                     isActive: index == _activePage,
                     percent: percent,
+                    onTap: () => _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    ),
                   );
                 },
               ),
@@ -85,11 +90,13 @@ class _ShelfCard extends StatelessWidget {
   final Book book;
   final bool isActive;
   final double percent;
+  final VoidCallback onTap;
 
   const _ShelfCard({
     required this.book,
     required this.isActive,
     required this.percent,
+    required this.onTap,
   });
 
   @override
@@ -97,8 +104,10 @@ class _ShelfCard extends StatelessWidget {
     final cardWidth = isActive ? 180.0 : 140.0;
     final coverHeight = cardWidth * (4 / 3);
 
-    return Center(
-      child: AnimatedContainer(
+    return GestureDetector(
+      onTap: onTap,
+      child: Center(
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
         width: cardWidth,
@@ -165,6 +174,7 @@ class _ShelfCard extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
