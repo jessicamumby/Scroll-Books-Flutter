@@ -280,6 +280,12 @@ class AppProvider extends ChangeNotifier {
   Future<void> removeFromLibrary(String userId, String bookId) async {
     library = library.where((id) => id != bookId).toList();
     notifyListeners();
-    // TODO: wire up UserDataService.removeFromLibrary in Task 2
+    if (userId.isNotEmpty) {
+      UserDataService.removeFromLibrary(userId, bookId).catchError(
+        (Object e, StackTrace st) {
+          debugPrint('AppProvider.removeFromLibrary error: $e\n$st');
+        },
+      );
+    }
   }
 }

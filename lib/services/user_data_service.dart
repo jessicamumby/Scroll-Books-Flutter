@@ -76,6 +76,14 @@ class UserDataService {
         .upsert({'user_id': userId, 'book_id': bookId}, onConflict: 'user_id,book_id');
   }
 
+  static Future<void> removeFromLibrary(String userId, String bookId) async {
+    await supabase
+        .from('library')
+        .delete()
+        .eq('user_id', userId)
+        .eq('book_id', bookId);
+  }
+
   static Future<void> syncProgress(
       String userId, String bookId, int chunkIndex) async {
     await supabase.from('progress').upsert(
