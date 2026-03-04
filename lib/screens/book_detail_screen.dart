@@ -67,11 +67,11 @@ class BookDetailScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppTheme.page,
           appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () => context.pop(),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () => context.pop(),
+            ),
           ),
-        ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
