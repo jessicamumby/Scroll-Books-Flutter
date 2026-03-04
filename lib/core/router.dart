@@ -12,7 +12,8 @@ import '../screens/change_password_screen.dart';
 import '../screens/library_screen.dart';
 import '../screens/book_detail_screen.dart';
 import '../screens/reader_screen.dart';
-import '../screens/stats_screen.dart';
+import '../screens/streaks_screen.dart';
+import '../screens/read_tab_screen.dart';
 import '../screens/email_confirm_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
@@ -44,7 +45,7 @@ final router = GoRouter(
     if (!authed && !onboarded && requiresAuth) return '/onboarding';
     if (!authed && requiresAuth) return '/login';
     if (authed && !onboarded && loc != '/onboarding' && loc != '/email-confirm') return '/onboarding';
-    if (authed && publicOnly.contains(loc)) return '/app/library';
+    if (authed && publicOnly.contains(loc)) return '/app/read';
     return null;
   },
   routes: [
@@ -82,12 +83,13 @@ final router = GoRouter(
     ShellRoute(
       builder: (_, __, child) => AppShell(child: child),
       routes: [
+        GoRoute(path: '/app/read', builder: (_, __) => const ReadTabScreen()),
+        GoRoute(path: '/app/streaks', builder: (_, __) => const StreaksScreen()),
         GoRoute(path: '/app/library', builder: (_, __) => const LibraryScreen()),
         GoRoute(
           path: '/app/library/:id',
           builder: (_, state) => BookDetailScreen(bookId: state.pathParameters['id']!),
         ),
-        GoRoute(path: '/app/stats', builder: (_, __) => const StatsScreen()),
         GoRoute(path: '/app/profile', builder: (_, __) => const ProfileScreen()),
         GoRoute(
           path: '/app/profile/reading-style',
@@ -96,5 +98,5 @@ final router = GoRouter(
       ],
     ),
   ],
-  initialLocation: '/app/library',
+  initialLocation: '/app/read',
 );

@@ -10,59 +10,71 @@ void main() {
   });
 
   group('AppTheme colours', () {
-    test('page colour matches Warm Punch token', () {
-      expect(AppTheme.page, const Color(0xFFFFF9F2));
+    test('cream colour matches Warm Punch token', () {
+      expect(AppTheme.cream, const Color(0xFFFFF8F0));
     });
 
-    test('amber colour matches secondary accent token', () {
-      expect(AppTheme.amber, const Color(0xFFFFB830));
+    test('page alias maps to cream', () {
+      expect(AppTheme.page, AppTheme.cream);
     });
 
-    test('brand colour matches Warm Punch token', () {
-      expect(AppTheme.brand, const Color(0xFFFF4D2E));
+    test('amber colour matches Warm Punch token', () {
+      expect(AppTheme.amber, const Color(0xFFE8A838));
+    });
+
+    test('tomato colour matches Warm Punch token', () {
+      expect(AppTheme.tomato, const Color(0xFFD94F30));
+    });
+
+    test('brand alias maps to tomato', () {
+      expect(AppTheme.brand, AppTheme.tomato);
     });
 
     test('ink colour matches Warm Punch token', () {
-      expect(AppTheme.ink, const Color(0xFF1C0F00));
+      expect(AppTheme.ink, const Color(0xFF2C2118));
     });
 
     test('sienna colour matches Warm Punch token', () {
       expect(AppTheme.sienna, const Color(0xFF7A3325));
     });
 
-    testWidgets('theme applies page colour as scaffold background', (tester) async {
+    testWidgets('theme applies cream colour as scaffold background', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
-          home: Scaffold(backgroundColor: AppTheme.page, body: const Text('test')),
+          home: Scaffold(backgroundColor: AppTheme.cream, body: const Text('test')),
         ),
       );
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, AppTheme.page);
+      expect(scaffold.backgroundColor, AppTheme.cream);
     });
 
-    test('colorScheme primary is brand', () {
-      expect(AppTheme.light.colorScheme.primary, AppTheme.brand);
+    test('colorScheme primary is tomato', () {
+      expect(AppTheme.light.colorScheme.primary, AppTheme.tomato);
     });
 
     test('colorScheme error is sienna', () {
       expect(AppTheme.light.colorScheme.error, AppTheme.sienna);
     });
 
-    test('brandDark colour matches Warm Punch token', () {
-      expect(AppTheme.brandDark, const Color(0xFFE03A1C));
+    test('brandDark alias maps to tomato', () {
+      expect(AppTheme.brandDark, AppTheme.tomato);
     });
 
-    test('brandPale colour matches Warm Punch token', () {
-      expect(AppTheme.brandPale, const Color(0xFFFFD0C8));
+    test('brandPale alias maps to tomatoLight', () {
+      expect(AppTheme.brandPale, AppTheme.tomatoLight);
     });
 
-    test('brandWash colour matches token', () {
-      expect(AppTheme.brandWash, const Color(0xFFFFF2F0));
+    test('tomatoLight colour matches token', () {
+      expect(AppTheme.tomatoLight, const Color(0xFFF4DDD7));
     });
 
-    test('forestPale colour matches token', () {
-      expect(AppTheme.forestPale, const Color(0xFFC8D8C4));
+    test('sageLight colour matches token', () {
+      expect(AppTheme.sageLight, const Color(0xFFE4EDE5));
+    });
+
+    test('forestPale alias maps to sageLight', () {
+      expect(AppTheme.forestPale, AppTheme.sageLight);
     });
   });
 }

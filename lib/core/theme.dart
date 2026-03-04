@@ -3,100 +3,163 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // ── Core palette (Warm Punch) ──
-  static const Color page        = Color(0xFFFFF9F2);
-  static const Color surface     = Color(0xFFFFF5E6);
-  static const Color surfaceAlt  = Color(0xFFF0E0CC);
-  static const Color border      = Color(0xFFF0E0CC);
-  static const Color borderSoft  = Color(0xFFF5EDE0);
+  // ── New Warm Punch palette ──
+  static const Color cream       = Color(0xFFFFF8F0);
+  static const Color parchment   = Color(0xFFF5EDE0);
+  static const Color warmGold    = Color(0xFFD4A853);
+  static const Color tomato      = Color(0xFFD94F30);
+  static const Color tomatoLight = Color(0xFFF4DDD7);
+  static const Color amber       = Color(0xFFE8A838);
+  static const Color amberLight  = Color(0xFFFDF0D5);
+  static const Color ink         = Color(0xFF2C2118);
+  static const Color inkMid      = Color(0xFF5C4A3A);
+  static const Color inkLight    = Color(0xFF8C7B6B);
+  static const Color sage        = Color(0xFF7A9E7E);
+  static const Color sageLight   = Color(0xFFE4EDE5);
+  static const Color warmWhite   = Color(0xFFFFFDFB);
 
-  // ── Text ──
-  static const Color ink         = Color(0xFF1C0F00);
-  static const Color mahogany    = Color(0xFF3D3025);
-  static const Color tobacco     = Color(0xFF7A5C44);
-  static const Color pewter      = Color(0xFFA08060);
-  static const Color fog         = Color(0xFFBFB39D);
+  // ── Backward-compat aliases (for auth/reader/profile screens) ──
+  static const Color page       = cream;
+  static const Color surface    = cream;
+  static const Color surfaceAlt = parchment;
+  static const Color border     = parchment;
+  static const Color borderSoft = parchment;
+  static const Color brand      = tomato;
+  static const Color brandDark  = tomato;
+  static const Color brandPale  = tomatoLight;
+  static const Color brandWash  = tomatoLight;
+  static const Color mahogany   = ink;
+  static const Color tobacco    = inkMid;
+  static const Color pewter     = inkLight;
+  static const Color fog        = inkLight;
+  static const Color forest     = sage;
+  static const Color forestPale = sageLight;
 
-  // ── Brand accent ──
-  static const Color brand       = Color(0xFFFF4D2E);
-  static const Color brandDark   = Color(0xFFE03A1C);
-  static const Color brandPale   = Color(0xFFFFD0C8);
-  static const Color brandWash   = Color(0xFFFFF2F0);
+  // ── Cover art (kept for book gradients) ──
+  static const Color coverDeep  = Color(0xFF2C3E50);
+  static const Color coverRich  = Color(0xFF4A1942);
+  static const Color sienna     = Color(0xFF7A3325);
 
-  // ── Secondary accent ──
-  static const Color amber       = Color(0xFFFFB830);
+  // ── Layout constants ──
+  static const double cardRadius   = 16.0;
+  static const double buttonRadius = 12.0;
+  static const double smallRadius  = 10.0;
 
-  // ── Cover art ──
-  static const Color coverDeep   = Color(0xFF2C3E50);
-  static const Color coverRich   = Color(0xFF4A1942);
+  // ── Typography helpers ──
+  static TextStyle headingStyle({
+    double fontSize = 22,
+    FontWeight fontWeight = FontWeight.w700,
+    Color color = ink,
+  }) => GoogleFonts.playfairDisplay(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+  );
 
-  // ── Supporting ──
-  static const Color sienna      = Color(0xFF7A3325);
-  static const Color forest      = Color(0xFF3A5A30);
-  static const Color forestPale  = Color(0xFFC8D8C4);
+  static TextStyle bodyStyle({
+    double fontSize = 14,
+    FontWeight fontWeight = FontWeight.w400,
+    Color color = ink,
+  }) => GoogleFonts.playfairDisplay(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+  );
 
+  static TextStyle monoLabel({
+    double fontSize = 10,
+    FontWeight fontWeight = FontWeight.w600,
+    Color color = inkLight,
+    double letterSpacing = 2.0,
+  }) => GoogleFonts.sourceCodePro(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    letterSpacing: letterSpacing,
+    color: color,
+  ).copyWith(textBaseline: TextBaseline.alphabetic);
+
+  // ── Shadow helpers ──
+  static List<BoxShadow> warmShadow({
+    Color? color,
+    double blur = 12,
+    double spread = 0,
+    Offset offset = const Offset(0, 4),
+  }) => [
+    BoxShadow(
+      color: (color ?? tomato).withValues(alpha: 0.15),
+      blurRadius: blur,
+      spreadRadius: spread,
+      offset: offset,
+    ),
+  ];
+
+  // ── Theme data ──
   static ThemeData get light => ThemeData(
     useMaterial3: true,
-    scaffoldBackgroundColor: page,
+    scaffoldBackgroundColor: cream,
     colorScheme: ColorScheme.light(
-      primary: brand,
-      onPrimary: surface,
-      surface: surface,
+      primary: tomato,
+      onPrimary: cream,
+      surface: cream,
       onSurface: ink,
       error: sienna,
-      onError: surface,
+      onError: cream,
     ),
-    textTheme: GoogleFonts.nunitoTextTheme().copyWith(
-      displayLarge: GoogleFonts.lora(
+    textTheme: GoogleFonts.playfairDisplayTextTheme().copyWith(
+      displayLarge: GoogleFonts.playfairDisplay(
         fontSize: 36, fontWeight: FontWeight.w700, color: ink,
       ),
-      displayMedium: GoogleFonts.lora(
+      displayMedium: GoogleFonts.playfairDisplay(
         fontSize: 28, fontWeight: FontWeight.w700, color: ink,
       ),
-      titleLarge: GoogleFonts.lora(
+      titleLarge: GoogleFonts.playfairDisplay(
         fontSize: 20, fontWeight: FontWeight.w600, color: ink,
       ),
-      bodyLarge: GoogleFonts.nunito(fontSize: 16, color: tobacco),
-      bodyMedium: GoogleFonts.nunito(fontSize: 14, color: tobacco),
+      bodyLarge: GoogleFonts.playfairDisplay(fontSize: 16, color: inkMid),
+      bodyMedium: GoogleFonts.playfairDisplay(fontSize: 14, color: inkMid),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: surface,
-      indicatorColor: brandPale,
+      backgroundColor: cream,
+      indicatorColor: tomatoLight,
       labelTextStyle: WidgetStateProperty.all(
-        GoogleFonts.nunito(fontSize: 12, color: tobacco),
+        GoogleFonts.playfairDisplay(fontSize: 12, color: inkMid),
       ),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: surface,
+      backgroundColor: cream,
       foregroundColor: ink,
       elevation: 0,
-      titleTextStyle: GoogleFonts.lora(
+      titleTextStyle: GoogleFonts.playfairDisplay(
         fontSize: 18, fontWeight: FontWeight.w600, color: ink,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: surface,
+      fillColor: cream,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: border),
+        borderRadius: BorderRadius.circular(buttonRadius),
+        borderSide: BorderSide(color: parchment),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: border),
+        borderRadius: BorderRadius.circular(buttonRadius),
+        borderSide: BorderSide(color: parchment),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: brand, width: 1.5),
+        borderRadius: BorderRadius.circular(buttonRadius),
+        borderSide: BorderSide(color: tomato, width: 1.5),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: brand,
-        foregroundColor: surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: tomato,
+        foregroundColor: cream,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(buttonRadius),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        textStyle: GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w700),
+        textStyle: GoogleFonts.playfairDisplay(
+          fontSize: 16, fontWeight: FontWeight.w700,
+        ),
       ),
     ),
   );
