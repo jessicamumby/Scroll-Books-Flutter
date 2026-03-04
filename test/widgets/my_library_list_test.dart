@@ -60,5 +60,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('detail'), findsOneWidget);
     });
+
+    testWidgets('renders Image widget for each book cover', (tester) async {
+      final provider = AppProvider();
+      provider.library = ['moby-dick', 'frankenstein'];
+      await tester.pumpWidget(_wrap(provider));
+      await tester.pumpAndSettle();
+      // One Image per book card
+      expect(find.byType(Image), findsNWidgets(2));
+    });
   });
 }
