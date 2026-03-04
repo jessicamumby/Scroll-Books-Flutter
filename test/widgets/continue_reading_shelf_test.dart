@@ -19,14 +19,13 @@ AppProvider _provider({
 Widget _wrap({
   Map<String, int> progress = const {},
   Map<String, int> bookTotalChunks = const {},
-}) =>
-    ChangeNotifierProvider<AppProvider>.value(
-      value: _provider(progress: progress, bookTotalChunks: bookTotalChunks),
-      child: MaterialApp(
-        theme: AppTheme.light,
-        home: const Scaffold(body: ContinueReadingShelf()),
-      ),
-    );
+}) => ChangeNotifierProvider<AppProvider>.value(
+  value: _provider(progress: progress, bookTotalChunks: bookTotalChunks),
+  child: MaterialApp(
+    theme: AppTheme.light,
+    home: const Scaffold(body: ContinueReadingShelf()),
+  ),
+);
 
 void main() {
   setUpAll(() {
@@ -66,18 +65,16 @@ void main() {
 
     testWidgets('only hasChunks books with progress appear', (tester) async {
       // pride-and-prejudice has hasChunks: false — should not appear
-      await tester.pumpWidget(_wrap(
-        progress: {'moby-dick': 50, 'pride-and-prejudice': 100},
-      ));
+      await tester.pumpWidget(
+        _wrap(progress: {'moby-dick': 50, 'pride-and-prejudice': 100}),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(PageView), findsOneWidget);
       expect(find.textContaining('Pride and Prejudice'), findsNothing);
     });
 
     testWidgets('tapping second card makes it active', (tester) async {
-      await tester.pumpWidget(_wrap(
-        progress: {'moby-dick': 50},
-      ));
+      await tester.pumpWidget(_wrap(progress: {'moby-dick': 50}));
       await tester.pumpAndSettle();
       expect(find.byType(PageView), findsOneWidget);
       // Drag to reveal second card then tap it — verify no error thrown
