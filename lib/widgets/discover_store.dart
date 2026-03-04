@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/theme.dart';
 
 class _DiscoverBook {
+  final String id;
   final String title;
   final String author;
   final Color color;
@@ -12,6 +13,7 @@ class _DiscoverBook {
   final String? tag;
 
   const _DiscoverBook({
+    required this.id,
     required this.title,
     required this.author,
     required this.color,
@@ -22,17 +24,15 @@ class _DiscoverBook {
 }
 
 const _discoverBooks = [
-  _DiscoverBook(title: 'Moby Dick', author: 'Herman Melville', color: Color(0xFF1A3A5C), price: 'Free', isFree: true, tag: 'Classic'),
-  _DiscoverBook(title: 'Pride and Prejudice', author: 'Jane Austen', color: Color(0xFF8B5E6E), price: 'Free', isFree: true, tag: 'Popular'),
-  _DiscoverBook(title: 'Jane Eyre', author: 'Charlotte Brontë', color: Color(0xFF3D2B4E), price: 'Free', isFree: true),
-  _DiscoverBook(title: 'Don Quixote', author: 'Miguel de Cervantes', color: Color(0xFF8B4513), price: 'Free', isFree: true, tag: 'Epic'),
-  _DiscoverBook(title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', color: Color(0xFFB8952A), price: 'Free', isFree: true, tag: 'Short'),
-  _DiscoverBook(title: 'Frankenstein', author: 'Mary Shelley', color: Color(0xFF1A3322), price: 'Free', isFree: true, tag: 'Classic'),
-  _DiscoverBook(title: 'The Odyssey', author: 'Homer', color: Color(0xFFC4762B), price: 'Free', isFree: true, tag: 'Epic'),
-  _DiscoverBook(title: 'Dracula', author: 'Bram Stoker', color: Color(0xFF6B4152), price: 'Free', isFree: true, tag: 'Popular'),
+  _DiscoverBook(id: 'moby-dick', title: 'Moby Dick', author: 'Herman Melville', color: Color(0xFF1A3A5C), price: 'Free', isFree: true, tag: 'Classic'),
+  _DiscoverBook(id: 'pride-and-prejudice', title: 'Pride and Prejudice', author: 'Jane Austen', color: Color(0xFF8B5E6E), price: 'Free', isFree: true, tag: 'Popular'),
+  _DiscoverBook(id: 'great-gatsby', title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', color: Color(0xFFB8952A), price: 'Free', isFree: true, tag: 'Short'),
+  _DiscoverBook(id: 'frankenstein', title: 'Frankenstein', author: 'Mary Shelley', color: Color(0xFF1A3322), price: 'Free', isFree: true, tag: 'Classic'),
+  _DiscoverBook(id: 'romeo-and-juliet', title: 'Romeo & Juliet', author: 'William Shakespeare', color: Color(0xFF8B1A2A), price: 'Free', isFree: true, tag: 'Classic'),
+  _DiscoverBook(id: 'wuthering-heights', title: 'Wuthering Heights', author: 'Emily Brontë', color: Color(0xFF2D1F3D), price: 'Free', isFree: true, tag: 'Popular'),
 ];
 
-const _filterTags = ['All', 'Free', 'Classic', 'Popular', 'Epic', 'Short'];
+const _filterTags = ['All', 'Free', 'Classic', 'Popular', 'Short'];
 
 class DiscoverStore extends StatefulWidget {
   const DiscoverStore({super.key});
@@ -222,7 +222,6 @@ class _DiscoverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: wire tap → context.go('/app/library/:id') when Discover books have real IDs
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.cream,
@@ -235,59 +234,68 @@ class _DiscoverCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Cover area
-          Container(
+          SizedBox(
             height: 100,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-              gradient: LinearGradient(
-                colors: [
-                  book.color,
-                  book.color.withValues(alpha: 0.7),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
             child: Stack(
               children: [
-                // Spine lines
-                Positioned(
-                  left: 10,
-                  top: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 2,
-                    color: AppTheme.warmGold.withValues(alpha: 0.40),
-                  ),
-                ),
-                Positioned(
-                  left: 14,
-                  top: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 0.5,
-                    color: AppTheme.warmGold.withValues(alpha: 0.25),
-                  ),
-                ),
-                // Title
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      book.title.toUpperCase(),
-                      style: AppTheme.monoLabel(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        letterSpacing: 1.5,
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                  child: Image.asset(
+                    'assets/covers/${book.id}.jpg',
+                    height: 100,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 100,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            book.color,
+                            book.color.withValues(alpha: 0.7),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            left: 10, top: 0, bottom: 0,
+                            child: Container(
+                              width: 2,
+                              color: AppTheme.warmGold.withValues(alpha: 0.40),
+                            ),
+                          ),
+                          Positioned(
+                            left: 14, top: 0, bottom: 0,
+                            child: Container(
+                              width: 0.5,
+                              color: AppTheme.warmGold.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Text(
+                                book.title.toUpperCase(),
+                                style: AppTheme.monoLabel(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 1.5,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                // Tag badge
                 if (book.tag != null)
                   Positioned(
                     top: 6,
