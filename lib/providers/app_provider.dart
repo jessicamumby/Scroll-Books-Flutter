@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/catalogue.dart';
 import '../services/user_data_service.dart';
 import '../utils/streak_calculator.dart';
 
@@ -193,6 +194,19 @@ class AppProvider extends ChangeNotifier {
     } catch (e, st) {
       debugPrint('AppProvider.useBookmarkToken error: $e\n$st');
     }
+  }
+
+  Map<String, int> get genreCounts {
+    final counts = <String, int>{};
+    for (final book in catalogue) {
+      final p = progress[book.id];
+      if (p != null && p > 0) {
+        for (final g in book.genres) {
+          counts[g] = (counts[g] ?? 0) + 1;
+        }
+      }
+    }
+    return counts;
   }
 
   void setBookTotalChunks(String bookId, int total) {
