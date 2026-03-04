@@ -15,7 +15,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Moby Dick'), findsOneWidget);
-      expect(find.text('Wuthering Heights'), findsAtLeastNWidgets(1));
+      expect(find.text('Wuthering Heights'), findsNWidgets(2));
       expect(find.text('Romeo & Juliet'), findsOneWidget);
       expect(find.text('Jane Eyre'), findsNothing);
       expect(find.text('Don Quixote'), findsNothing);
