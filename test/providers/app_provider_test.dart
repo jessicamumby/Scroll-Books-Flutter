@@ -167,4 +167,126 @@ void main() {
       expect(provider.library, ['moby-dick']);
     });
   });
+
+  group('AppProvider.setDailyGoal', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('updates dailyGoal field', () async {
+      final provider = AppProvider();
+      await provider.setDailyGoal(20);
+      expect(provider.dailyGoal, 20);
+    });
+
+    test('persists to SharedPreferences', () async {
+      SharedPreferences.setMockInitialValues({});
+      final provider = AppProvider();
+      await provider.setDailyGoal(15);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt('daily_goal'), 15);
+    });
+  });
+
+  group('AppProvider.useBookmarkToken edge cases', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('is a no-op when tokens are 0', () async {
+      final provider = AppProvider();
+      provider.bookmarkTokens = 0;
+      await provider.useBookmarkToken();
+      expect(provider.bookmarkTokens, 0);
+      expect(provider.frozenDays, isEmpty);
+    });
+
+    test('adds today to frozenDays', () async {
+      SharedPreferences.setMockInitialValues({});
+      final provider = AppProvider();
+      await provider.useBookmarkToken();
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      expect(provider.frozenDays, contains(today));
+    });
+
+    test('decrements tokens from 1 to 0 without changing resetAt', () async {
+      SharedPreferences.setMockInitialValues({});
+      final provider = AppProvider();
+      // Simulate state after first use
+      provider.bookmarkTokens = 1;
+      provider.bookmarkResetAt = '2099-12-31';
+      await provider.useBookmarkToken();
+      expect(provider.bookmarkTokens, 0);
+      expect(provider.bookmarkResetAt, '2099-12-31'); // unchanged
+    });
+  });
+
+  group('AppProvider.incrementPassagesRead', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('accumulates across multiple calls', () {
+      final provider = AppProvider();
+      provider.incrementPassagesRead('2026-03-04');
+      provider.incrementPassagesRead('2026-03-04');
+      provider.incrementPassagesRead('2026-03-04');
+      expect(provider.passagesRead, 3);
+      expect(provider.dailyPassages['2026-03-04'], 3);
+    });
+
+    test('tracks separate days independently', () {
+      final provider = AppProvider();
+      provider.incrementPassagesRead('2026-03-03');
+      provider.incrementPassagesRead('2026-03-03');
+      provider.incrementPassagesRead('2026-03-04');
+      expect(provider.passagesRead, 3);
+      expect(provider.dailyPassages['2026-03-03'], 2);
+      expect(provider.dailyPassages['2026-03-04'], 1);
+    });
+  });
+
+  group('AppProvider.genreCounts edge cases', () {
+    test('ignores unknown book IDs not in catalogue', () {
+      final provider = AppProvider();
+      provider.progress = {'nonexistent-book-id': 5};
+      expect(provider.genreCounts, isEmpty);
+    });
+
+    test('counts multiple genres from single book', () {
+      final provider = AppProvider();
+      // moby-dick has genres: Adventure, Gothic
+      provider.progress = {'moby-dick': 1};
+      expect(provider.genreCounts.length, 2);
+    });
+  });
+
+  group('AppProvider.setLastReadBook edge cases', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('is a no-op when setting same book ID', () {
+      final provider = AppProvider();
+      provider.lastReadBookId = 'moby-dick';
+      provider.setLastReadBook('moby-dick');
+      expect(provider.lastReadBookId, 'moby-dick');
+    });
+
+    test('updates when setting different book ID', () {
+      final provider = AppProvider();
+      provider.setLastReadBook('moby-dick');
+      provider.setLastReadBook('frankenstein');
+      expect(provider.lastReadBookId, 'frankenstein');
+    });
+  });
+
+  group('AppProvider.clearMilestone', () {
+    test('clears pendingMilestone', () {
+      final provider = AppProvider();
+      provider.pendingMilestone = 30;
+      provider.clearMilestone();
+      expect(provider.pendingMilestone, isNull);
+    });
+  });
 }
