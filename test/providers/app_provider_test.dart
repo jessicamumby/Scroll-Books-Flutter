@@ -25,13 +25,13 @@ void main() {
 
     test('counts multiple books in same genre', () {
       final provider = AppProvider();
-      // pride-and-prejudice: Romance; jane-eyre: Gothic, Romance
+      // pride-and-prejudice: Romance; romeo-and-juliet: Romance, Tragedy
       provider.progress = {
         'pride-and-prejudice': 3,
-        'jane-eyre': 1,
+        'romeo-and-juliet': 1,
       };
       expect(provider.genreCounts['Romance'], 2);
-      expect(provider.genreCounts['Gothic'], 1);
+      expect(provider.genreCounts['Tragedy'], 1);
     });
   });
 

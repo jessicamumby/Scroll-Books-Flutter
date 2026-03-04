@@ -14,65 +14,65 @@ void main() {
     );
   }
 
-  testWidgets('shows featured banner with Wuthering Heights', (tester) async {
-    await tester.pumpWidget(_wrap());
-    expect(find.text('Wuthering Heights'), findsOneWidget);
-    expect(find.text('FEATURED THIS WEEK'), findsOneWidget);
-  });
+  group('DiscoverStore', () {
+    testWidgets('shows only production books', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('Moby Dick'), findsOneWidget);
+      expect(find.text('Wuthering Heights'), findsNWidgets(2));
+      expect(find.text('Romeo & Juliet'), findsOneWidget);
+      expect(find.text('Jane Eyre'), findsNothing);
+      expect(find.text('Don Quixote'), findsNothing);
+      expect(find.text('The Odyssey'), findsNothing);
+      expect(find.text('Dracula'), findsNothing);
+    });
 
-  testWidgets('shows Add to Library button in featured banner', (tester) async {
-    await tester.pumpWidget(_wrap());
-    expect(find.text('Add to Library — Free'), findsOneWidget);
-  });
+    testWidgets('does not show Epic filter tag', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('Epic'), findsNothing);
+    });
 
-  testWidgets('shows filter tags', (tester) async {
-    await tester.pumpWidget(_wrap());
-    expect(find.text('All'), findsOneWidget);
-    expect(find.text('Free'), findsOneWidget);
-    expect(find.text('Classic'), findsOneWidget);
-    expect(find.text('Popular'), findsOneWidget);
-    expect(find.text('Epic'), findsOneWidget);
-    expect(find.text('Short'), findsOneWidget);
-  });
+    testWidgets('shows featured banner with Wuthering Heights', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.text('FEATURED THIS WEEK'), findsOneWidget);
+    });
 
-  testWidgets('shows AVAILABLE BOOKS section header', (tester) async {
-    await tester.pumpWidget(_wrap());
-    expect(find.text('AVAILABLE BOOKS'), findsOneWidget);
-  });
+    testWidgets('shows Add to Library button in featured banner', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.text('Add to Library — Free'), findsOneWidget);
+    });
 
-  testWidgets('shows all 8 books when All filter is selected', (tester) async {
-    await tester.pumpWidget(_wrap());
-    expect(find.text('Moby Dick'), findsWidgets);
-    expect(find.text('Jane Eyre'), findsWidgets);
-  });
+    testWidgets('shows filter tags', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.text('All'), findsOneWidget);
+      expect(find.text('Free'), findsOneWidget);
+      expect(find.text('Classic'), findsOneWidget);
+      expect(find.text('Popular'), findsOneWidget);
+      expect(find.text('Short'), findsOneWidget);
+    });
 
-  testWidgets('tapping Classic filter shows only Classic books', (tester) async {
-    await tester.pumpWidget(_wrap());
-    await tester.pumpAndSettle();
+    testWidgets('shows AVAILABLE BOOKS section header', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.text('AVAILABLE BOOKS'), findsOneWidget);
+    });
 
-    await tester.tap(find.text('Classic'));
-    await tester.pumpAndSettle();
+    testWidgets('tapping Classic filter shows only Classic books', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
 
-    // Classic books: Moby Dick, Frankenstein
-    expect(find.text('Moby Dick'), findsWidgets);
-    expect(find.text('Frankenstein'), findsWidgets);
-    expect(find.text('Don Quixote'), findsNothing);
-  });
+      await tester.tap(find.text('Classic'));
+      await tester.pumpAndSettle();
 
-  testWidgets('tapping Epic filter shows only Epic books', (tester) async {
-    await tester.pumpWidget(_wrap());
-    await tester.pumpAndSettle();
+      // Classic books: Moby Dick, Frankenstein, Romeo & Juliet
+      expect(find.text('Moby Dick'), findsWidgets);
+      expect(find.text('Frankenstein'), findsWidgets);
+      expect(find.text('Romeo & Juliet'), findsWidgets);
+    });
 
-    await tester.tap(find.text('Epic'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Don Quixote'), findsWidgets);
-    expect(find.text('The Odyssey'), findsWidgets);
-    expect(find.text('Jane Eyre'), findsNothing);
-  });
-
-  testWidgets('shows Free — Add button on book cards', (tester) async {
-    await tester.pumpWidget(_wrap());
-    expect(find.text('Free — Add'), findsWidgets);
+    testWidgets('shows Free — Add button on book cards', (tester) async {
+      await tester.pumpWidget(_wrap());
+      expect(find.text('Free — Add'), findsWidgets);
+    });
   });
 }

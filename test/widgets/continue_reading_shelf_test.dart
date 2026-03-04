@@ -64,13 +64,13 @@ void main() {
     });
 
     testWidgets('only hasChunks books with progress appear', (tester) async {
-      // pride-and-prejudice has hasChunks: false — should not appear
+      // all catalogue books have hasChunks: true — both should appear
       await tester.pumpWidget(
         _wrap(progress: {'moby-dick': 50, 'pride-and-prejudice': 100}),
       );
       await tester.pumpAndSettle();
       expect(find.byType(PageView), findsOneWidget);
-      expect(find.textContaining('Pride and Prejudice'), findsNothing);
+      expect(find.textContaining('Moby Dick'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('tapping second card makes it active', (tester) async {

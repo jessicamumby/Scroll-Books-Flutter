@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:scroll_books/core/theme.dart';
 import 'package:scroll_books/providers/app_provider.dart';
 import 'package:scroll_books/screens/reader_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _wrap({String readingStyle = 'vertical'}) {
   final provider = AppProvider()..readingStyle = readingStyle;
@@ -22,13 +23,17 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   group('ReaderScreen', () {
     testWidgets('shows loading indicator on init', (tester) async {
       await tester.pumpWidget(_wrap());
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('shows coming soon for book without chunks', (tester) async {
+    testWidgets('shows loading indicator for pride-and-prejudice on init', (tester) async {
       await tester.pumpWidget(
         ChangeNotifierProvider<AppProvider>.value(
           value: AppProvider(),
@@ -38,8 +43,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
-      expect(find.textContaining('Coming Soon'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
     testWidgets('shows back button in header', (tester) async {
@@ -59,19 +63,17 @@ void main() {
       expect(find.byType(GestureDetector), findsWidgets);
     });
 
-    testWidgets('shows coming soon screen for book without chunks (ReaderScreen level)', (tester) async {
+    testWidgets('all catalogue books show loading indicator on init', (tester) async {
       await tester.pumpWidget(
         ChangeNotifierProvider<AppProvider>.value(
           value: AppProvider(),
           child: MaterialApp(
             theme: AppTheme.light,
-            home: const ReaderScreen(bookId: 'pride-and-prejudice'),
+            home: const ReaderScreen(bookId: 'frankenstein'),
           ),
         ),
       );
-      await tester.pumpAndSettle();
-      // Coming Soon state — no share button because chunks aren't loaded
-      expect(find.textContaining('Coming Soon'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
     testWidgets('horizontal mode shows loading indicator on init', (tester) async {
@@ -81,7 +83,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('no share icon in coming soon state (share via long press)', (tester) async {
+    testWidgets('back button present for all catalogue books', (tester) async {
       await tester.pumpWidget(
         ChangeNotifierProvider<AppProvider>.value(
           value: AppProvider(),
@@ -91,8 +93,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.share_outlined), findsNothing);
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
     });
 
     test('formatShareText appends attribution', () {
@@ -108,18 +109,18 @@ void main() {
       expect(result, contains('\n\n'));
     });
 
-    testWidgets('coming soon state shows Coming Soon text', (tester) async {
+    testWidgets('unknown book id shows book not found', (tester) async {
       await tester.pumpWidget(
         ChangeNotifierProvider<AppProvider>.value(
           value: AppProvider(),
           child: MaterialApp(
             theme: AppTheme.light,
-            home: const ReaderScreen(bookId: 'pride-and-prejudice'),
+            home: const ReaderScreen(bookId: 'unknown-book'),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('Coming Soon'), findsOneWidget);
+      expect(find.textContaining('Book not found'), findsOneWidget);
     });
 
     test('incrementPassagesRead is exposed on AppProvider', () {

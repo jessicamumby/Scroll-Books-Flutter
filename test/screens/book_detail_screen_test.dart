@@ -76,5 +76,11 @@ void main() {
       expect(find.text('Remove from library?'), findsNothing);
       expect(provider.library, contains('moby-dick'));
     });
+
+    testWidgets('shows arrow_back_ios back button', (tester) async {
+      await tester.pumpWidget(_wrap('moby-dick'));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
+    });
   });
 }
