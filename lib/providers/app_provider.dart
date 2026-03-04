@@ -52,7 +52,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> _checkMilestone(int currentStreak) async {
-    const milestones = [7, 30, 100];
+    const milestones = [7, 30, 90, 365];
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastCelebrated = prefs.getInt('last_celebrated_milestone') ?? 0;

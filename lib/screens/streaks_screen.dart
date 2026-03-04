@@ -54,14 +54,16 @@ class _StreaksScreenState extends State<StreaksScreen> {
 class _StreaksTab extends StatelessWidget {
   const _StreaksTab({super.key});
 
-  List<bool> _getWeeklyCompletion(List<String> readDays) {
+  List<bool> _getWeeklyCompletion(
+    List<String> readDays,
+    List<String> frozenDays,
+  ) {
     final now = DateTime.now();
-    // Find Monday of current week
     final monday = now.subtract(Duration(days: now.weekday - 1));
     return List.generate(7, (i) {
       final day = monday.add(Duration(days: i));
       final dayStr = day.toIso8601String().substring(0, 10);
-      return readDays.contains(dayStr);
+      return readDays.contains(dayStr) || frozenDays.contains(dayStr);
     });
   }
 
@@ -80,7 +82,10 @@ class _StreaksTab extends StatelessWidget {
         );
         final todayStr = DateTime.now().toIso8601String().substring(0, 10);
         final passagesToday = provider.dailyPassages[todayStr] ?? 0;
-        final weeklyCompletion = _getWeeklyCompletion(provider.readDays);
+        final weeklyCompletion = _getWeeklyCompletion(
+          provider.readDays,
+          provider.frozenDays,
+        );
 
         return Container(
           color: AppTheme.warmWhite,
