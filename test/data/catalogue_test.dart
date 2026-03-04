@@ -35,5 +35,20 @@ void main() {
       expect(withChunks.length, 1);
       expect(withChunks.first.id, 'moby-dick');
     });
+
+    test('every book has a non-empty genres list', () {
+      for (final book in catalogue) {
+        expect(
+          book.genres,
+          isNotEmpty,
+          reason: '${book.id} has no genres',
+        );
+      }
+    });
+
+    test('moby-dick genres are Adventure and Gothic', () {
+      final book = getBookById('moby-dick')!;
+      expect(book.genres, containsAll(['Adventure', 'Gothic']));
+    });
   });
 }
