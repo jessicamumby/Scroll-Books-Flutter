@@ -119,4 +119,28 @@ void main() {
       expect(provider.bookmarkResetAt, futureDate);
     });
   });
+
+  group('AppProvider.lastReadBookId', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('is null initially', () {
+      final provider = AppProvider();
+      expect(provider.lastReadBookId, isNull);
+    });
+
+    test('setLastReadBook sets the field', () {
+      final provider = AppProvider();
+      provider.setLastReadBook('moby-dick');
+      expect(provider.lastReadBookId, 'moby-dick');
+    });
+
+    test('setLastReadBook overwrites previous value', () {
+      final provider = AppProvider();
+      provider.setLastReadBook('moby-dick');
+      provider.setLastReadBook('frankenstein');
+      expect(provider.lastReadBookId, 'frankenstein');
+    });
+  });
 }
