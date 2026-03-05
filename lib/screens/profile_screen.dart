@@ -8,6 +8,8 @@ import '../core/supabase_client.dart';
 import '../data/catalogue.dart';
 import '../models/saved_passage.dart';
 import '../providers/app_provider.dart';
+import '../utils/share_passage_image.dart';
+import '../widgets/reader/passage_share_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +19,12 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final GlobalKey _shareCardKey = GlobalKey();
+  String _shareCardText = '';
+  String _shareCardTitle = '';
+  String _shareCardAuthor = '';
+  String _shareCardPageLabel = '';
+
   String _currentEmail() {
     try {
       return supabase.auth.currentUser?.email ?? '';
@@ -33,129 +41,180 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _sharePassage(SavedPassage passage) async {
+    final book = getBookById(passage.bookId);
+    final title = book?.title ?? passage.bookId;
+    final author = book?.author ?? '';
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    final totalChunks = provider.bookTotalChunks[passage.bookId];
+    final page = passage.chunkIndex + 1;
+    final pct = (totalChunks != null && totalChunks > 0)
+        ? ((page) / totalChunks * 100).round()
+        : 0;
+
+    setState(() {
+      _shareCardText = passage.passageText;
+      _shareCardTitle = title;
+      _shareCardAuthor = author;
+      _shareCardPageLabel = 'p. $page · $pct%';
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await sharePassageImage(
+          repaintKey: _shareCardKey,
+          bookTitle: title,
+          author: author,
+        );
+      } catch (e, st) {
+        debugPrint('Share passage error: $e\n$st');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final email = _currentEmail();
 
-    return Scaffold(
-      backgroundColor: AppTheme.page,
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            onPressed: () => context.push('/app/profile/settings'),
-            icon: const Text('⚙️', style: TextStyle(fontSize: 24)),
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: AppTheme.page,
+          appBar: AppBar(
+            title: const Text('Profile'),
+            actions: [
+              IconButton(
+                onPressed: () => context.push('/app/profile/settings'),
+                icon: const Text('⚙️', style: TextStyle(fontSize: 24)),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Consumer<AppProvider>(
-        builder: (context, provider, _) {
-          final passages = provider.savedPassages;
+          body: Consumer<AppProvider>(
+            builder: (context, provider, _) {
+              final passages = provider.savedPassages;
 
-          return CustomScrollView(
-            slivers: [
-              // User info
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-                  child: Text(
-                    email,
-                    style: TextStyle(color: AppTheme.tobacco, fontSize: 15),
-                  ),
-                ),
-              ),
-              // Section header
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Saved Passages',
-                        style: GoogleFonts.lora(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.ink,
-                        ),
+              return CustomScrollView(
+                slivers: [
+                  // User info
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                      child: Text(
+                        email,
+                        style:
+                            TextStyle(color: AppTheme.tobacco, fontSize: 15),
                       ),
-                      const SizedBox(width: 8),
-                      if (passages.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppTheme.brandPale,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${passages.length}',
-                            style: GoogleFonts.dmMono(
-                              fontSize: 12,
-                              color: AppTheme.brand,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              // Passages list or empty state
-              if (passages.isEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 48),
-                    child: Column(
-                      children: [
-                        Icon(Icons.bookmark_border,
-                            size: 48, color: AppTheme.fog),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No saved passages yet',
-                          style: GoogleFonts.lora(
-                            fontSize: 16,
-                            color: AppTheme.pewter,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Long press any passage while reading to save it',
-                          style: GoogleFonts.nunito(
-                            fontSize: 13,
-                            color: AppTheme.tobacco,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
                     ),
                   ),
-                )
-              else
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, index) {
-                      final passage = passages[index];
-                      return _SavedPassageCard(
-                        passage: passage,
-                        totalChunks:
-                            provider.bookTotalChunks[passage.bookId],
-                        onDelete: () {
-                          final userId = _userId;
-                          if (userId != null) {
-                            provider.deleteSavedPassage(
-                                userId, passage.id);
-                          }
-                        },
-                      );
-                    },
-                    childCount: passages.length,
+                  // Section header
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Saved Passages',
+                            style: GoogleFonts.lora(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.ink,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (passages.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.brandPale,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${passages.length}',
+                                style: GoogleFonts.dmMono(
+                                  fontSize: 12,
+                                  color: AppTheme.brand,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-            ],
-          );
-        },
-      ),
+                  // Passages list or empty state
+                  if (passages.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 48),
+                        child: Column(
+                          children: [
+                            Icon(Icons.bookmark_border,
+                                size: 48, color: AppTheme.fog),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No saved passages yet',
+                              style: GoogleFonts.lora(
+                                fontSize: 16,
+                                color: AppTheme.pewter,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Long press any passage while reading to save it',
+                              style: GoogleFonts.nunito(
+                                fontSize: 13,
+                                color: AppTheme.tobacco,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (_, index) {
+                          final passage = passages[index];
+                          return _SavedPassageCard(
+                            passage: passage,
+                            totalChunks:
+                                provider.bookTotalChunks[passage.bookId],
+                            onDelete: () {
+                              final userId = _userId;
+                              if (userId != null) {
+                                provider.deleteSavedPassage(
+                                    userId, passage.id);
+                              }
+                            },
+                            onShare: () => _sharePassage(passage),
+                          );
+                        },
+                        childCount: passages.length,
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+        // Hidden share card for PNG generation
+        Positioned(
+          left: -1000,
+          top: -1000,
+          child: RepaintBoundary(
+            key: _shareCardKey,
+            child: PassageShareCard(
+              passageText: _shareCardText,
+              bookTitle: _shareCardTitle,
+              author: _shareCardAuthor,
+              pageLabel: _shareCardPageLabel,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -164,11 +223,13 @@ class _SavedPassageCard extends StatefulWidget {
   final SavedPassage passage;
   final int? totalChunks;
   final VoidCallback onDelete;
+  final VoidCallback onShare;
 
   const _SavedPassageCard({
     required this.passage,
     required this.totalChunks,
     required this.onDelete,
+    required this.onShare,
   });
 
   @override
@@ -177,10 +238,12 @@ class _SavedPassageCard extends StatefulWidget {
 
 class _SavedPassageCardState extends State<_SavedPassageCard>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _slideController;
-  bool _revealed = false;
+  late final AnimationController _animController;
+  late Animation<double> _offsetAnimation;
+  double _dragOffset = 0; // negative = left (delete), positive = right (share)
+  bool _animating = false;
 
-  static const double _deleteButtonWidth = 88.0;
+  static const double _actionWidth = 80.0;
 
   String get _percentage {
     if (widget.totalChunks == null || widget.totalChunks == 0) return '';
@@ -199,52 +262,89 @@ class _SavedPassageCardState extends State<_SavedPassageCard>
   @override
   void initState() {
     super.initState();
-    _slideController = AnimationController(
+    _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+    _offsetAnimation = const AlwaysStoppedAnimation(0);
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
-    // Only allow left swipe (negative dx)
-    final delta = details.primaryDelta ?? 0;
-    final newValue = _slideController.value - delta / _deleteButtonWidth;
-    _slideController.value = newValue.clamp(0.0, 1.0);
+    if (_animating) return;
+    setState(() {
+      _dragOffset = (_dragOffset + (details.primaryDelta ?? 0))
+          .clamp(-_actionWidth, _actionWidth);
+    });
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
-    // Snap open if past halfway or flicked left, otherwise snap closed
+    if (_animating) return;
     final velocity = details.primaryVelocity ?? 0;
-    if (velocity < -200 || _slideController.value > 0.5) {
-      _slideController.forward();
-      setState(() => _revealed = true);
+
+    double target;
+    if (_dragOffset < 0) {
+      target = (velocity < -200 || _dragOffset < -_actionWidth * 0.4)
+          ? -_actionWidth
+          : 0;
     } else {
-      _slideController.reverse();
-      setState(() => _revealed = false);
+      target = (velocity > 200 || _dragOffset > _actionWidth * 0.4)
+          ? _actionWidth
+          : 0;
     }
+
+    _snapTo(target);
+  }
+
+  void _snapTo(double target, {Duration? duration, VoidCallback? onComplete}) {
+    _animating = true;
+    _animController.duration = duration ?? const Duration(milliseconds: 200);
+    _offsetAnimation = Tween<double>(begin: _dragOffset, end: target)
+        .animate(CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOut,
+    ));
+
+    void listener() {
+      setState(() {
+        _dragOffset = _offsetAnimation.value;
+      });
+    }
+
+    _animController.reset();
+    _offsetAnimation.addListener(listener);
+    _animController.forward().then((_) {
+      _offsetAnimation.removeListener(listener);
+      _animating = false;
+      onComplete?.call();
+    });
   }
 
   void _close() {
-    _slideController.reverse();
-    setState(() => _revealed = false);
+    _snapTo(0);
   }
 
   void _confirmDelete() {
-    // Animate fully off-screen, then delete
-    _slideController.animateTo(
-      4.0, // slide well past the button width
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeIn,
-    ).then((_) {
-      if (mounted) widget.onDelete();
-    });
+    final screenWidth = MediaQuery.of(context).size.width;
+    _snapTo(
+      -screenWidth,
+      onComplete: () {
+        if (mounted) widget.onDelete();
+      },
+    );
   }
+
+  void _triggerShare() {
+    widget.onShare();
+    _close();
+  }
+
+  bool get _isRevealed => _dragOffset.abs() > 1;
 
   @override
   Widget build(BuildContext context) {
@@ -256,122 +356,130 @@ class _SavedPassageCardState extends State<_SavedPassageCard>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        child: Stack(
-          children: [
-            // Delete button revealed behind the card
-            Positioned.fill(
-              child: Row(
-                children: [
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: _confirmDelete,
-                    child: Container(
-                      width: _deleteButtonWidth,
-                      color: AppTheme.brand,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Delete',
-                        style: GoogleFonts.nunito(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+        child: SizedBox(
+          height: null, // intrinsic height from card content
+          child: Stack(
+            children: [
+              // Background actions
+              Positioned.fill(
+                child: Row(
+                  children: [
+                    // Share button (left side, revealed by swiping right)
+                    GestureDetector(
+                      onTap: _triggerShare,
+                      child: Container(
+                        width: _actionWidth,
+                        color: AppTheme.brand,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.ios_share,
                           color: Colors.white,
+                          size: 22,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            // Slideable card
-            AnimatedBuilder(
-              animation: _slideController,
-              builder: (context, child) => Transform.translate(
-                offset: Offset(
-                  -_slideController.value * _deleteButtonWidth,
-                  0,
-                ),
-                child: child,
-              ),
-              child: GestureDetector(
-                onHorizontalDragUpdate: _onHorizontalDragUpdate,
-                onHorizontalDragEnd: _onHorizontalDragEnd,
-                onTap: _revealed ? _close : null,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface,
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.cardRadius),
-                    border:
-                        Border.all(color: AppTheme.brandPale, width: 1),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.passage.passageText,
-                        style: GoogleFonts.lora(
-                          fontSize: 15,
-                          fontStyle: FontStyle.italic,
-                          color: AppTheme.ink,
-                          height: 1.5,
+                    const Spacer(),
+                    // Delete button (right side, revealed by swiping left)
+                    GestureDetector(
+                      onTap: _confirmDelete,
+                      child: Container(
+                        width: _actionWidth,
+                        color: const Color(0xFFDC3545),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.white,
+                          size: 22,
                         ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  style: GoogleFonts.nunito(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.ink,
-                                  ),
-                                ),
-                                if (author.isNotEmpty)
+                    ),
+                  ],
+                ),
+              ),
+              // Slideable card
+              Transform.translate(
+                offset: Offset(_dragOffset, 0),
+                child: GestureDetector(
+                  onHorizontalDragUpdate: _onHorizontalDragUpdate,
+                  onHorizontalDragEnd: _onHorizontalDragEnd,
+                  onTap: _isRevealed ? _close : null,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface,
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.cardRadius),
+                      border:
+                          Border.all(color: AppTheme.brandPale, width: 1),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.passage.passageText,
+                          style: GoogleFonts.lora(
+                            fontSize: 15,
+                            fontStyle: FontStyle.italic,
+                            color: AppTheme.ink,
+                            height: 1.5,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    author,
+                                    title,
                                     style: GoogleFonts.nunito(
-                                      fontSize: 12,
-                                      color: AppTheme.tobacco,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.ink,
                                     ),
                                   ),
-                              ],
-                            ),
-                          ),
-                          if (_percentage.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Text(
-                                _percentage,
-                                style: GoogleFonts.dmMono(
-                                  fontSize: 12,
-                                  color: AppTheme.tobacco,
-                                ),
+                                  if (author.isNotEmpty)
+                                    Text(
+                                      author,
+                                      style: GoogleFonts.nunito(
+                                        fontSize: 12,
+                                        color: AppTheme.tobacco,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _formattedDate,
-                        style: GoogleFonts.nunito(
-                          fontSize: 11,
-                          color: AppTheme.fog,
+                            if (_percentage.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Text(
+                                  _percentage,
+                                  style: GoogleFonts.dmMono(
+                                    fontSize: 12,
+                                    color: AppTheme.tobacco,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          _formattedDate,
+                          style: GoogleFonts.nunito(
+                            fontSize: 11,
+                            color: AppTheme.fog,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -151,7 +151,7 @@ void main() {
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('swipe reveals delete button, tap confirms deletion',
+    testWidgets('swipe left reveals delete icon, tap confirms deletion',
         (tester) async {
       final provider = _provider(savedPassages: [
         SavedPassage(
@@ -170,16 +170,16 @@ void main() {
         const Offset(-200, 0),
       );
       await tester.pumpAndSettle();
-      // Delete button should now be visible
-      expect(find.text('Delete'), findsOneWidget);
-      // Tap Delete to confirm
-      await tester.tap(find.text('Delete'));
+      // Delete icon should be in the tree
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+      // Tap delete icon to confirm
+      await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle();
       // Passage should be removed from the provider
       expect(provider.savedPassages, isEmpty);
     });
 
-    testWidgets('swipe back closes delete button without deleting',
+    testWidgets('swipe back closes action without deleting',
         (tester) async {
       final provider = _provider(savedPassages: [
         SavedPassage(
@@ -197,11 +197,33 @@ void main() {
         const Offset(-200, 0),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Delete'), findsOneWidget);
       // Tap the card to close
       await tester.tap(find.text('Call me Ishmael.'));
       await tester.pumpAndSettle();
       // Passage should still exist
+      expect(provider.savedPassages, hasLength(1));
+    });
+
+    testWidgets('swipe right reveals share icon', (tester) async {
+      final provider = _provider(savedPassages: [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 0,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime(2026, 3, 5),
+        ),
+      ]);
+      await tester.pumpWidget(_wrap(provider: provider));
+      // Swipe right to reveal share button
+      await tester.drag(
+        find.text('Call me Ishmael.'),
+        const Offset(200, 0),
+      );
+      await tester.pumpAndSettle();
+      // Share icon should be in the tree
+      expect(find.byIcon(Icons.ios_share), findsOneWidget);
+      // Passage should still exist (not deleted)
       expect(provider.savedPassages, hasLength(1));
     });
 
