@@ -21,16 +21,8 @@ Widget _wrap() {
             builder: (_, __) => const ProfileScreen(),
           ),
           GoRoute(
-            path: '/app/profile/reading-style',
-            builder: (_, __) => const Scaffold(body: Text('reading-style')),
-          ),
-          GoRoute(
-            path: '/onboarding',
-            builder: (_, __) => const Scaffold(body: Text('onboarding')),
-          ),
-          GoRoute(
-            path: '/change-password',
-            builder: (_, __) => const Scaffold(body: Text('change-password')),
+            path: '/app/profile/settings',
+            builder: (_, __) => const Scaffold(body: Text('settings')),
           ),
         ],
       ),
@@ -44,11 +36,6 @@ void main() {
   });
 
   group('ProfileScreen', () {
-    testWidgets('shows sign out button', (tester) async {
-      await tester.pumpWidget(_wrap());
-      expect(find.text('Sign Out'), findsOneWidget);
-    });
-
     testWidgets('shows email text widget', (tester) async {
       await tester.pumpWidget(_wrap());
       // In tests Supabase is not initialised so email is empty,
@@ -56,34 +43,17 @@ void main() {
       expect(find.byType(Text), findsWidgets);
     });
 
-    testWidgets('shows How Scroll Books works tile', (tester) async {
+    testWidgets('shows settings cog button', (tester) async {
       await tester.pumpWidget(_wrap());
-      expect(find.text('How Scroll Books works'), findsOneWidget);
+      expect(find.text('⚙️'), findsOneWidget);
     });
 
-    testWidgets('shows Reading style tile', (tester) async {
-      await tester.pumpWidget(_wrap());
-      expect(find.text('Reading style'), findsOneWidget);
-    });
-
-    testWidgets('shows Reset onboarding tile', (tester) async {
-      await tester.pumpWidget(_wrap());
-      expect(find.text('Reset onboarding'), findsOneWidget);
-    });
-
-    testWidgets('shows Change password tile', (tester) async {
+    testWidgets('tapping settings cog navigates to settings', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.text('Change password'), findsOneWidget);
-    });
-
-    testWidgets('tapping Change password navigates to /change-password',
-        (tester) async {
-      await tester.pumpWidget(_wrap());
+      await tester.tap(find.text('⚙️'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Change password'));
-      await tester.pumpAndSettle();
-      expect(find.text('change-password'), findsOneWidget);
+      expect(find.text('settings'), findsOneWidget);
     });
   });
 }
