@@ -18,6 +18,7 @@ import '../screens/email_confirm_screen.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/reading_style_screen.dart';
+import '../screens/settings_screen.dart';
 import '../widgets/app_shell.dart';
 import 'onboarding_state.dart';
 
@@ -91,6 +92,10 @@ final router = GoRouter(
           builder: (_, state) => BookDetailScreen(bookId: state.pathParameters['id']!),
         ),
         GoRoute(path: '/app/profile', builder: (_, __) => const ProfileScreen()),
+        GoRoute(
+          path: '/app/profile/settings',
+          builder: (_, __) => const SettingsScreen(),
+        ),
         GoRoute(
           path: '/app/profile/reading-style',
           builder: (_, __) => const ReadingStyleScreen(),
