@@ -96,19 +96,6 @@ void main() {
       expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
     });
 
-    test('formatShareText appends attribution', () {
-      const passage = 'Call me Ishmael.';
-      final result = ReaderScreen.formatShareText(passage);
-      expect(result, contains('Call me Ishmael.'));
-      expect(result, contains('— Read on Scroll Books'));
-    });
-
-    test('formatShareText separates passage and attribution with blank line', () {
-      const passage = 'Test passage.';
-      final result = ReaderScreen.formatShareText(passage);
-      expect(result, contains('\n\n'));
-    });
-
     testWidgets('unknown book id shows book not found', (tester) async {
       await tester.pumpWidget(
         ChangeNotifierProvider<AppProvider>.value(

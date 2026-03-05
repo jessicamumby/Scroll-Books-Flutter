@@ -1,20 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 import '../core/theme.dart';
 import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
 import '../services/user_data_service.dart';
-import '../widgets/reader/reader_card.dart';
+import '../widgets/reader/passage_action_overlay.dart';
+import '../widgets/reader/passage_share_card.dart';
 
 class ReaderScreen extends StatefulWidget {
   final String bookId;
@@ -22,9 +26,6 @@ class ReaderScreen extends StatefulWidget {
 
   @override
   State<ReaderScreen> createState() => _ReaderScreenState();
-
-  static String formatShareText(String passage) =>
-      '$passage\n\n— Read on Scroll Books';
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
@@ -36,6 +37,13 @@ class _ReaderScreenState extends State<ReaderScreen> {
   late PageController _pageController;
   Timer? _debounceTimer;
   Timer? _hintTimer;
+
+  // Share card state
+  final _passageShareCardKey = GlobalKey();
+  String _shareCardText = '';
+  String _shareCardTitle = '';
+  String _shareCardAuthor = '';
+  String _shareCardPageLabel = '';
 
   Book? get _book => getBookById(widget.bookId);
   String? get _userId {
@@ -157,8 +165,60 @@ class _ReaderScreenState extends State<ReaderScreen> {
     });
   }
 
-  void _share(String text) {
-    Share.share(ReaderScreen.formatShareText(text));
+  Future<void> _shareAsImage(String text, int chunkIndex) async {
+    final book = _book;
+    if (book == null) return;
+
+    final page = chunkIndex + 1;
+    final pct = _chunks.isNotEmpty
+        ? ((chunkIndex + 1) / _chunks.length * 100).round()
+        : 0;
+
+    setState(() {
+      _shareCardText = text;
+      _shareCardTitle = book.title;
+      _shareCardAuthor = book.author;
+      _shareCardPageLabel = 'p. $page · $pct%';
+    });
+
+    // Wait for the share card to rebuild with new content
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final boundary = _passageShareCardKey.currentContext
+            ?.findRenderObject() as RenderRepaintBoundary?;
+        if (boundary == null) return;
+        final image = await boundary.toImage(pixelRatio: 3.0);
+        final bytes =
+            await image.toByteData(format: ui.ImageByteFormat.png);
+        if (bytes == null) return;
+        final dir = await getTemporaryDirectory();
+        final file = File('${dir.path}/passage_card.png');
+        await file.writeAsBytes(bytes.buffer.asUint8List());
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          text:
+              'From "${book.title}" by ${book.author} — Read on Scroll Books',
+        );
+      } catch (e, st) {
+        debugPrint('Share passage error: $e\n$st');
+      }
+    });
+  }
+
+  Future<void> _savePassage(String text, int chunkIndex) async {
+    final userId = _userId;
+    if (userId == null) return;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    await provider.savePassage(userId, widget.bookId, chunkIndex, text);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Passage saved', style: GoogleFonts.nunito()),
+          backgroundColor: AppTheme.ink,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _goBack(BuildContext context) {
@@ -218,13 +278,27 @@ class _ReaderScreenState extends State<ReaderScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Hold any passage to share it',
+                  'Hold any passage to share or save it',
                   style: GoogleFonts.nunito(
                     fontSize: 13,
                     color: AppTheme.surface,
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+        // Hidden share card for PNG generation
+        Positioned(
+          left: -1000,
+          top: -1000,
+          child: RepaintBoundary(
+            key: _passageShareCardKey,
+            child: PassageShareCard(
+              passageText: _shareCardText,
+              bookTitle: _shareCardTitle,
+              author: _shareCardAuthor,
+              pageLabel: _shareCardPageLabel,
             ),
           ),
         ),
@@ -288,7 +362,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
       );
     }
 
-    final style = Provider.of<AppProvider>(context).readingStyle;
+    final provider = Provider.of<AppProvider>(context);
+    final style = provider.readingStyle;
     final isHorizontal = style == 'horizontal';
 
     final pageView = PageView.builder(
@@ -296,13 +371,14 @@ class _ReaderScreenState extends State<ReaderScreen> {
       scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
       itemCount: _chunks.length,
       onPageChanged: _onPageChanged,
-      itemBuilder: (_, index) => GestureDetector(
-        onLongPress: () => _share(_chunks[index]),
-        child: ReaderCard(
-          text: _chunks[index],
-          chunkIndex: index,
-          totalChunks: _chunks.length,
-        ),
+      itemBuilder: (_, index) => PassageActionOverlay(
+        text: _chunks[index],
+        chunkIndex: index,
+        totalChunks: _chunks.length,
+        bookId: widget.bookId,
+        isSaved: provider.isPassageSaved(widget.bookId, index),
+        onShare: _shareAsImage,
+        onSave: _savePassage,
       ),
     );
 
