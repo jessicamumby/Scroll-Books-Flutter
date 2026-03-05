@@ -10,8 +10,8 @@ Widget _wrap({
   int totalChunks = 100,
   String bookId = 'moby-dick',
   bool isSaved = false,
-  void Function(String, int)? onShare,
-  void Function(String, int)? onSave,
+  Future<void> Function(String, int)? onShare,
+  Future<void> Function(String, int)? onSave,
   ValueChanged<bool>? onActionsVisibleChanged,
 }) {
   return MaterialApp(
@@ -23,8 +23,8 @@ Widget _wrap({
         totalChunks: totalChunks,
         bookId: bookId,
         isSaved: isSaved,
-        onShare: onShare ?? (_, __) {},
-        onSave: onSave ?? (_, __) {},
+        onShare: onShare ?? (_, __) async {},
+        onSave: onSave ?? (_, __) async {},
         onActionsVisibleChanged: onActionsVisibleChanged,
       ),
     ),
@@ -69,7 +69,7 @@ void main() {
       await tester.pumpWidget(_wrap(
         text: 'Test passage',
         chunkIndex: 5,
-        onShare: (text, index) {
+        onShare: (text, index) async {
           sharedText = text;
           sharedIndex = index;
         },
@@ -89,7 +89,7 @@ void main() {
       await tester.pumpWidget(_wrap(
         text: 'Save me',
         chunkIndex: 3,
-        onSave: (text, index) {
+        onSave: (text, index) async {
           savedText = text;
           savedIndex = index;
         },
@@ -126,6 +126,18 @@ void main() {
       await tester.tap(find.text('Share'));
       await tester.pumpAndSettle();
       expect(find.text('Share'), findsNothing);
+    });
+
+    testWidgets('shows loading spinner on button tap', (tester) async {
+      await tester.pumpWidget(_wrap(
+        onSave: (_, __) => Future<void>.delayed(const Duration(seconds: 1)),
+      ));
+      await tester.longPress(find.text('Call me Ishmael.'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('onActionsVisibleChanged called true on long press',
