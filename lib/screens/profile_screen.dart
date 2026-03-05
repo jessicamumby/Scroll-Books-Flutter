@@ -160,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-class _SavedPassageCard extends StatelessWidget {
+class _SavedPassageCard extends StatefulWidget {
   final SavedPassage passage;
   final int? totalChunks;
   final VoidCallback onDelete;
@@ -171,13 +171,24 @@ class _SavedPassageCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  @override
+  State<_SavedPassageCard> createState() => _SavedPassageCardState();
+}
+
+class _SavedPassageCardState extends State<_SavedPassageCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _slideController;
+  bool _revealed = false;
+
+  static const double _deleteButtonWidth = 88.0;
+
   String get _percentage {
-    if (totalChunks == null || totalChunks == 0) return '';
-    return '${((passage.chunkIndex + 1) / totalChunks! * 100).round()}%';
+    if (widget.totalChunks == null || widget.totalChunks == 0) return '';
+    return '${((widget.passage.chunkIndex + 1) / widget.totalChunks! * 100).round()}%';
   }
 
   String get _formattedDate {
-    final d = passage.savedAt;
+    final d = widget.passage.savedAt;
     const months = [
       '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -186,88 +197,178 @@ class _SavedPassageCard extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  void _onHorizontalDragUpdate(DragUpdateDetails details) {
+    // Only allow left swipe (negative dx)
+    final delta = details.primaryDelta ?? 0;
+    final newValue = _slideController.value - delta / _deleteButtonWidth;
+    _slideController.value = newValue.clamp(0.0, 1.0);
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    // Snap open if past halfway or flicked left, otherwise snap closed
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity < -200 || _slideController.value > 0.5) {
+      _slideController.forward();
+      setState(() => _revealed = true);
+    } else {
+      _slideController.reverse();
+      setState(() => _revealed = false);
+    }
+  }
+
+  void _close() {
+    _slideController.reverse();
+    setState(() => _revealed = false);
+  }
+
+  void _confirmDelete() {
+    // Animate fully off-screen, then delete
+    _slideController.animateTo(
+      4.0, // slide well past the button width
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeIn,
+    ).then((_) {
+      if (mounted) widget.onDelete();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final book = getBookById(passage.bookId);
-    final title = book?.title ?? passage.bookId;
+    final book = getBookById(widget.passage.bookId);
+    final title = book?.title ?? widget.passage.bookId;
     final author = book?.author ?? '';
 
-    return Dismissible(
-      key: ValueKey(passage.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        color: AppTheme.brand,
-        child: const Icon(Icons.delete_outline, color: Colors.white),
-      ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-          border: Border.all(color: AppTheme.brandPale, width: 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        child: Stack(
           children: [
-            Text(
-              passage.passageText,
-              style: GoogleFonts.lora(
-                fontSize: 15,
-                fontStyle: FontStyle.italic,
-                color: AppTheme.ink,
-                height: 1.5,
+            // Delete button revealed behind the card
+            Positioned.fill(
+              child: Row(
+                children: [
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _confirmDelete,
+                    child: Container(
+                      width: _deleteButtonWidth,
+                      color: AppTheme.brand,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Delete',
+                        style: GoogleFonts.nunito(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
+            // Slideable card
+            AnimatedBuilder(
+              animation: _slideController,
+              builder: (context, child) => Transform.translate(
+                offset: Offset(
+                  -_slideController.value * _deleteButtonWidth,
+                  0,
+                ),
+                child: child,
+              ),
+              child: GestureDetector(
+                onHorizontalDragUpdate: _onHorizontalDragUpdate,
+                onHorizontalDragEnd: _onHorizontalDragEnd,
+                onTap: _revealed ? _close : null,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.cardRadius),
+                    border:
+                        Border.all(color: AppTheme.brandPale, width: 1),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
-                        style: GoogleFonts.nunito(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                        widget.passage.passageText,
+                        style: GoogleFonts.lora(
+                          fontSize: 15,
+                          fontStyle: FontStyle.italic,
                           color: AppTheme.ink,
+                          height: 1.5,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: GoogleFonts.nunito(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.ink,
+                                  ),
+                                ),
+                                if (author.isNotEmpty)
+                                  Text(
+                                    author,
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 12,
+                                      color: AppTheme.tobacco,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (_percentage.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Text(
+                                _percentage,
+                                style: GoogleFonts.dmMono(
+                                  fontSize: 12,
+                                  color: AppTheme.tobacco,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formattedDate,
+                        style: GoogleFonts.nunito(
+                          fontSize: 11,
+                          color: AppTheme.fog,
                         ),
                       ),
-                      if (author.isNotEmpty)
-                        Text(
-                          author,
-                          style: GoogleFonts.nunito(
-                            fontSize: 12,
-                            color: AppTheme.tobacco,
-                          ),
-                        ),
                     ],
                   ),
                 ),
-                if (_percentage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Text(
-                      _percentage,
-                      style: GoogleFonts.dmMono(
-                        fontSize: 12,
-                        color: AppTheme.tobacco,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _formattedDate,
-              style: GoogleFonts.nunito(
-                fontSize: 11,
-                color: AppTheme.fog,
               ),
             ),
           ],

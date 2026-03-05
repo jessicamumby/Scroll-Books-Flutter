@@ -151,7 +151,8 @@ void main() {
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('swipe to delete removes passage', (tester) async {
+    testWidgets('swipe reveals delete button, tap confirms deletion',
+        (tester) async {
       final provider = _provider(savedPassages: [
         SavedPassage(
           id: 'p1',
@@ -163,14 +164,45 @@ void main() {
       ]);
       await tester.pumpWidget(_wrap(provider: provider));
       expect(find.text('Call me Ishmael.'), findsOneWidget);
-      // Swipe left to delete
+      // Swipe left to reveal delete button
       await tester.drag(
         find.text('Call me Ishmael.'),
-        const Offset(-500, 0),
+        const Offset(-200, 0),
       );
       await tester.pumpAndSettle();
-      // After dismiss, the passage should be removed from the provider
+      // Delete button should now be visible
+      expect(find.text('Delete'), findsOneWidget);
+      // Tap Delete to confirm
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+      // Passage should be removed from the provider
       expect(provider.savedPassages, isEmpty);
+    });
+
+    testWidgets('swipe back closes delete button without deleting',
+        (tester) async {
+      final provider = _provider(savedPassages: [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 0,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime(2026, 3, 5),
+        ),
+      ]);
+      await tester.pumpWidget(_wrap(provider: provider));
+      // Swipe left to reveal
+      await tester.drag(
+        find.text('Call me Ishmael.'),
+        const Offset(-200, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Delete'), findsOneWidget);
+      // Tap the card to close
+      await tester.tap(find.text('Call me Ishmael.'));
+      await tester.pumpAndSettle();
+      // Passage should still exist
+      expect(provider.savedPassages, hasLength(1));
     });
 
     testWidgets('shows percentage when totalChunks available',
