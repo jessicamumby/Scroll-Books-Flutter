@@ -12,6 +12,7 @@ Widget _wrap({
   bool isSaved = false,
   void Function(String, int)? onShare,
   void Function(String, int)? onSave,
+  ValueChanged<bool>? onActionsVisibleChanged,
 }) {
   return MaterialApp(
     theme: AppTheme.light,
@@ -24,6 +25,7 @@ Widget _wrap({
         isSaved: isSaved,
         onShare: onShare ?? (_, __) {},
         onSave: onSave ?? (_, __) {},
+        onActionsVisibleChanged: onActionsVisibleChanged,
       ),
     ),
   );
@@ -124,6 +126,32 @@ void main() {
       await tester.tap(find.text('Share'));
       await tester.pumpAndSettle();
       expect(find.text('Share'), findsNothing);
+    });
+
+    testWidgets('onActionsVisibleChanged called true on long press',
+        (tester) async {
+      bool? visible;
+      await tester.pumpWidget(_wrap(
+        onActionsVisibleChanged: (v) => visible = v,
+      ));
+      await tester.longPress(find.text('Call me Ishmael.'));
+      await tester.pumpAndSettle();
+      expect(visible, isTrue);
+    });
+
+    testWidgets('onActionsVisibleChanged called false on dismiss',
+        (tester) async {
+      final values = <bool>[];
+      await tester.pumpWidget(_wrap(
+        onActionsVisibleChanged: (v) => values.add(v),
+      ));
+      await tester.longPress(find.text('Call me Ishmael.'));
+      await tester.pumpAndSettle();
+      expect(values, [true]);
+      // Tap the scrim area to dismiss
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(values, [true, false]);
     });
   });
 }

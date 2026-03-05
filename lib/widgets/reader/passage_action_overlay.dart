@@ -11,6 +11,7 @@ class PassageActionOverlay extends StatefulWidget {
   final bool isSaved;
   final void Function(String text, int chunkIndex) onShare;
   final void Function(String text, int chunkIndex) onSave;
+  final ValueChanged<bool>? onActionsVisibleChanged;
 
   const PassageActionOverlay({
     super.key,
@@ -21,6 +22,7 @@ class PassageActionOverlay extends StatefulWidget {
     required this.isSaved,
     required this.onShare,
     required this.onSave,
+    this.onActionsVisibleChanged,
   });
 
   @override
@@ -52,6 +54,7 @@ class _PassageActionOverlayState extends State<PassageActionOverlay>
     _liftController.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
         setState(() => _showActions = true);
+        widget.onActionsVisibleChanged?.call(true);
         _fadeController.forward();
       }
     });
@@ -80,19 +83,20 @@ class _PassageActionOverlayState extends State<PassageActionOverlay>
     _fadeController.reverse().then((_) {
       if (mounted) {
         setState(() => _showActions = false);
+        widget.onActionsVisibleChanged?.call(false);
         _liftController.reverse();
       }
     });
   }
 
   void _onShareTap() {
-    _dismiss();
     widget.onShare(widget.text, widget.chunkIndex);
+    _dismiss();
   }
 
   void _onSaveTap() {
-    _dismiss();
     widget.onSave(widget.text, widget.chunkIndex);
+    _dismiss();
   }
 
   @override
@@ -173,6 +177,7 @@ class _ActionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

@@ -33,6 +33,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool _loading = true;
   bool _fetchError = false;
   bool _showShareHint = false;
+  bool _overlayActive = false;
   int _startIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
@@ -369,6 +370,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     final pageView = PageView.builder(
       controller: _pageController,
       scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
+      physics: _overlayActive ? const NeverScrollableScrollPhysics() : null,
       itemCount: _chunks.length,
       onPageChanged: _onPageChanged,
       itemBuilder: (_, index) => PassageActionOverlay(
@@ -379,6 +381,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
         isSaved: provider.isPassageSaved(widget.bookId, index),
         onShare: _shareAsImage,
         onSave: _savePassage,
+        onActionsVisibleChanged: (visible) {
+          if (mounted) setState(() => _overlayActive = visible);
+        },
       ),
     );
 
@@ -388,30 +393,33 @@ class _ReaderScreenState extends State<ReaderScreen> {
       children: [
         pageView,
         Positioned.fill(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
+          child: IgnorePointer(
+            ignoring: _overlayActive,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(flex: 4),
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
+                const Spacer(flex: 4),
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
