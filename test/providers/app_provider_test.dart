@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:scroll_books/models/saved_passage.dart';
 import 'package:scroll_books/providers/app_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -287,6 +288,133 @@ void main() {
       provider.pendingMilestone = 30;
       provider.clearMilestone();
       expect(provider.pendingMilestone, isNull);
+    });
+  });
+
+  group('AppProvider.savedPassages', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('starts as empty list', () {
+      final provider = AppProvider();
+      expect(provider.savedPassages, isEmpty);
+    });
+
+    test('isPassageSaved returns false when no passages saved', () {
+      final provider = AppProvider();
+      expect(provider.isPassageSaved('moby-dick', 0), isFalse);
+    });
+
+    test('isPassageSaved returns true for matching bookId and chunkIndex', () {
+      final provider = AppProvider();
+      provider.savedPassages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 5,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.now(),
+        ),
+      ];
+      expect(provider.isPassageSaved('moby-dick', 5), isTrue);
+    });
+
+    test('isPassageSaved returns false for different chunkIndex', () {
+      final provider = AppProvider();
+      provider.savedPassages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 5,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.now(),
+        ),
+      ];
+      expect(provider.isPassageSaved('moby-dick', 10), isFalse);
+    });
+
+    test('isPassageSaved returns false for different bookId', () {
+      final provider = AppProvider();
+      provider.savedPassages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 5,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.now(),
+        ),
+      ];
+      expect(provider.isPassageSaved('frankenstein', 5), isFalse);
+    });
+
+    test('savePassage adds to local list', () async {
+      final provider = AppProvider();
+      await provider.savePassage('', 'moby-dick', 3, 'Test passage');
+      expect(provider.savedPassages.length, 1);
+      expect(provider.savedPassages.first.bookId, 'moby-dick');
+      expect(provider.savedPassages.first.chunkIndex, 3);
+      expect(provider.savedPassages.first.passageText, 'Test passage');
+    });
+
+    test('savePassage does not create duplicate', () async {
+      final provider = AppProvider();
+      await provider.savePassage('', 'moby-dick', 3, 'Test passage');
+      await provider.savePassage('', 'moby-dick', 3, 'Test passage');
+      expect(provider.savedPassages.length, 1);
+    });
+
+    test('savePassage allows different chunks from same book', () async {
+      final provider = AppProvider();
+      await provider.savePassage('', 'moby-dick', 3, 'Passage A');
+      await provider.savePassage('', 'moby-dick', 7, 'Passage B');
+      expect(provider.savedPassages.length, 2);
+    });
+
+    test('deleteSavedPassage removes by id', () async {
+      final provider = AppProvider();
+      provider.savedPassages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 5,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.now(),
+        ),
+        SavedPassage(
+          id: 'p2',
+          bookId: 'frankenstein',
+          chunkIndex: 0,
+          passageText: 'Beware.',
+          savedAt: DateTime.now(),
+        ),
+      ];
+      await provider.deleteSavedPassage('', 'p1');
+      expect(provider.savedPassages.length, 1);
+      expect(provider.savedPassages.first.id, 'p2');
+    });
+
+    test('deleteSavedPassage handles non-existent id gracefully', () async {
+      final provider = AppProvider();
+      provider.savedPassages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 5,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.now(),
+        ),
+      ];
+      await provider.deleteSavedPassage('', 'non-existent');
+      expect(provider.savedPassages.length, 1);
+    });
+
+    test('savePassage prepends to list (newest first)', () async {
+      final provider = AppProvider();
+      await provider.savePassage('', 'moby-dick', 1, 'First');
+      await provider.savePassage('', 'moby-dick', 2, 'Second');
+      expect(provider.savedPassages.first.passageText, 'Second');
+      expect(provider.savedPassages.last.passageText, 'First');
     });
   });
 }

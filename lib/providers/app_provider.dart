@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/catalogue.dart';
+import '../models/saved_passage.dart';
 import '../services/user_data_service.dart';
 import '../utils/streak_calculator.dart';
 
@@ -21,6 +22,7 @@ class AppProvider extends ChangeNotifier {
   List<String> frozenDays = [];
   String? bookmarkResetAt;
   String? lastReadBookId;
+  List<SavedPassage> savedPassages = [];
 
   Future<void> _loadLocalStats() async {
     try {
@@ -40,6 +42,13 @@ class AppProvider extends ChangeNotifier {
       if (dailyJson != null) {
         final decoded = jsonDecode(dailyJson) as Map<String, dynamic>;
         dailyPassages = decoded.map((k, v) => MapEntry(k, v as int));
+      }
+      final savedJson = prefs.getString('saved_passages');
+      if (savedJson != null) {
+        final decoded = jsonDecode(savedJson) as List;
+        savedPassages = decoded
+            .map((e) => SavedPassage.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
     } catch (e, st) {
       debugPrint('AppProvider._loadLocalStats error: $e\n$st');
@@ -89,6 +98,7 @@ class AppProvider extends ChangeNotifier {
       bookmarkTokens = data.bookmarkTokens;
       bookmarkResetAt = data.bookmarkResetAt;
       frozenDays = data.frozenDays;
+      savedPassages = data.savedPassages;
       await resetBookmarksIfExpired();
       // Hydrate total chunks from SharedPreferences
       try {
@@ -287,5 +297,85 @@ class AppProvider extends ChangeNotifier {
         },
       );
     }
+  }
+
+  bool isPassageSaved(String bookId, int chunkIndex) {
+    return savedPassages
+        .any((p) => p.bookId == bookId && p.chunkIndex == chunkIndex);
+  }
+
+  Future<void> savePassage(
+    String userId,
+    String bookId,
+    int chunkIndex,
+    String passageText,
+  ) async {
+    // Avoid duplicates locally
+    if (isPassageSaved(bookId, chunkIndex)) return;
+
+    // Optimistic local add
+    final now = DateTime.now();
+    final tempId = '${bookId}_$chunkIndex';
+    final passage = SavedPassage(
+      id: tempId,
+      bookId: bookId,
+      chunkIndex: chunkIndex,
+      passageText: passageText,
+      savedAt: now,
+    );
+    savedPassages = [passage, ...savedPassages];
+    notifyListeners();
+
+    if (userId.isNotEmpty) {
+      try {
+        final result = await UserDataService.savePassage(
+          userId,
+          bookId,
+          chunkIndex,
+          passageText,
+        );
+        // Replace temp entry with server response
+        final saved = SavedPassage.fromJson(result);
+        savedPassages = savedPassages
+            .map((p) => p.id == tempId ? saved : p)
+            .toList();
+        notifyListeners();
+      } catch (e, st) {
+        debugPrint('AppProvider.savePassage error: $e\n$st');
+      }
+    }
+
+    _cacheSavedPassages();
+  }
+
+  Future<void> deleteSavedPassage(String userId, String passageId) async {
+    savedPassages = savedPassages.where((p) => p.id != passageId).toList();
+    notifyListeners();
+    _cacheSavedPassages();
+
+    if (userId.isNotEmpty) {
+      UserDataService.deleteSavedPassage(userId, passageId).catchError(
+        (Object e, StackTrace st) {
+          debugPrint('AppProvider.deleteSavedPassage error: $e\n$st');
+        },
+      );
+    }
+  }
+
+  void _cacheSavedPassages() {
+    SharedPreferences.getInstance().then((prefs) {
+      final json = savedPassages
+          .map((p) => {
+                'id': p.id,
+                'book_id': p.bookId,
+                'chunk_index': p.chunkIndex,
+                'passage_text': p.passageText,
+                'saved_at': p.savedAt.toIso8601String(),
+              })
+          .toList();
+      prefs.setString('saved_passages', jsonEncode(json));
+    }).catchError((Object e, StackTrace st) {
+      debugPrint('AppProvider._cacheSavedPassages error: $e\n$st');
+    });
   }
 }

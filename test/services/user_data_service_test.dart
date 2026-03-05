@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:scroll_books/models/saved_passage.dart';
 import 'package:scroll_books/services/user_data_service.dart';
 
 void main() {
@@ -137,6 +138,60 @@ void main() {
       expect(data.readingStyle, 'horizontal');
       expect(data.bookmarkTokens, 1);
       expect(data.frozenDays, ['2026-03-02']);
+    });
+  });
+
+  group('UserData.savedPassages', () {
+    test('defaults to empty list when not provided', () {
+      final data = UserData(library: [], progress: {}, readDays: []);
+      expect(data.savedPassages, isEmpty);
+    });
+
+    test('holds saved passages when provided', () {
+      final passages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 10,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.utc(2026, 3, 5),
+        ),
+      ];
+      final data = UserData(
+        library: ['moby-dick'],
+        progress: {'moby-dick': 10},
+        readDays: ['2026-03-05'],
+        savedPassages: passages,
+      );
+      expect(data.savedPassages.length, 1);
+      expect(data.savedPassages.first.bookId, 'moby-dick');
+      expect(data.savedPassages.first.passageText, 'Call me Ishmael.');
+    });
+
+    test('can hold multiple saved passages', () {
+      final passages = [
+        SavedPassage(
+          id: 'p1',
+          bookId: 'moby-dick',
+          chunkIndex: 10,
+          passageText: 'Call me Ishmael.',
+          savedAt: DateTime.utc(2026, 3, 5),
+        ),
+        SavedPassage(
+          id: 'p2',
+          bookId: 'frankenstein',
+          chunkIndex: 0,
+          passageText: 'Beware.',
+          savedAt: DateTime.utc(2026, 3, 4),
+        ),
+      ];
+      final data = UserData(
+        library: [],
+        progress: {},
+        readDays: [],
+        savedPassages: passages,
+      );
+      expect(data.savedPassages.length, 2);
     });
   });
 }

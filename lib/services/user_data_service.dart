@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
+import '../models/saved_passage.dart';
 
 class UserData {
   final List<String> library;
@@ -10,6 +11,7 @@ class UserData {
   final int bookmarkTokens;
   final String? bookmarkResetAt;
   final List<String> frozenDays;
+  final List<SavedPassage> savedPassages;
 
   const UserData({
     required this.library,
@@ -19,6 +21,7 @@ class UserData {
     this.bookmarkTokens = 2,
     this.bookmarkResetAt,
     this.frozenDays = const [],
+    this.savedPassages = const [],
   });
 }
 
@@ -33,6 +36,11 @@ class UserDataService {
           .select('reading_style')
           .eq('user_id', userId)
           .maybeSingle(),
+      supabase
+          .from('saved_passages')
+          .select()
+          .eq('user_id', userId)
+          .order('saved_at', ascending: false),
     ]);
 
     final library = (results[0] as List)
@@ -59,6 +67,10 @@ class UserDataService {
             ? frozenDaysRaw.cast<String>()
             : (jsonDecode(frozenDaysRaw as String) as List).cast<String>());
 
+    final savedPassages = (results[4] as List)
+        .map((r) => SavedPassage.fromJson(r as Map<String, dynamic>))
+        .toList();
+
     return UserData(
       library: library,
       progress: progress,
@@ -67,6 +79,7 @@ class UserDataService {
       bookmarkTokens: bookmarkTokens,
       bookmarkResetAt: bookmarkResetAt,
       frozenDays: frozenDays,
+      savedPassages: savedPassages,
     );
   }
 
@@ -127,5 +140,38 @@ class UserDataService {
       },
       onConflict: 'user_id',
     );
+  }
+
+  static Future<Map<String, dynamic>> savePassage(
+    String userId,
+    String bookId,
+    int chunkIndex,
+    String passageText,
+  ) async {
+    final result = await supabase
+        .from('saved_passages')
+        .upsert(
+          {
+            'user_id': userId,
+            'book_id': bookId,
+            'chunk_index': chunkIndex,
+            'passage_text': passageText,
+          },
+          onConflict: 'user_id,book_id,chunk_index',
+        )
+        .select()
+        .single();
+    return result;
+  }
+
+  static Future<void> deleteSavedPassage(
+    String userId,
+    String passageId,
+  ) async {
+    await supabase
+        .from('saved_passages')
+        .delete()
+        .eq('id', passageId)
+        .eq('user_id', userId);
   }
 }
