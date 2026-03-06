@@ -66,14 +66,33 @@ class _AppWithAuthState extends State<_AppWithAuth> {
     final appLinks = AppLinks();
     // Cold start: app was opened via the deep link
     appLinks.getInitialLink().then((uri) async {
-      if (uri != null) {
+      if (uri == null) return;
+      final handled = await _handleProfileLink(uri);
+      if (!handled) {
         await Supabase.instance.client.auth.getSessionFromUrl(uri);
       }
     });
     // Warm start: app was already running when the link arrived
     appLinks.uriLinkStream.listen((uri) async {
-      await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      final handled = await _handleProfileLink(uri);
+      if (!handled) {
+        await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      }
     });
+  }
+
+  Future<bool> _handleProfileLink(Uri uri) async {
+    // Handle scrollbooks://profile/username
+    if (uri.scheme == 'scrollbooks' && uri.host == 'profile') {
+      final username = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : null;
+      if (username != null && username.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          router.push('/app/profile/view/$username');
+        });
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
