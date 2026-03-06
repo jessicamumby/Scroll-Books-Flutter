@@ -87,6 +87,9 @@ class _StreaksTab extends StatelessWidget {
           provider.readDays,
           provider.frozenDays,
         );
+        final isAtRisk = !provider.readDays.contains(todayStr) &&
+            !provider.frozenDays.contains(todayStr);
+        final showPersonalBest = provider.longestStreak > streak;
 
         return Container(
           color: AppTheme.warmWhite,
@@ -94,7 +97,18 @@ class _StreaksTab extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               children: [
-                StreakCounter(streakCount: streak),
+                StreakCounter(streakCount: streak, isAtRisk: isAtRisk),
+                if (showPersonalBest) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Personal best: ${provider.longestStreak} days',
+                    style: AppTheme.monoLabel(
+                      fontSize: 11,
+                      color: AppTheme.inkLight,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 WeeklyProgressDots(
                   completedDays: weeklyCompletion,
