@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 import '../models/saved_passage.dart';
+import '../models/user_public_profile.dart';
 
 class UserData {
   final List<String> library;
@@ -212,5 +213,98 @@ class UserDataService {
     } catch (_) {
       return false;
     }
+  }
+
+  static Future<UserPublicProfile?> fetchPublicProfile(String username) async {
+    try {
+      final profileRow = await supabase
+          .from('profiles')
+          .select('user_id, username, display_name, is_private')
+          .eq('username', username.toLowerCase())
+          .maybeSingle();
+
+      if (profileRow == null) return null;
+
+      final userId = profileRow['user_id'] as String;
+      final isPrivate = (profileRow['is_private'] as bool?) ?? false;
+
+      if (isPrivate) {
+        return UserPublicProfile(
+          userId: userId,
+          username: profileRow['username'] as String? ?? username,
+          displayName: profileRow['display_name'] as String? ?? '',
+          isPrivate: true,
+          followerCount: 0,
+          followingCount: 0,
+          streakCount: 0,
+          badgesEarned: 0,
+          passagesSaved: 0,
+        );
+      }
+
+      // Fetch counts in parallel
+      final counts = await Future.wait([
+        supabase.from('follows').select().eq('following_id', userId),
+        supabase.from('follows').select().eq('follower_id', userId),
+        supabase.from('read_days').select('date').eq('user_id', userId),
+        supabase.from('saved_passages').select('id').eq('user_id', userId),
+      ]);
+
+      final followerCount = (counts[0] as List).length;
+      final followingCount = (counts[1] as List).length;
+      final readDays = (counts[2] as List).map((r) => r['date'] as String).toList();
+      final passagesSaved = (counts[3] as List).length;
+
+      // Simple streak calc: count consecutive days from today
+      int streak = 0;
+      final today = DateTime.now();
+      for (int i = 0; i < 400; i++) {
+        final d = today.subtract(Duration(days: i)).toIso8601String().substring(0, 10);
+        if (readDays.contains(d)) {
+          streak++;
+        } else if (i > 0) {
+          break;
+        }
+      }
+
+      return UserPublicProfile(
+        userId: userId,
+        username: profileRow['username'] as String? ?? username,
+        displayName: profileRow['display_name'] as String? ?? '',
+        isPrivate: false,
+        followerCount: followerCount,
+        followingCount: followingCount,
+        streakCount: streak,
+        badgesEarned: 0,
+        passagesSaved: passagesSaved,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> followUser(String followerId, String followingId) async {
+    await supabase.from('follows').upsert(
+      {'follower_id': followerId, 'following_id': followingId},
+      onConflict: 'follower_id,following_id',
+    );
+  }
+
+  static Future<void> unfollowUser(String followerId, String followingId) async {
+    await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', followerId)
+        .eq('following_id', followingId);
+  }
+
+  static Future<bool> isFollowing(String followerId, String followingId) async {
+    final result = await supabase
+        .from('follows')
+        .select('id')
+        .eq('follower_id', followerId)
+        .eq('following_id', followingId)
+        .maybeSingle();
+    return result != null;
   }
 }
