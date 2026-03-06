@@ -13,6 +13,7 @@ import '../widgets/bookmark_card.dart';
 import '../widgets/milestones_list.dart';
 import '../widgets/genre_badges_grid.dart';
 import '../widgets/longevity_badges_list.dart';
+import '../widgets/milestone_celebration_overlay.dart';
 
 class StreaksScreen extends StatefulWidget {
   const StreaksScreen({super.key});
@@ -26,28 +27,41 @@ class _StreaksScreenState extends State<StreaksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.cream,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SharedHeader(heading: 'Your Reading'),
-            SharedTabBar(
-              tabs: const ['Streaks', 'Badges'],
-              selectedIndex: _selectedTab,
-              onTabSelected: (i) => setState(() => _selectedTab = i),
+    return Consumer<AppProvider>(
+      builder: (context, provider, _) {
+        return Scaffold(
+          backgroundColor: AppTheme.cream,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    const SharedHeader(heading: 'Your Reading'),
+                    SharedTabBar(
+                      tabs: const ['Streaks', 'Badges'],
+                      selectedIndex: _selectedTab,
+                      onTabSelected: (i) => setState(() => _selectedTab = i),
+                    ),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _selectedTab == 0
+                            ? const _StreaksTab(key: ValueKey('streaks'))
+                            : const _BadgesTab(key: ValueKey('badges')),
+                      ),
+                    ),
+                  ],
+                ),
+                if (provider.pendingMilestone != null)
+                  MilestoneCelebrationOverlay(
+                    milestone: provider.pendingMilestone!,
+                    onDismiss: provider.clearMilestone,
+                  ),
+              ],
             ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: _selectedTab == 0
-                    ? const _StreaksTab(key: ValueKey('streaks'))
-                    : const _BadgesTab(key: ValueKey('badges')),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
