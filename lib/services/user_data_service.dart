@@ -12,6 +12,8 @@ class UserData {
   final String? bookmarkResetAt;
   final List<String> frozenDays;
   final List<SavedPassage> savedPassages;
+  final String? username;
+  final bool isPrivate;
 
   const UserData({
     required this.library,
@@ -22,6 +24,8 @@ class UserData {
     this.bookmarkResetAt,
     this.frozenDays = const [],
     this.savedPassages = const [],
+    this.username,
+    this.isPrivate = false,
   });
 }
 
@@ -41,6 +45,11 @@ class UserDataService {
           .select()
           .eq('user_id', userId)
           .order('saved_at', ascending: false),
+      supabase
+          .from('profiles')
+          .select('username, is_private')
+          .eq('user_id', userId)
+          .maybeSingle(),
     ]);
 
     final library = (results[0] as List)
@@ -71,6 +80,10 @@ class UserDataService {
         .map((r) => SavedPassage.fromJson(r as Map<String, dynamic>))
         .toList();
 
+    final profile = results[5] as Map<String, dynamic>?;
+    final username = profile?['username'] as String?;
+    final isPrivate = (profile?['is_private'] as bool?) ?? false;
+
     return UserData(
       library: library,
       progress: progress,
@@ -80,6 +93,8 @@ class UserDataService {
       bookmarkResetAt: bookmarkResetAt,
       frozenDays: frozenDays,
       savedPassages: savedPassages,
+      username: username,
+      isPrivate: isPrivate,
     );
   }
 
@@ -173,5 +188,29 @@ class UserDataService {
         .delete()
         .eq('id', passageId)
         .eq('user_id', userId);
+  }
+
+  static Future<void> saveUsername(String userId, String username) async {
+    await supabase.from('profiles').upsert(
+      {'user_id': userId, 'username': username.toLowerCase()},
+      onConflict: 'user_id',
+    );
+  }
+
+  static Future<void> saveAccountVisibility(String userId, {required bool isPrivate}) async {
+    await supabase.from('profiles').upsert(
+      {'user_id': userId, 'is_private': isPrivate},
+      onConflict: 'user_id',
+    );
+  }
+
+  static Future<bool> isUsernameAvailable(String candidate) async {
+    try {
+      final result = await supabase
+          .rpc('is_username_available', params: {'candidate': candidate});
+      return result as bool? ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 }
