@@ -106,7 +106,8 @@ class _StreaksTab extends StatelessWidget {
         final passagesToday = provider.dailyPassages[todayStr] ?? 0;
         final weeklyCompletion = _getWeeklyCompletion(provider.readDays);
         final weeklyFrozen = _getWeeklyFrozen(provider.frozenDays);
-        final isAtRisk = !provider.readDays.contains(todayStr) &&
+        final isAtRisk = streak > 0 &&
+            !provider.readDays.contains(todayStr) &&
             !provider.frozenDays.contains(todayStr);
         final showPersonalBest = provider.longestStreak > streak;
 

@@ -133,7 +133,7 @@ class AppProvider extends ChangeNotifier {
           debugPrint('AppProvider.load pending_reading_style error: $e\n$st');
         }
       }
-      final current = calculateStreak(readDays);
+      final current = calculateStreak(readDays, frozenDays: frozenDays);
       if (current > longestStreak) {
         longestStreak = current;
         await _saveLocalStats();
@@ -164,7 +164,7 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     }
     await UserDataService.markReadToday(userId);
-    final current = calculateStreak(readDays);
+    final current = calculateStreak(readDays, frozenDays: frozenDays);
     if (current > longestStreak) {
       longestStreak = current;
       await _saveLocalStats();
