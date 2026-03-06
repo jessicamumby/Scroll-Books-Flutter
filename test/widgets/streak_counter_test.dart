@@ -76,5 +76,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('updating streakCount disposes old controller without error', (tester) async {
+      await tester.pumpWidget(_wrap(streak: 3));
+      await tester.pump();
+      await tester.pumpWidget(_wrap(streak: 7));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.takeException(), isNull);
+      expect(find.text('7'), findsOneWidget);
+    });
   });
 }

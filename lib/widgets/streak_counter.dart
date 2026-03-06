@@ -105,6 +105,7 @@ class _StreakCounterState extends State<StreakCounter>
   }
 
   void _startLoops(int halfCycles) {
+    _controller.stop();
     _halfCyclesLeft = halfCycles;
     _controller.forward(from: 0);
   }
@@ -131,14 +132,11 @@ class _StreakCounterState extends State<StreakCounter>
     final tier = _tierFor(widget.streakCount);
     Widget emoji = GestureDetector(
       onTap: () => _startLoops(_tapHalfCycles),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (_, __) => FadeTransition(
-          opacity: _opacity,
-          child: ScaleTransition(
-            scale: _scale,
-            child: Text(tier.emoji, style: TextStyle(fontSize: tier.emojiSize)),
-          ),
+      child: FadeTransition(
+        opacity: _opacity,
+        child: ScaleTransition(
+          scale: _scale,
+          child: Text(tier.emoji, style: TextStyle(fontSize: tier.emojiSize)),
         ),
       ),
     );
@@ -147,45 +145,48 @@ class _StreakCounterState extends State<StreakCounter>
       emoji = Opacity(opacity: 0.6, child: emoji);
     }
 
-    return Container(
-      width: 150,
-      height: 150,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            AppTheme.tomato.withValues(alpha: 0.08),
-            AppTheme.amber.withValues(alpha: 0.12),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+      child: Container(
+        width: 150,
+        height: 150,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              AppTheme.tomato.withValues(alpha: 0.08),
+              AppTheme.amber.withValues(alpha: 0.12),
+            ],
+          ),
+          border: Border.all(
+            color: AppTheme.tomato.withValues(alpha: 0.20),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            emoji,
+            const SizedBox(height: 2),
+            Text(
+              '${widget.streakCount}',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 38,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.ink,
+                letterSpacing: -1.5,
+              ),
+            ),
+            Text(
+              'DAY STREAK',
+              style: AppTheme.monoLabel(
+                fontSize: 10,
+                color: AppTheme.inkLight,
+                letterSpacing: 1.0,
+              ),
+            ),
           ],
         ),
-        border: Border.all(
-          color: AppTheme.tomato.withValues(alpha: 0.20),
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          emoji,
-          const SizedBox(height: 2),
-          Text(
-            '${widget.streakCount}',
-            style: GoogleFonts.playfairDisplay(
-              fontSize: 38,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.ink,
-              letterSpacing: -1.5,
-            ),
-          ),
-          Text(
-            'DAY STREAK',
-            style: AppTheme.monoLabel(
-              fontSize: 10,
-              color: AppTheme.inkLight,
-              letterSpacing: 1.0,
-            ),
-          ),
-        ],
       ),
     );
   }
