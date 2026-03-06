@@ -78,5 +78,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('change-password'), findsOneWidget);
     });
+
+    testWidgets('shows Username settings tile', (tester) async {
+      final provider = AppProvider()..username = 'jessreads';
+      await tester.pumpWidget(ChangeNotifierProvider<AppProvider>.value(
+        value: provider,
+        child: MaterialApp.router(
+          theme: AppTheme.light,
+          routerConfig: GoRouter(
+            initialLocation: '/settings',
+            routes: [
+              GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+              GoRoute(path: '/app/profile/reading-style', builder: (_, __) => const Scaffold(body: Text('reading-style'))),
+              GoRoute(path: '/onboarding', builder: (_, __) => const Scaffold(body: Text('onboarding'))),
+              GoRoute(path: '/change-password', builder: (_, __) => const Scaffold(body: Text('change-password'))),
+            ],
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Username'), findsOneWidget);
+      expect(find.text('@jessreads'), findsOneWidget);
+    });
+
+    testWidgets('shows Account Visibility tile', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      expect(find.text('Account Visibility'), findsOneWidget);
+    });
   });
 }
