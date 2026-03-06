@@ -58,4 +58,31 @@ void main() {
     // The today dot that is not completed uses a CustomPaint for dashed circle
     expect(find.byType(CustomPaint), findsWidgets);
   });
+
+  testWidgets('shows amber frozen dot for frozen day', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: WeeklyProgressDots(
+          completedDays: const [false, false, false, false, false, false, false],
+          frozenDays: const [true, false, false, false, false, false, false],
+          todayIndex: 1,
+        ),
+      ),
+    ));
+    expect(find.byType(WeeklyProgressDots), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('completed day takes priority over frozen', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: WeeklyProgressDots(
+          completedDays: const [true, false, false, false, false, false, false],
+          frozenDays: const [true, false, false, false, false, false, false],
+          todayIndex: 1,
+        ),
+      ),
+    ));
+    expect(tester.takeException(), isNull);
+  });
 }

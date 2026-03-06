@@ -4,12 +4,14 @@ import '../core/theme.dart';
 
 class WeeklyProgressDots extends StatelessWidget {
   final List<bool> completedDays; // length 7, Mon=0 .. Sun=6
-  final int todayIndex; // 0-based, 0=Monday
+  final List<bool> frozenDays;    // length 7, amber bookmark dots
+  final int todayIndex;
 
   const WeeklyProgressDots({
     super.key,
     required this.completedDays,
     required this.todayIndex,
+    this.frozenDays = const [false, false, false, false, false, false, false],
   });
 
   static const _dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -20,6 +22,7 @@ class WeeklyProgressDots extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(7, (i) {
         final completed = i < completedDays.length && completedDays[i];
+        final frozen = i < frozenDays.length && frozenDays[i];
         final isToday = i == todayIndex;
         return Padding(
           padding: EdgeInsets.only(left: i == 0 ? 0 : 10),
@@ -28,6 +31,7 @@ class WeeklyProgressDots extends StatelessWidget {
             children: [
               _DotCircle(
                 completed: completed,
+                frozen: frozen && !completed,
                 isToday: isToday,
               ),
               const SizedBox(height: 6),
@@ -49,10 +53,12 @@ class WeeklyProgressDots extends StatelessWidget {
 
 class _DotCircle extends StatelessWidget {
   final bool completed;
+  final bool frozen;
   final bool isToday;
 
   const _DotCircle({
     required this.completed,
+    required this.frozen,
     required this.isToday,
   });
 
@@ -78,6 +84,24 @@ class _DotCircle extends StatelessWidget {
           ],
         ),
         child: const Icon(Icons.check, color: Colors.white, size: 18),
+      );
+    }
+
+    if (frozen) {
+      return Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppTheme.amber.withValues(alpha: 0.25),
+          border: Border.all(
+            color: AppTheme.amber.withValues(alpha: 0.60),
+            width: 1.5,
+          ),
+        ),
+        child: const Center(
+          child: Text('🔖', style: TextStyle(fontSize: 14)),
+        ),
       );
     }
 

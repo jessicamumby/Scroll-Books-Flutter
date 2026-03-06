@@ -55,16 +55,23 @@ class _StreaksScreenState extends State<StreaksScreen> {
 class _StreaksTab extends StatelessWidget {
   const _StreaksTab({super.key});
 
-  List<bool> _getWeeklyCompletion(
-    List<String> readDays,
-    List<String> frozenDays,
-  ) {
+  List<bool> _getWeeklyCompletion(List<String> readDays) {
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
     return List.generate(7, (i) {
       final day = monday.add(Duration(days: i));
       final dayStr = day.toIso8601String().substring(0, 10);
-      return readDays.contains(dayStr) || frozenDays.contains(dayStr);
+      return readDays.contains(dayStr);
+    });
+  }
+
+  List<bool> _getWeeklyFrozen(List<String> frozenDays) {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return List.generate(7, (i) {
+      final day = monday.add(Duration(days: i));
+      final dayStr = day.toIso8601String().substring(0, 10);
+      return frozenDays.contains(dayStr);
     });
   }
 
@@ -83,10 +90,8 @@ class _StreaksTab extends StatelessWidget {
         );
         final todayStr = DateTime.now().toIso8601String().substring(0, 10);
         final passagesToday = provider.dailyPassages[todayStr] ?? 0;
-        final weeklyCompletion = _getWeeklyCompletion(
-          provider.readDays,
-          provider.frozenDays,
-        );
+        final weeklyCompletion = _getWeeklyCompletion(provider.readDays);
+        final weeklyFrozen = _getWeeklyFrozen(provider.frozenDays);
         final isAtRisk = !provider.readDays.contains(todayStr) &&
             !provider.frozenDays.contains(todayStr);
         final showPersonalBest = provider.longestStreak > streak;
@@ -112,6 +117,7 @@ class _StreaksTab extends StatelessWidget {
                 const SizedBox(height: 24),
                 WeeklyProgressDots(
                   completedDays: weeklyCompletion,
+                  frozenDays: weeklyFrozen,
                   todayIndex: _getTodayIndex(),
                 ),
                 const SizedBox(height: 24),
