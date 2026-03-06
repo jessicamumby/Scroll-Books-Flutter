@@ -1,22 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/supabase_client.dart';
 import '../core/theme.dart';
 import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
 import '../services/user_data_service.dart';
+import '../utils/share_passage_image.dart';
 import '../widgets/reader/passage_action_overlay.dart';
 import '../widgets/reader/passage_share_card.dart';
 
@@ -33,6 +29,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool _loading = true;
   bool _fetchError = false;
   bool _showShareHint = false;
+  bool _overlayActive = false;
   int _startIndex = 0;
   late PageController _pageController;
   Timer? _debounceTimer;
@@ -184,20 +181,10 @@ class _ReaderScreenState extends State<ReaderScreen> {
     // Wait for the share card to rebuild with new content
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        final boundary = _passageShareCardKey.currentContext
-            ?.findRenderObject() as RenderRepaintBoundary?;
-        if (boundary == null) return;
-        final image = await boundary.toImage(pixelRatio: 3.0);
-        final bytes =
-            await image.toByteData(format: ui.ImageByteFormat.png);
-        if (bytes == null) return;
-        final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/passage_card.png');
-        await file.writeAsBytes(bytes.buffer.asUint8List());
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          text:
-              'From "${book.title}" by ${book.author} — Read on Scroll Books',
+        await sharePassageImage(
+          repaintKey: _passageShareCardKey,
+          bookTitle: book.title,
+          author: book.author,
         );
       } catch (e, st) {
         debugPrint('Share passage error: $e\n$st');
@@ -369,6 +356,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     final pageView = PageView.builder(
       controller: _pageController,
       scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
+      physics: _overlayActive ? const NeverScrollableScrollPhysics() : null,
       itemCount: _chunks.length,
       onPageChanged: _onPageChanged,
       itemBuilder: (_, index) => PassageActionOverlay(
@@ -379,6 +367,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
         isSaved: provider.isPassageSaved(widget.bookId, index),
         onShare: _shareAsImage,
         onSave: _savePassage,
+        onActionsVisibleChanged: (visible) {
+          if (mounted) setState(() => _overlayActive = visible);
+        },
       ),
     );
 
@@ -388,30 +379,33 @@ class _ReaderScreenState extends State<ReaderScreen> {
       children: [
         pageView,
         Positioned.fill(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
+          child: IgnorePointer(
+            ignoring: _overlayActive,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(flex: 4),
-              Expanded(
-                flex: 3,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
+                const Spacer(flex: 4),
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
