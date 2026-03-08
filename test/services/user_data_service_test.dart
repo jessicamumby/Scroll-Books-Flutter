@@ -152,14 +152,9 @@ void main() {
     });
 
     test('fetchAll select string includes all bookmark fields', () {
-      // Regression guard: the select string in user_data_service.dart must include
-      // all three bookmark fields. If this test description fails to match reality,
-      // it means the select was narrowed again. Update this test AND the service.
-      const selectString =
-          'reading_style, bookmark_tokens, bookmark_reset_at, frozen_days';
-      expect(selectString.contains('bookmark_tokens'), isTrue);
-      expect(selectString.contains('bookmark_reset_at'), isTrue);
-      expect(selectString.contains('frozen_days'), isTrue);
+      expect(UserDataService.prefsSelectFields.contains('bookmark_tokens'), isTrue);
+      expect(UserDataService.prefsSelectFields.contains('bookmark_reset_at'), isTrue);
+      expect(UserDataService.prefsSelectFields.contains('frozen_days'), isTrue);
     });
   });
 
