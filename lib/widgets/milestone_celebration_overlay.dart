@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/theme.dart';
+import '../utils/share_streak_badge_image.dart';
+import '../widgets/streak_badge_share_card.dart';
 
 class _MilestoneData {
   final String name;
@@ -19,7 +21,7 @@ _MilestoneData _dataFor(int milestone) {
   switch (milestone) {
     case 7:
       return const _MilestoneData(
-        name: 'Week Worm', emoji: '🪱', subtitle: '7 day streak!',
+        name: 'Week Worm', emoji: '🐛', subtitle: '7 day streak!',
       );
     case 30:
       return const _MilestoneData(
@@ -31,7 +33,7 @@ _MilestoneData _dataFor(int milestone) {
       );
     default:
       return const _MilestoneData(
-        name: 'Literary Legend', emoji: '🏆', subtitle: '365 day streak!',
+        name: 'Literary Legend', emoji: '🏛', subtitle: '365 day streak!',
       );
   }
 }
@@ -39,11 +41,13 @@ _MilestoneData _dataFor(int milestone) {
 class MilestoneCelebrationOverlay extends StatefulWidget {
   final int milestone;
   final VoidCallback onDismiss;
+  final String? username;
 
   const MilestoneCelebrationOverlay({
     super.key,
     required this.milestone,
     required this.onDismiss,
+    this.username,
   });
 
   @override
@@ -59,6 +63,7 @@ class _MilestoneCelebrationOverlayState
   late final Animation<double> _opacity;
   final List<_Particle> _particles = [];
   final Random _rng = Random();
+  final GlobalKey _shareCardKey = GlobalKey();
 
   @override
   void initState() {
@@ -113,6 +118,20 @@ class _MilestoneCelebrationOverlayState
                   particle: p,
                   animation: _controller,
                 ))),
+            if (widget.username != null)
+              Positioned(
+                left: -1000,
+                top: -1000,
+                child: RepaintBoundary(
+                  key: _shareCardKey,
+                  child: StreakBadgeShareCard(
+                    username: widget.username!,
+                    badgeName: data.name,
+                    badgeEmoji: data.emoji,
+                    streakDays: widget.milestone,
+                  ),
+                ),
+              ),
             // Badge card
             Center(
               child: AnimatedBuilder(
@@ -152,6 +171,21 @@ class _MilestoneCelebrationOverlayState
                           color: AppTheme.inkMid,
                         ),
                       ),
+                      if (widget.username != null) ...[
+                        const SizedBox(height: 12),
+                        TextButton.icon(
+                          onPressed: () async {
+                            await shareStreakBadgeImage(
+                              repaintKey: _shareCardKey,
+                              badgeName: data.name,
+                              username: widget.username!,
+                            );
+                          },
+                          style: TextButton.styleFrom(foregroundColor: AppTheme.tobacco),
+                          icon: const Icon(Icons.share, size: 16),
+                          label: const Text('SHARE'),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       Text(
                         'Tap to continue',

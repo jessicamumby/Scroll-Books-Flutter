@@ -8,11 +8,14 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  Widget _wrap({required int currentStreak}) {
+  Widget _wrap({required int currentStreak, String? username}) {
     return MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
-          child: LongevityBadgesList(currentStreak: currentStreak),
+          child: LongevityBadgesList(
+            currentStreak: currentStreak,
+            username: username,
+          ),
         ),
       ),
     );
@@ -64,5 +67,22 @@ void main() {
     for (final o in opacities) {
       expect(o.opacity, 1.0);
     }
+  });
+
+  testWidgets('shows share icon on each unlocked badge when username provided', (tester) async {
+    await tester.pumpWidget(_wrap(currentStreak: 31, username: 'jessreads'));
+    // Week Worm (7) and Page Turner (30) are unlocked
+    expect(find.byIcon(Icons.share), findsNWidgets(2));
+  });
+
+  testWidgets('no share icons when username is null', (tester) async {
+    await tester.pumpWidget(_wrap(currentStreak: 400));
+    expect(find.byIcon(Icons.share), findsNothing);
+  });
+
+  testWidgets('locked badges never show share icon', (tester) async {
+    await tester.pumpWidget(_wrap(currentStreak: 31, username: 'jessreads'));
+    // Only 2 of 4 unlocked — Bibliophile (90) and Literary Legend (365) are locked
+    expect(find.byIcon(Icons.share), findsNWidgets(2));
   });
 }
