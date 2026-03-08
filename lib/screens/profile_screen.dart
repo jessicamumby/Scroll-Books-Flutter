@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import '../core/supabase_client.dart';
 import '../data/catalogue.dart';
@@ -28,14 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _shareCardTitle = '';
   String _shareCardAuthor = '';
   String _shareCardPageLabel = '';
-
-  String _currentEmail() {
-    try {
-      return supabase.auth.currentUser?.email ?? '';
-    } catch (_) {
-      return '';
-    }
-  }
 
   String? get _userId {
     try {
@@ -101,8 +92,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final email = _currentEmail();
-
     return Stack(
       children: [
         Scaffold(
@@ -110,13 +99,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             title: const Text('Profile'),
             actions: [
-              Consumer<AppProvider>(
-                builder: (context, provider, _) => IconButton(
-                  onPressed: provider.username != null ? _shareProfile : null,
-                  icon: const Icon(Icons.share, size: 22),
-                  tooltip: 'Share profile',
-                ),
-              ),
               IconButton(
                 onPressed: () => context.push('/app/profile/settings'),
                 icon: const Text('⚙️', style: TextStyle(fontSize: 24)),
@@ -129,14 +111,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               return CustomScrollView(
                 slivers: [
-                  // User info
+                  // User info row: @username + share button
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-                      child: Text(
-                        email,
-                        style:
-                            TextStyle(color: AppTheme.tobacco, fontSize: 15),
+                      padding: const EdgeInsets.fromLTRB(24, 8, 16, 16),
+                      child: Row(
+                        children: [
+                          if (provider.username != null)
+                            Text(
+                              '@${provider.username}',
+                              style: TextStyle(
+                                  color: AppTheme.tobacco, fontSize: 15),
+                            ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed:
+                                provider.username != null ? _shareProfile : null,
+                            icon: const Icon(Icons.share, size: 18),
+                            tooltip: 'Share profile',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
                       ),
                     ),
                   ),
