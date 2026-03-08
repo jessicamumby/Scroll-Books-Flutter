@@ -50,11 +50,9 @@ void main() {
   });
 
   group('ProfileScreen', () {
-    testWidgets('shows email text widget', (tester) async {
+    testWidgets('shows Profile app bar title', (tester) async {
       await tester.pumpWidget(_wrap());
-      // In tests Supabase is not initialised so email is empty,
-      // but the Text widget itself must exist in the tree.
-      expect(find.byType(Text), findsWidgets);
+      expect(find.text('Profile'), findsOneWidget);
     });
 
     testWidgets('shows settings cog button', (tester) async {
@@ -256,6 +254,50 @@ void main() {
       ]);
       await tester.pumpWidget(_wrap(provider: provider));
       expect(find.text('No saved passages yet'), findsNothing);
+    });
+
+    testWidgets('shows @username in user info row when username is set',
+        (tester) async {
+      final provider = _provider();
+      provider.username = 'jessreads';
+      await tester.pumpWidget(_wrap(provider: provider));
+      // ProfileShareCard is positioned off-screen (left: -1000) but still in
+      // the widget tree, so both the body text and the hidden card render
+      // '@jessreads', giving 2 matches. findsAtLeastNWidgets(1) is used
+      // intentionally here.
+      expect(find.text('@jessreads'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('share icon is visible when username is set',
+        (tester) async {
+      final provider = _provider();
+      provider.username = 'jessreads';
+      await tester.pumpWidget(_wrap(provider: provider));
+      expect(find.byIcon(Icons.share), findsOneWidget);
+    });
+
+    testWidgets('no email address text is rendered on the profile screen',
+        (tester) async {
+      final provider = _provider();
+      provider.username = 'jessreads';
+      await tester.pumpWidget(_wrap(provider: provider));
+      // ProfileShareCard is off-screen but in the tree — 2 matches expected.
+      expect(find.text('@jessreads'), findsAtLeastNWidgets(1));
+      final emailTexts = find.byWidgetPredicate((widget) =>
+          widget is Text &&
+          widget.data != null &&
+          widget.data!.contains('@') &&
+          widget.data!.contains('.'));
+      expect(emailTexts, findsNothing,
+          reason: 'Email address must not be rendered on the profile screen');
+    });
+
+    testWidgets('share icon is present but disabled when username is null',
+        (tester) async {
+      await tester.pumpWidget(_wrap()); // no username set, provider.username == null
+      final button = tester.widget<IconButton>(
+          find.widgetWithIcon(IconButton, Icons.share));
+      expect(button.onPressed, isNull);
     });
   });
 }

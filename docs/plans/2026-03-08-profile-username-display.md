@@ -1,3 +1,93 @@
+# Profile Username Display Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Replace the email address on the profile screen with `@username`, and move the share profile icon from the AppBar into a row next to the username.
+
+**Architecture:** Single-file change in `lib/screens/profile_screen.dart`. The `provider.username` field is already loaded from the `profiles` Supabase table by `AppProvider` — no data-layer changes needed. The `_currentEmail()` method and `supabase_flutter` import are removed as dead code. The AppBar share `IconButton` is removed and a compact `Icons.share` button is added inline in the user info row.
+
+**Tech Stack:** Flutter, Dart, `flutter_test`, `provider`
+
+---
+
+### Task 1: Show `@username` and move share icon into the user info row
+
+**Files:**
+- Modify: `lib/screens/profile_screen.dart`
+- Modify: `test/screens/profile_screen_test.dart`
+
+**Background:**
+
+`ProfileScreen` currently has:
+
+- `_currentEmail()` getter (lines 32–38) — reads `supabase.auth.currentUser?.email`; used only to show email under the AppBar
+- `final email = _currentEmail();` in `build()` (line 104)
+- A `Text(email, ...)` sliver in the user info section (lines 133–142)
+- A share `IconButton` in `AppBar` actions (lines 113–118)
+- A settings gear `IconButton` in `AppBar` actions (lines 120–123)
+
+The `import 'package:supabase_flutter/supabase_flutter.dart';` (line 5) exists only to support `_currentEmail()` — `supabase_client.dart` already imports it for the `_userId` getter.
+
+`AppProvider.username` is a `String?` loaded from `profiles.username` in `fetchAll`. It is the user's public `@handle` (e.g. `jessreads`) without the `@` prefix. All current users have one — username is mandatory during signup.
+
+---
+
+**Step 1: Write the failing tests**
+
+Open `test/screens/profile_screen_test.dart`. The `_provider()` factory at the top creates an `AppProvider` directly — you can set `provider.username` on it before passing it to `_wrap()`.
+
+Inside the existing `group('ProfileScreen', () { ... })` block, add these three tests **before** the closing `});`:
+
+```dart
+testWidgets('shows @username in user info row when username is set',
+    (tester) async {
+  final provider = _provider();
+  provider.username = 'jessreads';
+  await tester.pumpWidget(_wrap(provider: provider));
+  expect(find.text('@jessreads'), findsOneWidget);
+});
+
+testWidgets('share icon is visible when username is set',
+    (tester) async {
+  final provider = _provider();
+  provider.username = 'jessreads';
+  await tester.pumpWidget(_wrap(provider: provider));
+  expect(find.byIcon(Icons.share), findsOneWidget);
+});
+
+testWidgets('no email address text is rendered on the profile screen',
+    (tester) async {
+  final provider = _provider();
+  provider.username = 'jessreads';
+  await tester.pumpWidget(_wrap(provider: provider));
+  // Username shows as @handle, not as email
+  expect(find.text('@jessreads'), findsOneWidget);
+  // No text containing '@' followed by a domain appears
+  final emailTexts = find.byWidgetPredicate((widget) =>
+      widget is Text &&
+      widget.data != null &&
+      widget.data!.contains('@') &&
+      widget.data!.contains('.'));
+  expect(emailTexts, findsNothing,
+      reason: 'Email address must not be rendered on the profile screen');
+});
+```
+
+**Step 2: Run the failing tests**
+
+```bash
+flutter test test/screens/profile_screen_test.dart --name "shows @username|share icon is visible|no email address"
+```
+
+Expected: all three FAIL — `@jessreads` not found, `Icons.share` not found (it's in AppBar currently and the test shape will differ), email check may pass or fail depending on test environment.
+
+---
+
+**Step 3: Apply the fix**
+
+Replace the entire contents of `lib/screens/profile_screen.dart` with:
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -539,3 +629,36 @@ class _SavedPassageCardState extends State<_SavedPassageCard>
     );
   }
 }
+```
+
+What changed vs the original:
+- Removed `import 'package:supabase_flutter/supabase_flutter.dart';`
+- Removed `_currentEmail()` method
+- Removed `final email = _currentEmail();` from `build()`
+- Removed share `IconButton` from `AppBar` actions
+- Replaced `Text(email, ...)` sliver with a `Row` containing `Text('@${provider.username}')` and `IconButton(Icons.share, ...)`
+
+**Step 4: Run the new tests to verify they pass**
+
+```bash
+flutter test test/screens/profile_screen_test.dart --name "shows @username|share icon is visible|no email address"
+```
+
+Expected: all three PASS.
+
+**Step 5: Run the full test suite**
+
+```bash
+flutter test
+```
+
+Expected: same pass count as before (315 passing, 10 pre-existing failures in library/book-detail/public-profile screen tests). The three new tests should PASS. No new failures.
+
+Note: the existing `'shows email text widget'` test (`find.byType(Text), findsWidgets`) will continue to pass since there are still `Text` widgets in the tree.
+
+**Step 6: Commit**
+
+```bash
+git add lib/screens/profile_screen.dart test/screens/profile_screen_test.dart
+git commit -m "feat: show @username and inline share button on profile screen"
+```
