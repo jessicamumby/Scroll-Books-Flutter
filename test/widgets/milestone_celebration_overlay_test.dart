@@ -8,12 +8,13 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  Widget _wrap({required int milestone, VoidCallback? onDismiss}) =>
+  Widget _wrap({required int milestone, VoidCallback? onDismiss, String? username}) =>
       MaterialApp(
         home: Scaffold(
           body: MilestoneCelebrationOverlay(
             milestone: milestone,
             onDismiss: onDismiss ?? () {},
+            username: username,
           ),
         ),
       );
@@ -52,6 +53,18 @@ void main() {
       await tester.pumpWidget(_wrap(milestone: 90));
       await tester.pump(const Duration(seconds: 1));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('shows share button when username is provided', (tester) async {
+      await tester.pumpWidget(_wrap(milestone: 7, username: 'jessreads'));
+      await tester.pump();
+      expect(find.byIcon(Icons.share), findsOneWidget);
+    });
+
+    testWidgets('no share button when username is null', (tester) async {
+      await tester.pumpWidget(_wrap(milestone: 7));
+      await tester.pump();
+      expect(find.byIcon(Icons.share), findsNothing);
     });
   });
 }
