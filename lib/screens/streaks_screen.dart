@@ -13,6 +13,7 @@ import '../widgets/bookmark_card.dart';
 import '../widgets/milestones_list.dart';
 import '../widgets/genre_badges_grid.dart';
 import '../widgets/longevity_badges_list.dart';
+import '../widgets/milestone_celebration_overlay.dart';
 
 class StreaksScreen extends StatefulWidget {
   const StreaksScreen({super.key});
@@ -26,28 +27,41 @@ class _StreaksScreenState extends State<StreaksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.cream,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SharedHeader(heading: 'Your Reading'),
-            SharedTabBar(
-              tabs: const ['Streaks', 'Badges'],
-              selectedIndex: _selectedTab,
-              onTabSelected: (i) => setState(() => _selectedTab = i),
+    return Consumer<AppProvider>(
+      builder: (context, provider, _) {
+        return Scaffold(
+          backgroundColor: AppTheme.cream,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    const SharedHeader(heading: 'Your Reading'),
+                    SharedTabBar(
+                      tabs: const ['Streaks', 'Badges'],
+                      selectedIndex: _selectedTab,
+                      onTabSelected: (i) => setState(() => _selectedTab = i),
+                    ),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _selectedTab == 0
+                            ? const _StreaksTab(key: ValueKey('streaks'))
+                            : const _BadgesTab(key: ValueKey('badges')),
+                      ),
+                    ),
+                  ],
+                ),
+                if (provider.pendingMilestone != null)
+                  MilestoneCelebrationOverlay(
+                    milestone: provider.pendingMilestone!,
+                    onDismiss: provider.clearMilestone,
+                  ),
+              ],
             ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: _selectedTab == 0
-                    ? const _StreaksTab(key: ValueKey('streaks'))
-                    : const _BadgesTab(key: ValueKey('badges')),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -55,16 +69,23 @@ class _StreaksScreenState extends State<StreaksScreen> {
 class _StreaksTab extends StatelessWidget {
   const _StreaksTab({super.key});
 
-  List<bool> _getWeeklyCompletion(
-    List<String> readDays,
-    List<String> frozenDays,
-  ) {
+  List<bool> _getWeeklyCompletion(List<String> readDays) {
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
     return List.generate(7, (i) {
       final day = monday.add(Duration(days: i));
       final dayStr = day.toIso8601String().substring(0, 10);
-      return readDays.contains(dayStr) || frozenDays.contains(dayStr);
+      return readDays.contains(dayStr);
+    });
+  }
+
+  List<bool> _getWeeklyFrozen(List<String> frozenDays) {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return List.generate(7, (i) {
+      final day = monday.add(Duration(days: i));
+      final dayStr = day.toIso8601String().substring(0, 10);
+      return frozenDays.contains(dayStr);
     });
   }
 
@@ -83,10 +104,12 @@ class _StreaksTab extends StatelessWidget {
         );
         final todayStr = DateTime.now().toIso8601String().substring(0, 10);
         final passagesToday = provider.dailyPassages[todayStr] ?? 0;
-        final weeklyCompletion = _getWeeklyCompletion(
-          provider.readDays,
-          provider.frozenDays,
-        );
+        final weeklyCompletion = _getWeeklyCompletion(provider.readDays);
+        final weeklyFrozen = _getWeeklyFrozen(provider.frozenDays);
+        final isAtRisk = streak > 0 &&
+            !provider.readDays.contains(todayStr) &&
+            !provider.frozenDays.contains(todayStr);
+        final showPersonalBest = provider.longestStreak > streak;
 
         return Container(
           color: AppTheme.warmWhite,
@@ -94,10 +117,22 @@ class _StreaksTab extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               children: [
-                StreakCounter(streakCount: streak),
+                StreakCounter(streakCount: streak, isAtRisk: isAtRisk),
+                if (showPersonalBest) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Personal best: ${provider.longestStreak} days',
+                    style: AppTheme.monoLabel(
+                      fontSize: 11,
+                      color: AppTheme.inkLight,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 WeeklyProgressDots(
                   completedDays: weeklyCompletion,
+                  frozenDays: weeklyFrozen,
                   todayIndex: _getTodayIndex(),
                 ),
                 const SizedBox(height: 24),

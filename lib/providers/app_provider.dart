@@ -23,6 +23,8 @@ class AppProvider extends ChangeNotifier {
   String? bookmarkResetAt;
   String? lastReadBookId;
   List<SavedPassage> savedPassages = [];
+  String? username;
+  bool isPrivate = false;
 
   Future<void> _loadLocalStats() async {
     try {
@@ -99,6 +101,8 @@ class AppProvider extends ChangeNotifier {
       bookmarkResetAt = data.bookmarkResetAt;
       frozenDays = data.frozenDays;
       savedPassages = data.savedPassages;
+      username = data.username;
+      isPrivate = data.isPrivate;
       await resetBookmarksIfExpired();
       // Hydrate total chunks from SharedPreferences
       try {
@@ -129,7 +133,7 @@ class AppProvider extends ChangeNotifier {
           debugPrint('AppProvider.load pending_reading_style error: $e\n$st');
         }
       }
-      final current = calculateStreak(readDays);
+      final current = calculateStreak(readDays, frozenDays: frozenDays);
       if (current > longestStreak) {
         longestStreak = current;
         await _saveLocalStats();
@@ -160,7 +164,7 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     }
     await UserDataService.markReadToday(userId);
-    final current = calculateStreak(readDays);
+    final current = calculateStreak(readDays, frozenDays: frozenDays);
     if (current > longestStreak) {
       longestStreak = current;
       await _saveLocalStats();
@@ -377,5 +381,17 @@ class AppProvider extends ChangeNotifier {
     }).catchError((Object e, StackTrace st) {
       debugPrint('AppProvider._cacheSavedPassages error: $e\n$st');
     });
+  }
+
+  Future<void> setUsername(String userId, String newUsername) async {
+    username = newUsername;
+    notifyListeners();
+    await UserDataService.saveUsername(userId, newUsername);
+  }
+
+  Future<void> setAccountVisibility(String userId, {required bool isPrivate}) async {
+    this.isPrivate = isPrivate;
+    notifyListeners();
+    await UserDataService.saveAccountVisibility(userId, isPrivate: isPrivate);
   }
 }

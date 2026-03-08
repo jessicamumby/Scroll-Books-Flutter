@@ -35,10 +35,10 @@ void main() {
       expect(find.text('Create your account'), findsOneWidget);
     });
 
-    testWidgets('shows three form fields', (tester) async {
+    testWidgets('shows four form fields including username', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pumpAndSettle();
-      expect(find.byType(TextFormField), findsNWidgets(3));
+      expect(find.byType(TextFormField), findsNWidgets(4));
     });
 
     testWidgets('shows Create account button', (tester) async {
@@ -67,6 +67,30 @@ void main() {
       await tester.tap(find.text('Already have an account? Log in'));
       await tester.pumpAndSettle();
       expect(find.text('login'), findsOneWidget);
+    });
+
+    testWidgets('username field shows invalid format error', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Username'),
+        'AB', // too short + uppercase — invalid
+      );
+      await tester.tap(find.text('Create account'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('lowercase'), findsOneWidget);
+    });
+
+    testWidgets('username field shows length error when too short', (tester) async {
+      await tester.pumpWidget(_wrap());
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Username'),
+        'ab', // too short
+      );
+      await tester.tap(find.text('Create account'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('3'), findsWidgets);
     });
   });
 }

@@ -9,7 +9,10 @@ import '../data/catalogue.dart';
 import '../models/saved_passage.dart';
 import '../providers/app_provider.dart';
 import '../utils/share_passage_image.dart';
+import '../utils/share_profile_image.dart';
+import '../utils/streak_calculator.dart';
 import '../widgets/reader/passage_share_card.dart';
+import '../widgets/profile_share_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +23,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey _shareCardKey = GlobalKey();
+  final GlobalKey _profileShareCardKey = GlobalKey();
   String _shareCardText = '';
   String _shareCardTitle = '';
   String _shareCardAuthor = '';
@@ -72,6 +76,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _shareProfile() async {
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    final username = provider.username ?? '';
+    if (username.isEmpty) return;
+    try {
+      await shareProfileImage(
+        repaintKey: _profileShareCardKey,
+        username: username,
+      );
+    } catch (e, st) {
+      debugPrint('Share profile error: $e\n$st');
+    }
+  }
+
+  int _countBadges(AppProvider provider) {
+    final streak = calculateStreak(provider.readDays, frozenDays: provider.frozenDays);
+    int count = 0;
+    for (final days in [7, 30, 90, 365]) {
+      if (streak >= days) count++;
+    }
+    return count;
+  }
+
   @override
   Widget build(BuildContext context) {
     final email = _currentEmail();
@@ -83,6 +110,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             title: const Text('Profile'),
             actions: [
+              Consumer<AppProvider>(
+                builder: (context, provider, _) => IconButton(
+                  onPressed: provider.username != null ? _shareProfile : null,
+                  icon: const Icon(Icons.share, size: 22),
+                  tooltip: 'Share profile',
+                ),
+              ),
               IconButton(
                 onPressed: () => context.push('/app/profile/settings'),
                 icon: const Text('⚙️', style: TextStyle(fontSize: 24)),
@@ -200,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
           ),
         ),
-        // Hidden share card for PNG generation
+        // Hidden passage share card for PNG generation
         Positioned(
           left: -1000,
           top: -1000,
@@ -213,6 +247,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
               pageLabel: _shareCardPageLabel,
             ),
           ),
+        ),
+        // Hidden profile share card for PNG generation
+        Consumer<AppProvider>(
+          builder: (context, provider, _) {
+            if (provider.username == null) return const SizedBox.shrink();
+            final streak = calculateStreak(
+              provider.readDays,
+              frozenDays: provider.frozenDays,
+            );
+            final badgesEarned = _countBadges(provider);
+            return Positioned(
+              left: -1000,
+              top: -1000,
+              child: RepaintBoundary(
+                key: _profileShareCardKey,
+                child: ProfileShareCard(
+                  username: provider.username!,
+                  streakCount: streak,
+                  badgesEarned: badgesEarned,
+                  passagesSaved: provider.savedPassages.length,
+                ),
+              ),
+            );
+          },
         ),
       ],
     );

@@ -49,4 +49,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No Bookmarks Left'), findsOneWidget);
   });
+
+  testWidgets('shows days left label when token is being refilled', (tester) async {
+    final resetDate = DateTime.now().add(const Duration(days: 5));
+    final resetStr = resetDate.toIso8601String().substring(0, 10);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: BookmarkCard(
+          bookmarksRemaining: 1,
+          bookmarkResetAt: resetStr,
+          onUseBookmark: () {},
+        ),
+      ),
+    ));
+    expect(find.textContaining('days left'), findsOneWidget);
+  });
+
+  testWidgets('does not show days left when all tokens full', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: BookmarkCard(
+          bookmarksRemaining: 2,
+          bookmarkResetAt: null,
+          onUseBookmark: () {},
+        ),
+      ),
+    ));
+    expect(find.textContaining('days left'), findsNothing);
+  });
 }

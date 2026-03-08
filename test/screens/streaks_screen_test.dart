@@ -107,5 +107,42 @@ void main() {
       // StreakCounter shows the count — with 1 read day (today), streak = 1
       expect(find.text('1'), findsWidgets);
     });
+
+    testWidgets('shows Personal best when longestStreak > current streak', (tester) async {
+      final provider = AppProvider()
+        ..readDays = []
+        ..frozenDays = []
+        ..bookmarkTokens = 2
+        ..longestStreak = 21
+        ..dailyGoal = 10
+        ..dailyPassages = {}
+        ..library = []
+        ..progress = {};
+      await tester.pumpWidget(ChangeNotifierProvider<AppProvider>.value(
+        value: provider,
+        child: MaterialApp(theme: AppTheme.light, home: const StreaksScreen()),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Personal best'), findsOneWidget);
+    });
+
+    testWidgets('does not show Personal best when longestStreak equals current', (tester) async {
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final provider = AppProvider()
+        ..readDays = [today]
+        ..frozenDays = []
+        ..bookmarkTokens = 2
+        ..longestStreak = 1
+        ..dailyGoal = 10
+        ..dailyPassages = {}
+        ..library = []
+        ..progress = {};
+      await tester.pumpWidget(ChangeNotifierProvider<AppProvider>.value(
+        value: provider,
+        child: MaterialApp(theme: AppTheme.light, home: const StreaksScreen()),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Personal best'), findsNothing);
+    });
   });
 }

@@ -28,6 +28,30 @@ class BookmarkCard extends StatelessWidget {
     return 'Resets in $days days';
   }
 
+  double _tokenFillProgress(int tokenIndex) {
+    // Returns 0.0 (empty) to 1.0 (full)
+    if (bookmarkResetAt == null) return 1.0;
+    final now = DateTime.now();
+    final resetDate = DateTime.parse(bookmarkResetAt!);
+    const totalMs = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+    final elapsedMs = now.millisecondsSinceEpoch -
+        (resetDate.millisecondsSinceEpoch - totalMs);
+    final progress = (elapsedMs / totalMs).clamp(0.0, 1.0);
+    final filled = tokenIndex < bookmarksRemaining;
+    if (filled) return 1.0;
+    return progress;
+  }
+
+  int _daysLeft() {
+    if (bookmarkResetAt == null) return 0;
+    final today = DateTime.now();
+    final resetDate = DateTime.parse(bookmarkResetAt!);
+    return resetDate
+        .difference(DateTime(today.year, today.month, today.day))
+        .inDays
+        .clamp(0, 7);
+  }
+
   void _showBookmarkToast(BuildContext context) {
     final overlay = Overlay.of(context);
     late OverlayEntry entry;
@@ -87,12 +111,32 @@ class BookmarkCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Column(
                 children: [
-                  _PennantToken(filled: bookmarksRemaining >= 1),
-                  const SizedBox(width: 4),
-                  _PennantToken(filled: bookmarksRemaining >= 2),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _PennantToken(
+                        filled: bookmarksRemaining >= 1,
+                        fillProgress: _tokenFillProgress(0),
+                      ),
+                      const SizedBox(width: 4),
+                      _PennantToken(
+                        filled: bookmarksRemaining >= 2,
+                        fillProgress: _tokenFillProgress(1),
+                      ),
+                    ],
+                  ),
+                  if (bookmarkResetAt != null && bookmarksRemaining < 2) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${_daysLeft()} days left',
+                      style: GoogleFonts.dmMono(
+                        fontSize: 10,
+                        color: AppTheme.inkLight,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -140,24 +184,60 @@ class BookmarkCard extends StatelessWidget {
 
 class _PennantToken extends StatelessWidget {
   final bool filled;
-  const _PennantToken({required this.filled});
+  final double fillProgress; // 0.0 = empty, 1.0 = full
+
+  const _PennantToken({required this.filled, this.fillProgress = 1.0});
 
   @override
   Widget build(BuildContext context) {
+    if (filled) {
+      return ClipPath(
+        clipper: _PennantClipper(),
+        child: Container(
+          width: 22,
+          height: 30,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppTheme.amber, AppTheme.tomato],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Refilling: liquid fill from bottom up
     return ClipPath(
       clipper: _PennantClipper(),
-      child: Container(
+      child: SizedBox(
         width: 22,
         height: 30,
-        decoration: BoxDecoration(
-          gradient: filled
-              ? const LinearGradient(
-                  colors: [AppTheme.amber, AppTheme.tomato],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )
-              : null,
-          color: filled ? null : AppTheme.inkLight.withValues(alpha: 0.15),
+        child: Stack(
+          children: [
+            // Empty background
+            Container(
+              width: 22,
+              height: 30,
+              color: AppTheme.inkLight.withValues(alpha: 0.15),
+            ),
+            // Liquid fill from bottom
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 30 * fillProgress,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.amber, AppTheme.tomato],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

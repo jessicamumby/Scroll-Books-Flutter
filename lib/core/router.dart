@@ -19,6 +19,7 @@ import '../screens/onboarding_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/reading_style_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/public_profile_screen.dart';
 import '../widgets/app_shell.dart';
 import 'onboarding_state.dart';
 
@@ -99,6 +100,12 @@ final router = GoRouter(
         GoRoute(
           path: '/app/profile/reading-style',
           builder: (_, __) => const ReadingStyleScreen(),
+        ),
+        GoRoute(
+          path: '/app/profile/view/:username',
+          builder: (_, state) => PublicProfileScreen(
+            username: state.pathParameters['username']!,
+          ),
         ),
       ],
     ),
