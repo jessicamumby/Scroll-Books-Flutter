@@ -139,6 +139,21 @@ void main() {
       expect(data.bookmarkTokens, 1);
       expect(data.frozenDays, ['2026-03-02']);
     });
+
+    test('bookmarkTokens of 0 is preserved — not coerced to default 2', () {
+      final data = UserData(
+        library: [],
+        progress: {},
+        readDays: [],
+        bookmarkTokens: 0,
+        bookmarkResetAt: '2026-03-15',
+        frozenDays: ['2026-03-08', '2026-03-09'],
+      );
+      expect(data.bookmarkTokens, 0,
+          reason: 'A user who spent both tokens must not see them reset to 2');
+      expect(data.bookmarkResetAt, '2026-03-15');
+      expect(data.frozenDays.length, 2);
+    });
   });
 
   group('UserData.savedPassages', () {
