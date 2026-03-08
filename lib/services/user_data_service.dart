@@ -31,6 +31,9 @@ class UserData {
 }
 
 class UserDataService {
+  static const String prefsSelectFields =
+      'reading_style, bookmark_tokens, bookmark_reset_at, frozen_days';
+
   static Future<UserData> fetchAll(String userId) async {
     final results = await Future.wait(<Future<dynamic>>[
       supabase.from('library').select('book_id').eq('user_id', userId),
@@ -38,7 +41,7 @@ class UserDataService {
       supabase.from('read_days').select('date').eq('user_id', userId),
       supabase
           .from('user_preferences')
-          .select('reading_style')
+          .select(UserDataService.prefsSelectFields)
           .eq('user_id', userId)
           .maybeSingle(),
       supabase

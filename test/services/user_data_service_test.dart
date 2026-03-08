@@ -139,6 +139,23 @@ void main() {
       expect(data.bookmarkTokens, 1);
       expect(data.frozenDays, ['2026-03-02']);
     });
+
+    test('bookmarkTokens of 0 is preserved — not coerced to default 2', () {
+      final data = UserData(
+        library: [],
+        progress: {},
+        readDays: [],
+        bookmarkTokens: 0,
+      );
+      expect(data.bookmarkTokens, 0,
+          reason: 'A user who spent both tokens must not see them reset to 2');
+    });
+
+    test('fetchAll select string includes all bookmark fields', () {
+      expect(UserDataService.prefsSelectFields.contains('bookmark_tokens'), isTrue);
+      expect(UserDataService.prefsSelectFields.contains('bookmark_reset_at'), isTrue);
+      expect(UserDataService.prefsSelectFields.contains('frozen_days'), isTrue);
+    });
   });
 
   group('UserData.savedPassages', () {
