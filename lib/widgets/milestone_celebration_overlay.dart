@@ -21,7 +21,7 @@ _MilestoneData _dataFor(int milestone) {
   switch (milestone) {
     case 7:
       return const _MilestoneData(
-        name: 'Week Worm', emoji: '🪱', subtitle: '7 day streak!',
+        name: 'Week Worm', emoji: '🐛', subtitle: '7 day streak!',
       );
     case 30:
       return const _MilestoneData(
@@ -33,7 +33,7 @@ _MilestoneData _dataFor(int milestone) {
       );
     default:
       return const _MilestoneData(
-        name: 'Literary Legend', emoji: '🏆', subtitle: '365 day streak!',
+        name: 'Literary Legend', emoji: '🏛', subtitle: '365 day streak!',
       );
   }
 }
