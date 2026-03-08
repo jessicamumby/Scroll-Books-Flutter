@@ -56,6 +56,7 @@ class _StreaksScreenState extends State<StreaksScreen> {
                   MilestoneCelebrationOverlay(
                     milestone: provider.pendingMilestone!,
                     onDismiss: provider.clearMilestone,
+                    username: provider.username,
                   ),
               ],
             ),
@@ -183,7 +184,7 @@ class _BadgesTab extends StatelessWidget {
               children: [
                 GenreBadgesGrid(genreCounts: provider.genreCounts),
                 const SizedBox(height: 28),
-                LongevityBadgesList(currentStreak: streak),
+                LongevityBadgesList(currentStreak: streak, username: provider.username),
                 const SizedBox(height: 24),
               ],
             ),
