@@ -38,7 +38,7 @@ class UserDataService {
       supabase.from('read_days').select('date').eq('user_id', userId),
       supabase
           .from('user_preferences')
-          .select('reading_style')
+          .select('reading_style, bookmark_tokens, bookmark_reset_at, frozen_days')
           .eq('user_id', userId)
           .maybeSingle(),
       supabase
