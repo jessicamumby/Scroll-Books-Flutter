@@ -146,13 +146,9 @@ void main() {
         progress: {},
         readDays: [],
         bookmarkTokens: 0,
-        bookmarkResetAt: '2026-03-15',
-        frozenDays: ['2026-03-08', '2026-03-09'],
       );
       expect(data.bookmarkTokens, 0,
           reason: 'A user who spent both tokens must not see them reset to 2');
-      expect(data.bookmarkResetAt, '2026-03-15');
-      expect(data.frozenDays.length, 2);
     });
   });
 
