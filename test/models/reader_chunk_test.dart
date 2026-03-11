@@ -242,4 +242,40 @@ void main() {
       expect(types, ['S', 'S', 'C', 'S', 'S', 'C', 'S']);
     });
   });
+
+  group('displayIndexForRawIndex', () {
+    final chunks = [
+      const ReaderChunk(text: 'Chapter 1. Loomings', type: 'chapter_header', chapter: 1),
+      const ReaderChunk(text: 'Call me Ishmael.', type: 'sentence', chapter: 1),
+      const ReaderChunk(text: 'Some years ago.', type: 'sentence', chapter: 1),
+      const ReaderChunk(text: 'Chapter 2. The Carpet-Bag', type: 'chapter_header', chapter: 2),
+      const ReaderChunk(text: 'I stuffed a shirt.', type: 'sentence', chapter: 2),
+    ];
+
+    late List<DisplayItem> display;
+
+    setUp(() {
+      final chapters = buildChapterInfoList(chunks);
+      display = buildDisplayList(chunks, chapters);
+    });
+
+    test('exact match returns correct display index', () {
+      expect(displayIndexForRawIndex(display, 1), 0);
+      expect(displayIndexForRawIndex(display, 2), 1);
+      expect(displayIndexForRawIndex(display, 4), 3);
+    });
+
+    test('raw index pointing to chapter_header resolves to next sentence', () {
+      expect(displayIndexForRawIndex(display, 0), 0);
+      expect(displayIndexForRawIndex(display, 3), 3);
+    });
+
+    test('raw index past end resolves to last sentence', () {
+      expect(displayIndexForRawIndex(display, 999), 3);
+    });
+
+    test('returns 0 for empty display list', () {
+      expect(displayIndexForRawIndex([], 5), 0);
+    });
+  });
 }

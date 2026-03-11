@@ -178,3 +178,23 @@ List<DisplayItem> buildDisplayList(List<ReaderChunk> chunks, List<ChapterInfo> c
 
   return display;
 }
+
+int displayIndexForRawIndex(List<DisplayItem> displayList, int rawIndex) {
+  if (displayList.isEmpty) return 0;
+
+  for (int i = 0; i < displayList.length; i++) {
+    final item = displayList[i];
+    if (item is SentenceItem && item.rawIndex == rawIndex) return i;
+  }
+
+  for (int i = 0; i < displayList.length; i++) {
+    final item = displayList[i];
+    if (item is SentenceItem && item.rawIndex >= rawIndex) return i;
+  }
+
+  for (int i = displayList.length - 1; i >= 0; i--) {
+    if (displayList[i] is SentenceItem) return i;
+  }
+
+  return 0;
+}
