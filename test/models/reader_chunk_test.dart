@@ -40,4 +40,61 @@ void main() {
       expect(stripChapterPrefix('Chapter 5. The Dr. visits'), 'The Dr. visits');
     });
   });
+
+  group('ChapterInfo', () {
+    test('stores chapter metadata', () {
+      const info = ChapterInfo(
+        chapterNumber: 1,
+        title: 'Chapter 1. Loomings',
+        startIndex: 1,
+        sentenceCount: 3,
+      );
+      expect(info.chapterNumber, 1);
+      expect(info.title, 'Chapter 1. Loomings');
+      expect(info.startIndex, 1);
+      expect(info.sentenceCount, 3);
+    });
+  });
+
+  group('buildChapterInfoList', () {
+    test('builds chapters from chunks with headers', () {
+      final chunks = [
+        const ReaderChunk(text: 'Chapter 1. Loomings', type: 'chapter_header', chapter: 1),
+        const ReaderChunk(text: 'Call me Ishmael.', type: 'sentence', chapter: 1),
+        const ReaderChunk(text: 'Some years ago.', type: 'sentence', chapter: 1),
+        const ReaderChunk(text: 'Chapter 2. The Carpet-Bag', type: 'chapter_header', chapter: 2),
+        const ReaderChunk(text: 'I stuffed a shirt.', type: 'sentence', chapter: 2),
+      ];
+      final chapters = buildChapterInfoList(chunks);
+      expect(chapters.length, 2);
+      expect(chapters[0].chapterNumber, 1);
+      expect(chapters[0].title, 'Chapter 1. Loomings');
+      expect(chapters[0].startIndex, 1);
+      expect(chapters[0].sentenceCount, 2);
+      expect(chapters[1].chapterNumber, 2);
+      expect(chapters[1].startIndex, 4);
+      expect(chapters[1].sentenceCount, 1);
+    });
+
+    test('returns empty list for legacy chunks (no chapter_header)', () {
+      final chunks = [
+        const ReaderChunk(text: 'Call me Ishmael.', type: 'sentence', chapter: 0),
+        const ReaderChunk(text: 'Some years ago.', type: 'sentence', chapter: 0),
+      ];
+      final chapters = buildChapterInfoList(chunks);
+      expect(chapters, isEmpty);
+    });
+
+    test('handles chapter with no sentences', () {
+      final chunks = [
+        const ReaderChunk(text: 'Chapter 1. Empty', type: 'chapter_header', chapter: 1),
+        const ReaderChunk(text: 'Chapter 2. Has Content', type: 'chapter_header', chapter: 2),
+        const ReaderChunk(text: 'Content here.', type: 'sentence', chapter: 2),
+      ];
+      final chapters = buildChapterInfoList(chunks);
+      expect(chapters.length, 2);
+      expect(chapters[0].sentenceCount, 0);
+      expect(chapters[1].sentenceCount, 1);
+    });
+  });
 }
