@@ -22,4 +22,22 @@ void main() {
       expect(chunk.isChapterHeader, isFalse);
     });
   });
+
+  group('stripChapterPrefix', () {
+    test('strips "Chapter N. " prefix', () {
+      expect(stripChapterPrefix('Chapter 1. Loomings'), 'Loomings');
+    });
+
+    test('strips multi-digit chapter numbers', () {
+      expect(stripChapterPrefix('Chapter 135. Epilogue'), 'Epilogue');
+    });
+
+    test('returns full text when no ". " separator exists', () {
+      expect(stripChapterPrefix('Prologue'), 'Prologue');
+    });
+
+    test('handles ". " in chapter title by only stripping first occurrence', () {
+      expect(stripChapterPrefix('Chapter 5. The Dr. visits'), 'The Dr. visits');
+    });
+  });
 }
