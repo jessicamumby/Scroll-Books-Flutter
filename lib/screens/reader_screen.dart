@@ -12,7 +12,10 @@ import '../core/theme.dart';
 import '../data/catalogue.dart';
 import '../providers/app_provider.dart';
 import '../services/user_data_service.dart';
+import '../models/reader_chunk.dart';
 import '../utils/share_passage_image.dart';
+import '../widgets/reader/chapter_complete_card.dart';
+import '../widgets/reader/chapter_list_drawer.dart';
 import '../widgets/reader/passage_action_overlay.dart';
 import '../widgets/reader/passage_share_card.dart';
 
@@ -25,7 +28,10 @@ class ReaderScreen extends StatefulWidget {
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
-  List<String> _chunks = [];
+  List<DisplayItem> _displayList = [];
+  List<ChapterInfo> _chapters = [];
+  int _currentDisplayIndex = 0;
+  int _totalSentenceCount = 0;
   bool _loading = true;
   bool _fetchError = false;
   bool _showShareHint = false;
@@ -98,15 +104,25 @@ class _ReaderScreenState extends State<ReaderScreen> {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) throw Exception('fetch failed');
       final data = jsonDecode(response.body) as List;
-      final chunks = data.map((e) => e['text'] as String).toList();
+      final rawChunks = data.map((e) {
+        final type = e['type'] as String? ?? 'sentence';
+        final chapter = e['chapter'] as int? ?? 0;
+        return ReaderChunk(text: e['text'] as String, type: type, chapter: chapter);
+      }).toList();
+
+      final chapters = buildChapterInfoList(rawChunks);
+      final displayList = buildDisplayList(rawChunks, chapters);
+      final totalSentences = rawChunks.where((c) => c.isSentence).length;
 
       if (mounted) {
         final provider = Provider.of<AppProvider>(context, listen: false);
-        provider.setBookTotalChunks(widget.bookId, chunks.length);
+        provider.setBookTotalChunks(widget.bookId, totalSentences);
         provider.setLastReadBook(widget.bookId);
         setState(() {
-          _chunks = chunks;
-          _startIndex = savedIndex.clamp(0, chunks.length - 1);
+          _chapters = chapters;
+          _displayList = displayList;
+          _totalSentenceCount = totalSentences;
+          _startIndex = displayIndexForRawIndex(displayList, savedIndex);
           _loading = false;
         });
 
@@ -135,7 +151,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
   }
 
-  void _onPageChanged(int index) {
+  void _onPageChanged(int displayIndex) {
+    setState(() => _currentDisplayIndex = displayIndex);
+
+    final item = _displayList[displayIndex];
+    if (item is! SentenceItem) return;
+
     final today = DateTime.now().toIso8601String().substring(0, 10);
     if (mounted) {
       Provider.of<AppProvider>(context, listen: false)
@@ -143,17 +164,18 @@ class _ReaderScreenState extends State<ReaderScreen> {
       _hintTimer?.cancel();
       setState(() => _showShareHint = false);
     }
+
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () async {
       try {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt('progress_${widget.bookId}', index);
+        await prefs.setInt('progress_${widget.bookId}', item.rawIndex);
       } catch (e, st) {
         debugPrint('Save local progress error: $e\n$st');
       }
       if (_userId != null) {
         try {
-          await UserDataService.syncProgress(_userId!, widget.bookId, index);
+          await UserDataService.syncProgress(_userId!, widget.bookId, item.rawIndex);
           await UserDataService.markReadToday(_userId!);
         } catch (e, st) {
           debugPrint('Sync remote progress error: $e\n$st');
@@ -167,8 +189,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
     if (book == null) return;
 
     final page = chunkIndex + 1;
-    final pct = _chunks.isNotEmpty
-        ? ((chunkIndex + 1) / _chunks.length * 100).round()
+    final pct = _totalSentenceCount > 0
+        ? ((chunkIndex + 1) / _totalSentenceCount * 100).round()
         : 0;
 
     setState(() {
@@ -208,6 +230,34 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
   }
 
+  ChapterInfo? get _currentChapter {
+    if (_chapters.isEmpty || _displayList.isEmpty) return null;
+    final item = _displayList[_currentDisplayIndex];
+    final chapterNum = item is SentenceItem
+        ? item.chapterNumber
+        : (item as ChapterCompleteItem).completedChapterNumber;
+    try {
+      return _chapters.firstWhere((c) => c.chapterNumber == chapterNum);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _getCurrentRawIndex() {
+    if (_displayList.isEmpty) return 0;
+    final item = _displayList[_currentDisplayIndex];
+    if (item is SentenceItem) return item.rawIndex;
+    final completed = item as ChapterCompleteItem;
+    final chapter = _chapters.firstWhere((c) => c.chapterNumber == completed.completedChapterNumber);
+    return chapter.startIndex + chapter.sentenceCount - 1;
+  }
+
+  void _jumpToChapter(int chapterNumber) {
+    final chapter = _chapters.firstWhere((c) => c.chapterNumber == chapterNumber);
+    final displayIdx = displayIndexForRawIndex(_displayList, chapter.startIndex);
+    _pageController.jumpToPage(displayIdx);
+  }
+
   void _goBack(BuildContext context) {
     context.go('/app/library');
   }
@@ -238,10 +288,49 @@ class _ReaderScreenState extends State<ReaderScreen> {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => _goBack(context),
         ),
-        title: Text(
-          book.title,
-          style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
+        title: _chapters.isNotEmpty
+            ? GestureDetector(
+                onTap: () => showChapterListDrawer(
+                  context: context,
+                  chapters: _chapters,
+                  currentChapterNumber: _currentChapter?.chapterNumber ?? 1,
+                  currentRawIndex: _getCurrentRawIndex(),
+                  onChapterSelected: _jumpToChapter,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      book.title,
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.ink,
+                      ),
+                    ),
+                    if (_currentChapter != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'CH. ${_currentChapter!.chapterNumber} \u{00B7} ${stripChapterPrefix(_currentChapter!.title).toUpperCase()}',
+                            style: AppTheme.monoLabel(
+                              fontSize: 9,
+                              letterSpacing: 1,
+                              color: AppTheme.tomato,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Text('\u{25BC}', style: TextStyle(fontSize: 8, color: AppTheme.inkLight)),
+                        ],
+                      ),
+                  ],
+                ),
+              )
+            : Text(
+                book.title,
+                style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
       ),
       body: _buildBody(book),
     );
@@ -317,7 +406,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
       );
     }
 
-    if (!book.hasChunks || _chunks.isEmpty) {
+    if (!book.hasChunks || _displayList.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -357,20 +446,29 @@ class _ReaderScreenState extends State<ReaderScreen> {
       controller: _pageController,
       scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
       physics: _overlayActive ? const NeverScrollableScrollPhysics() : null,
-      itemCount: _chunks.length,
+      itemCount: _displayList.length,
       onPageChanged: _onPageChanged,
-      itemBuilder: (_, index) => PassageActionOverlay(
-        text: _chunks[index],
-        chunkIndex: index,
-        totalChunks: _chunks.length,
-        bookId: widget.bookId,
-        isSaved: provider.isPassageSaved(widget.bookId, index),
-        onShare: _shareAsImage,
-        onSave: _savePassage,
-        onActionsVisibleChanged: (visible) {
-          if (mounted) setState(() => _overlayActive = visible);
-        },
-      ),
+      itemBuilder: (_, index) {
+        final item = _displayList[index];
+        if (item is ChapterCompleteItem) {
+          return ChapterCompleteCard(item: item, readingStyle: style);
+        }
+        final sentence = item as SentenceItem;
+        return PassageActionOverlay(
+          text: sentence.text,
+          chunkIndex: sentence.sentenceOrdinal - 1,
+          totalChunks: _totalSentenceCount,
+          bookId: widget.bookId,
+          isSaved: provider.isPassageSaved(widget.bookId, sentence.rawIndex),
+          onShare: (text, _) => _shareAsImage(text, sentence.sentenceOrdinal - 1),
+          onSave: (text, _) => _savePassage(text, sentence.rawIndex),
+          onActionsVisibleChanged: (visible) {
+            if (mounted) setState(() => _overlayActive = visible);
+          },
+          chapterTitle: sentence.chapterTitle,
+          chapterNumber: sentence.isChapterOpener ? sentence.chapterNumber : null,
+        );
+      },
     );
 
     if (!isHorizontal) return _wrapWithHint(pageView);
