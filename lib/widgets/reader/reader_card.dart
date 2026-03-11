@@ -6,12 +6,16 @@ class ReaderCard extends StatelessWidget {
   final String text;
   final int chunkIndex;
   final int totalChunks;
+  final String? chapterTitle;
+  final int? chapterNumber;
 
   const ReaderCard({
     super.key,
     required this.text,
     required this.chunkIndex,
     required this.totalChunks,
+    this.chapterTitle,
+    this.chapterNumber,
   });
 
   String get _pageLabel {
@@ -52,6 +56,31 @@ class ReaderCard extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                if (chapterTitle != null && chapterNumber != null) ...[
+                                  Text(
+                                    'CHAPTER $chapterNumber',
+                                    style: AppTheme.monoLabel(
+                                      fontSize: 9,
+                                      letterSpacing: 3,
+                                      color: AppTheme.tomato,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    chapterTitle!,
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.ink,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    height: 1,
+                                    color: AppTheme.parchment,
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
                                 Flexible(
                                   child: SingleChildScrollView(
                                     child: Text(

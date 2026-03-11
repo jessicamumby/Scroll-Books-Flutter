@@ -99,6 +99,42 @@ void main() {
           reason: 'Border width should be 1.5');
     });
 
+    testWidgets('renders inline chapter header when chapterTitle and chapterNumber are provided', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: ReaderCard(
+              text: 'Call me Ishmael.',
+              chunkIndex: 0,
+              totalChunks: 100,
+              chapterTitle: 'Loomings',
+              chapterNumber: 1,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('CHAPTER 1'), findsOneWidget);
+      expect(find.text('Loomings'), findsOneWidget);
+      expect(find.text('Call me Ishmael.'), findsOneWidget);
+    });
+
+    testWidgets('does not render chapter header when chapterTitle is null', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: ReaderCard(
+              text: 'Some years ago.',
+              chunkIndex: 1,
+              totalChunks: 100,
+            ),
+          ),
+        ),
+      );
+      expect(find.textContaining('CHAPTER'), findsNothing);
+    });
+
     testWidgets('does not render left accent strip', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
