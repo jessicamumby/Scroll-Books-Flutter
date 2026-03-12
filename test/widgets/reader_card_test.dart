@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scroll_books/core/theme.dart';
+import 'package:scroll_books/widgets/reader/passage_action_overlay.dart';
 import 'package:scroll_books/widgets/reader/reader_card.dart';
 
 void main() {
@@ -97,6 +98,65 @@ void main() {
           reason: 'Border color should be AppTheme.brandPale');
       expect(border.top.width, 1.5,
           reason: 'Border width should be 1.5');
+    });
+
+    testWidgets('renders inline chapter header when chapterTitle and chapterNumber are provided', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: ReaderCard(
+              text: 'Call me Ishmael.',
+              chunkIndex: 0,
+              totalChunks: 100,
+              chapterTitle: 'Loomings',
+              chapterNumber: 1,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('CHAPTER 1'), findsOneWidget);
+      expect(find.text('Loomings'), findsOneWidget);
+      expect(find.text('Call me Ishmael.'), findsOneWidget);
+    });
+
+    testWidgets('does not render chapter header when chapterTitle is null', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
+            body: ReaderCard(
+              text: 'Some years ago.',
+              chunkIndex: 1,
+              totalChunks: 100,
+            ),
+          ),
+        ),
+      );
+      expect(find.textContaining('CHAPTER'), findsNothing);
+    });
+
+    testWidgets('chapter header renders when passed through PassageActionOverlay params', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: PassageActionOverlay(
+              text: 'Call me Ishmael.',
+              chunkIndex: 0,
+              totalChunks: 100,
+              bookId: 'moby-dick',
+              isSaved: false,
+              onShare: (_, __) async {},
+              onSave: (_, __) async {},
+              chapterTitle: 'Loomings',
+              chapterNumber: 1,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('CHAPTER 1'), findsOneWidget);
+      expect(find.text('Loomings'), findsOneWidget);
     });
 
     testWidgets('does not render left accent strip', (tester) async {

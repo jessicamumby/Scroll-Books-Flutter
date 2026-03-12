@@ -14,6 +14,8 @@ class PassageActionOverlay extends StatefulWidget {
   final Future<void> Function(String text, int chunkIndex) onShare;
   final Future<void> Function(String text, int chunkIndex) onSave;
   final ValueChanged<bool>? onActionsVisibleChanged;
+  final String? chapterTitle;
+  final int? chapterNumber;
 
   const PassageActionOverlay({
     super.key,
@@ -25,6 +27,8 @@ class PassageActionOverlay extends StatefulWidget {
     required this.onShare,
     required this.onSave,
     this.onActionsVisibleChanged,
+    this.chapterTitle,
+    this.chapterNumber,
   });
 
   @override
@@ -168,6 +172,8 @@ class _PassageActionOverlayState extends State<PassageActionOverlay>
           text: widget.text,
           chunkIndex: widget.chunkIndex,
           totalChunks: widget.totalChunks,
+          chapterTitle: widget.chapterTitle,
+          chapterNumber: widget.chapterNumber,
         ),
       ),
     );
