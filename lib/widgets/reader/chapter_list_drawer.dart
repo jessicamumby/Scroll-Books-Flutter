@@ -94,12 +94,13 @@ class _ChapterListContent extends StatelessWidget {
                     child: Row(
                       children: [
                         SizedBox(
-                          width: 24,
+                          width: 36,
                           child: Text(
                             '${chapter.chapterNumber}',
                             style: AppTheme.monoLabel(fontSize: 10, color: AppTheme.inkLight),
                           ),
                         ),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             displayTitle,
