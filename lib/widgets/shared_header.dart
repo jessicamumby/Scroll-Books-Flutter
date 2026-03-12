@@ -14,9 +14,11 @@ class SharedHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'SCROLL BOOKS',
-            style: AppTheme.monoLabel(fontSize: 10, color: AppTheme.inkLight),
+          Center(
+            child: Text(
+              'SCROLL BOOKS',
+              style: AppTheme.monoLabel(fontSize: 10, color: AppTheme.inkLight),
+            ),
           ),
           const SizedBox(height: 4),
           Text(

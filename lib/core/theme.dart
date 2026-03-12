@@ -129,6 +129,7 @@ class AppTheme {
       backgroundColor: cream,
       foregroundColor: ink,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       titleTextStyle: GoogleFonts.playfairDisplay(
         fontSize: 18, fontWeight: FontWeight.w600, color: ink,
       ),
