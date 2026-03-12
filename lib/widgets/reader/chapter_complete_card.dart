@@ -7,11 +7,13 @@ import '../../models/reader_chunk.dart';
 class ChapterCompleteCard extends StatefulWidget {
   final ChapterCompleteItem item;
   final String readingStyle;
+  final VoidCallback? onShare;
 
   const ChapterCompleteCard({
     super.key,
     required this.item,
     required this.readingStyle,
+    this.onShare,
   });
 
   @override
@@ -26,12 +28,15 @@ class _ChapterCompleteCardState extends State<ChapterCompleteCard>
 
   static const _emojiSet = ['\u{1F389}', '\u{1F38A}', '\u{2728}', '\u{2B50}', '\u{1F525}', '\u{1F4D6}', '\u{1F4DA}', '\u{1F31F}', '\u{1F4AB}', '\u{1F3C5}'];
 
+  // Total animation budget: 6.5s (max delay 2s + max duration 4.5s)
+  static const _totalMs = 6500;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4500),
+      duration: const Duration(milliseconds: _totalMs),
     );
     _spawnEmojis();
     _controller.forward();
@@ -43,8 +48,9 @@ class _ChapterCompleteCardState extends State<ChapterCompleteCard>
         emoji: _emojiSet[_rng.nextInt(_emojiSet.length)],
         x: _rng.nextDouble() * 0.9 + 0.05,
         size: 16 + _rng.nextDouble() * 16,
-        delay: _rng.nextDouble() * 2 / 4.5,
-        duration: (2.5 + _rng.nextDouble() * 2) / 4.5,
+        // Normalise by 6.5s so all emojis complete before controller ends
+        delay: _rng.nextDouble() * 2 / 6.5,
+        duration: (2.5 + _rng.nextDouble() * 2) / 6.5,
       ));
     }
   }
@@ -66,69 +72,104 @@ class _ChapterCompleteCardState extends State<ChapterCompleteCard>
       child: SafeArea(
         child: Stack(
           children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('\u{1F3C6}', style: TextStyle(fontSize: 44)),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Chapter Complete!',
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.tomato,
+            // Main content: centred, with swipe hint pinned at bottom
+            Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('\u{1F3C6}', style: TextStyle(fontSize: 44)),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Chapter Complete!',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.tomato,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.completedChapterTitle,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'CHAPTER ${item.completedChapterNumber} OF ${item.totalChapters}',
+                            style: AppTheme.monoLabel(
+                              fontSize: 9,
+                              letterSpacing: 2,
+                              color: AppTheme.sage,
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _StatPill(
+                                value: '${item.passagesInChapter}',
+                                label: 'PASSAGES READ',
+                                color: AppTheme.amberLight,
+                              ),
+                              const SizedBox(width: 10),
+                              _StatPill(
+                                value: '${item.bookProgressPercent}%',
+                                label: 'BOOK PROGRESS',
+                                color: AppTheme.sageLight,
+                              ),
+                            ],
+                          ),
+                          if (widget.onShare != null) ...[
+                            const SizedBox(height: 24),
+                            GestureDetector(
+                              onTap: widget.onShare,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: AppTheme.tomato.withValues(alpha: 0.4)),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.share_outlined, size: 15, color: AppTheme.tomato),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'SHARE',
+                                      style: AppTheme.monoLabel(fontSize: 10, color: AppTheme.tomato),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.completedChapterTitle,
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.ink,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'CHAPTER ${item.completedChapterNumber} OF ${item.totalChapters}',
-                      style: AppTheme.monoLabel(
-                        fontSize: 9,
-                        letterSpacing: 2,
-                        color: AppTheme.sage,
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _StatPill(
-                          value: '${item.passagesInChapter}',
-                          label: 'PASSAGES READ',
-                          color: AppTheme.amberLight,
-                        ),
-                        const SizedBox(width: 10),
-                        _StatPill(
-                          value: '${item.bookProgressPercent}%',
-                          label: 'BOOK PROGRESS',
-                          color: AppTheme.sageLight,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 28),
-                    Text(
-                      'Swipe to continue $arrow',
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 13,
-                        color: AppTheme.inkLight,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                // Swipe hint pinned at the bottom
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 36),
+                  child: Text(
+                    'Swipe to continue $arrow',
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 13,
+                      color: AppTheme.inkLight,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            // Falling emojis on top of everything
             ..._emojis.map((e) => _FallingEmojiWidget(
                   emoji: e,
                   animation: _controller,
@@ -211,7 +252,7 @@ class _FallingEmojiWidget extends StatelessWidget {
         if (t == 0) return const SizedBox.shrink();
         final screenH = MediaQuery.of(context).size.height;
         final screenW = MediaQuery.of(context).size.width;
-        final top = -50.0 + (screenH + 50) * t;
+        final top = -50.0 + (screenH + 100) * t;
         final left = emoji.x * screenW;
         final opacity = t < 0.7 ? 1.0 : (1.0 - ((t - 0.7) / 0.3)).clamp(0.0, 1.0);
         final rotation = t * 2 * pi;

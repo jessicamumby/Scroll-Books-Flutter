@@ -50,7 +50,7 @@ class MyLibraryList extends StatelessWidget {
     return Container(
       color: AppTheme.warmWhite,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+        padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

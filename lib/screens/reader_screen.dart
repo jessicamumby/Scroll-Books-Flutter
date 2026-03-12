@@ -230,6 +230,30 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
   }
 
+  Future<void> _shareChapterComplete(ChapterCompleteItem item) async {
+    final book = _book;
+    if (book == null) return;
+
+    setState(() {
+      _shareCardText = 'I just finished "${item.completedChapterTitle}" — chapter ${item.completedChapterNumber} of ${item.totalChapters}. ${item.bookProgressPercent}% through the book!';
+      _shareCardTitle = book.title;
+      _shareCardAuthor = book.author;
+      _shareCardPageLabel = 'CH. ${item.completedChapterNumber} OF ${item.totalChapters}';
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await sharePassageImage(
+          repaintKey: _passageShareCardKey,
+          bookTitle: book.title,
+          author: book.author,
+        );
+      } catch (e, st) {
+        debugPrint('Share chapter complete error: $e\n$st');
+      }
+    });
+  }
+
   ChapterInfo? get _currentChapter {
     if (_chapters.isEmpty || _displayList.isEmpty) return null;
     final item = _displayList[_currentDisplayIndex];
@@ -299,31 +323,34 @@ class _ReaderScreenState extends State<ReaderScreen> {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          book.title,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.ink,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.inkLight),
+                      ],
+                    ),
                     Text(
-                      book.title,
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.ink,
+                      _currentChapter != null
+                          ? 'CH. ${_currentChapter!.chapterNumber} \u{00B7} ${stripChapterPrefix(_currentChapter!.title).toUpperCase()}'
+                          : '',
+                      style: AppTheme.monoLabel(
+                        fontSize: 9,
+                        letterSpacing: 1,
+                        color: AppTheme.tomato,
                       ),
                     ),
-                    if (_currentChapter != null)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'CH. ${_currentChapter!.chapterNumber} \u{00B7} ${stripChapterPrefix(_currentChapter!.title).toUpperCase()}',
-                            style: AppTheme.monoLabel(
-                              fontSize: 9,
-                              letterSpacing: 1,
-                              color: AppTheme.tomato,
-                            ),
-                          ),
-                          const SizedBox(width: 3),
-                          Text('\u{25BC}', style: TextStyle(fontSize: 8, color: AppTheme.inkLight)),
-                        ],
-                      ),
                   ],
                 ),
               )
@@ -451,7 +478,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
       itemBuilder: (_, index) {
         final item = _displayList[index];
         if (item is ChapterCompleteItem) {
-          return ChapterCompleteCard(item: item, readingStyle: style);
+          return ChapterCompleteCard(
+            item: item,
+            readingStyle: style,
+            onShare: () => _shareChapterComplete(item),
+          );
         }
         final sentence = item as SentenceItem;
         return PassageActionOverlay(
