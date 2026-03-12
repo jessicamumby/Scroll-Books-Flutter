@@ -312,6 +312,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => _goBack(context),
         ),
+        centerTitle: false,
         title: _chapters.isNotEmpty
             ? GestureDetector(
                 onTap: () => showChapterListDrawer(
@@ -325,7 +326,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                   height: 38,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         book.title,
