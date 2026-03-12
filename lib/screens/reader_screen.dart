@@ -321,42 +321,48 @@ class _ReaderScreenState extends State<ReaderScreen> {
                   currentRawIndex: _getCurrentRawIndex(),
                   onChapterSelected: _jumpToChapter,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          book.title,
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.ink,
-                          ),
+                child: SizedBox(
+                  height: 38,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        book.title,
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.ink,
                         ),
-                        const SizedBox(width: 2),
-                        Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.inkLight),
-                      ],
-                    ),
-                    Text(
-                      _currentChapter != null
-                          ? 'CH. ${_currentChapter!.chapterNumber} \u{00B7} ${stripChapterPrefix(_currentChapter!.title).toUpperCase()}'
-                          : '',
-                      style: AppTheme.monoLabel(
-                        fontSize: 9,
-                        letterSpacing: 1,
-                        color: AppTheme.tomato,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 1),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            _currentChapter != null
+                                ? 'CH. ${_currentChapter!.chapterNumber} \u{00B7} ${stripChapterPrefix(_currentChapter!.title).toUpperCase()}'
+                                : '',
+                            style: AppTheme.monoLabel(
+                              fontSize: 9,
+                              letterSpacing: 1,
+                              color: AppTheme.tomato,
+                            ),
+                          ),
+                          if (_currentChapter != null) ...[
+                            const SizedBox(width: 1),
+                            Icon(Icons.arrow_drop_down, size: 14, color: AppTheme.tomato),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               )
             : Text(
                 book.title,
-                style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w600),
+                style: GoogleFonts.playfairDisplay(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.ink),
               ),
       ),
       body: _buildBody(book),

@@ -114,6 +114,37 @@ void main() {
       expect(find.text('Scroll for more chapters'), findsNothing);
     });
 
+    testWidgets('renders 3-digit chapter number and title without overlap', (tester) async {
+      final highNumberChapters = [
+        const ChapterInfo(chapterNumber: 100, title: 'Chapter 100. The Grand Armada', startIndex: 1, sentenceCount: 50),
+        const ChapterInfo(chapterNumber: 101, title: 'Chapter 101. Knights and Squires', startIndex: 52, sentenceCount: 30),
+      ];
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showChapterListDrawer(
+                context: context,
+                chapters: highNumberChapters,
+                currentChapterNumber: 100,
+                currentRawIndex: 3,
+                onChapterSelected: (_) {},
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      expect(find.text('100'), findsOneWidget);
+      expect(find.text('101'), findsOneWidget);
+      expect(find.textContaining('The Grand Armada'), findsOneWidget);
+      expect(find.textContaining('Knights and Squires'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('tapping a chapter row calls onChapterSelected', (tester) async {
       int? selectedChapter;
       await tester.pumpWidget(wrap(
