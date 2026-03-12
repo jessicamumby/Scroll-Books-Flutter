@@ -80,5 +80,28 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('shows share button when onShare is provided', (tester) async {
+      bool tapped = false;
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ChapterCompleteCard(
+            item: item,
+            readingStyle: 'vertical',
+            onShare: () => tapped = true,
+          ),
+        ),
+      ));
+      await tester.pump();
+      expect(find.text('SHARE'), findsOneWidget);
+      await tester.tap(find.text('SHARE'));
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('does not show share button when onShare is null', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pump();
+      expect(find.text('SHARE'), findsNothing);
+    });
   });
 }

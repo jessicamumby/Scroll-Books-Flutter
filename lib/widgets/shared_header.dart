@@ -10,7 +10,7 @@ class SharedHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppTheme.cream,
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
